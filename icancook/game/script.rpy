@@ -13,18 +13,32 @@ define note = Character(None, what_color="#a89a88")        # 旁白
 image kv = "images/key_visual.jpg"
 image vig = "images/vignette.png"
 image black = Solid("#000000")
+image bistro = "images/bg_bistro.jpg"
+
+## ——— 立绘：从精灵表裁切（与网页 Demo 共用 sheet.json 的格子尺寸） ———
+## 表：2920×1303，5 格，每格 584×1303
+image idimya calm = im.Crop("images/idimya/sheet.png", (0, 0, 584, 1303))
+image idimya amused = im.Crop("images/idimya/sheet.png", (584, 0, 584, 1303))
+image idimya sly = im.Crop("images/idimya/sheet.png", (1168, 0, 584, 1303))
+image idimya suspicious = im.Crop("images/idimya/sheet.png", (1752, 0, 584, 1303))
+image idimya hungry = im.Crop("images/idimya/sheet.png", (2336, 0, 584, 1303))
+
 
 ## ——— 演出：让「她离你有多近」变成可感知的变量 ———————————————
+transform sprite_base:
+    xalign 0.5
+    yalign 1.0
+
 transform push_slow:
     zoom 1.0
     linear 26.0 zoom 1.06
 
 transform lean_in:
     zoom 1.05
-    linear 3.0 zoom 1.20 xalign 0.5 yalign 0.42
+    linear 3.0 zoom 1.20
 
 transform lean_back:
-    zoom 1.02
+    zoom 1.06
     linear 1.6 zoom 1.0
 
 transform flicker:
@@ -45,7 +59,7 @@ label start:
 
     $ chapter_name = "序章 · 重访第一夜"
 
-    scene kv
+    scene bistro
     with Dissolve(1.2)
 
     note "有些邀请是不该接受的。"
@@ -60,12 +74,12 @@ label start:
 
 label ch0_arrive:
 
-    scene kv
+    scene bistro
     with Dissolve(2.0)
 
     show vig
 
-    show kv at push_slow
+    show idimya amused at sprite_base, push_slow
 
     note "小酒馆在一条你从没注意过的巷子里。木墙比记忆中更高，也更暗。"
 
@@ -83,7 +97,7 @@ label ch0_arrive:
 
     n "（她把「不会吃你」这句话咽回去了。）"
 
-    show kv at lean_in
+    show idimya amused at sprite_base, lean_in
     with Dissolve(0.6)
 
     idimya "三周不见。你有没有想我？"
@@ -108,7 +122,7 @@ label ch0_arrive:
             $ scent += 2
             n "「你呢？这三个月里，你约过几个人来这张桌子？」"
 
-            show kv at lean_back
+            show idimya suspicious at sprite_base, lean_back
             with Dissolve(0.4)
             idimya "……"
             idimya "你是第一个被我问到还想反问我的。"
@@ -123,7 +137,7 @@ label ch0_arrive:
 
 label ch0_q1:
 
-    show kv at push_slow
+    show idimya calm at sprite_base, push_slow
     with Dissolve(0.8)
 
     note "她把烛台往你那边推了一点。火苗歪了一下，她的脸暗了一半，又亮回来。"
@@ -157,7 +171,7 @@ label ch0_q1:
             $ trust += 1
             n "「因为我很饿。」"
 
-            show kv at lean_in
+            show idimya hungry at sprite_base, lean_in
             with Dissolve(0.5)
 
             idimya "……哈。"
@@ -173,7 +187,7 @@ label ch0_q1:
 
 label ch0_smell:
 
-    show kv at push_slow
+    show idimya calm at sprite_base, push_slow
     with Dissolve(0.6)
 
     note "你低下头。桌上的东西离你很近：烛台、一杯没动过的酒、一本合着的笔记本。"
@@ -199,7 +213,7 @@ label ch0_smell:
 
 label ch0_q2:
 
-    show kv at push_slow
+    show idimya calm at sprite_base, push_slow
     with Dissolve(0.6)
 
     idimya "第二个问题。"
@@ -225,7 +239,7 @@ label ch0_q2:
         "「我怕的是自己会习惯你。」":
             $ scent += 2
             $ trust += 1
-            show kv at lean_in
+            show idimya amused at sprite_base, lean_in
             with Dissolve(0.5)
 
             n "「我怕的是自己会习惯你。」"
@@ -244,7 +258,7 @@ label ch0_q2:
 
 label ch0_q3:
 
-    show kv at push_slow
+    show idimya calm at sprite_base, push_slow
     with Dissolve(0.6)
 
     note "烛火低了一截。她伸手把蜡油按回烛芯里，动作很慢，像在给什么东西掖被子。"
@@ -267,7 +281,7 @@ label ch0_q3:
             $ doubt += 3
             n "「一个我可以骗过去的东西。」"
 
-            show kv at lean_back
+            show idimya suspicious at sprite_base, lean_back
             with Dissolve(0.4)
 
             idimya "那你现在应该已经骗过去了才对。"
@@ -278,7 +292,7 @@ label ch0_q3:
         "「你本来是什么，就是什么。别为我改。」":
             $ scent += 2
             $ trust += 2
-            show kv at lean_in
+            show idimya sly at sprite_base, lean_in
             with Dissolve(0.6)
 
             n "「你本来是什么，就是什么。别为我改。」"
@@ -300,7 +314,7 @@ label ch0_q3:
 
 label ch0_reversal:
 
-    show kv at push_slow
+    show idimya calm at sprite_base, push_slow
     with Dissolve(0.6)
 
     note "你把菜单推回去，合上，放在她手边。"
@@ -308,7 +322,7 @@ label ch0_reversal:
     n "「今晚你来点。」"
     n "「不过在你点之前——我想知道，你想吃什么。」"
 
-    show kv at lean_in
+    show idimya hungry at sprite_base, lean_in
     with Dissolve(0.8)
 
     note "她的笑停了一下。不是僵住，是那种被人摸到了心口的位置、突然不知道要不要后退的停。"
@@ -366,7 +380,7 @@ label ch0_reversal:
 
 label ch0_ending:
 
-    show kv at push_slow
+    show idimya calm at sprite_base, push_slow
     with Dissolve(0.8)
 
     if doubt >= trust + 1:
@@ -386,6 +400,9 @@ label ch0_ending:
 
 
 label end_lie:
+
+    show idimya suspicious at sprite_base
+    with Dissolve(0.4)
 
     note "她送你到门口，替你拉开门，冷风灌进来。"
 
@@ -407,6 +424,9 @@ label end_lie:
 
 
 label end_name:
+
+    show idimya calm at sprite_base
+    with Dissolve(0.4)
 
     note "她陪你走到巷口，站定，没有跟出来。"
 
@@ -430,6 +450,9 @@ label end_name:
 
 
 label end_scent:
+
+    show idimya sly at sprite_base
+    with Dissolve(0.4)
 
     note "她没送你。你走到门口时，她在背后开口。"
 

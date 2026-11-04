@@ -8,8 +8,10 @@
   // ---------------------------------------------------------------- 资源
   const IMG = {
     kv: '../icancook/game/images/key_visual.jpg',
+    bistro: '../icancook/game/images/bg_bistro.jpg',
     vig: '../icancook/game/images/vignette.png',
   };
+  const SPRITE_DIR = '../icancook/game/images/idimya/';
 
   // ---------------------------------------------------------------- 音效
   // 没有音频素材，用 WebAudio 合成；她的声音与旁白用不同滤波，产生「她在场」的听觉差异
@@ -85,6 +87,8 @@
     stage: $('#stage'),
     bg: $('#bg'),
     char: $('#char'),
+    charInner: $('#charInner'),
+    lid: $('#lid'),
     vig: $('#vig'),
     box: $('#box'),
     who: $('#who'),
@@ -101,6 +105,86 @@
     closeHistory: $('#closeHistory'),
     quick: $('#quick'),
   };
+
+  const SPRITE = {
+    ready: false,
+    sheet: null,          // Image
+    cell: { w: 584, h: 1304 },
+    frames: {},           // name -> [x,y,w,h]
+    blink: null,          // Image
+    name: 'calm',
+    blinkTimer: null,
+    blinkUntil: 0,
+  };
+
+  window.__spriteDebug = () => ({ ready: SPRITE.ready, frames: Object.keys(SPRITE.frames||{}), sheet: !!SPRITE.sheet });
+
+  function loadSprite() {
+    SPRITE.frames = SPRITE.frames || {};
+    fetch(SPRITE_DIR + 'sheet.json')
+      .then((r) => r.json())
+      .then((m) => {
+        SPRITE.cell = m.cell;
+        SPRITE.frames = m.frames;
+        const sheet = new Image();
+        sheet.onload = () => { SPRITE.sheet = sheet; SPRITE.ready = true; };
+        sheet.src = SPRITE_DIR + m.image;
+        const bl = new Image();
+        bl.onload = () => { SPRITE.blink = bl; };
+        bl.src = SPRITE_DIR + m.blink_patch.file;
+      })
+      .catch((e) => console.warn('立绘表加载失败', e));
+  }
+
+  function setExpression(name) {
+    if (!SPRITE.frames || !SPRITE.frames[name]) name = 'calm';
+    SPRITE.name = name;
+    paintSprite();
+  }
+
+  function paintSprite() {
+    if (!SPRITE.ready) return;
+    const f = SPRITE.frames[SPRITE.name] || SPRITE.frames.calm;
+    const { w, h } = SPRITE.cell;
+    // 用舞台高度的比例定尺寸：立绘高度 ≈ 舞台 92%
+    const stageH = el.stage.clientHeight || 1080;
+    const scale = (stageH * 0.92) / h;
+    el.char.style.width = Math.round(w * scale) + 'px';
+    el.char.style.height = Math.round(stageH * 0.92) + 'px';
+    el.charInner.style.width = '100%';
+    el.charInner.style.height = '100%';
+    el.charInner.style.backgroundImage = `url("${SPRITE_DIR}sheet.png")`;
+    el.charInner.style.backgroundSize =
+      `${Math.round(w * Object.keys(SPRITE.frames).length * scale)}px ${Math.round(h * scale)}px`;
+    el.charInner.style.backgroundPosition =
+      `${-Math.round(f[0] * scale)}px ${-Math.round(f[1] * scale)}px`;
+  }
+
+  // 眨眼：每 3~7 秒一次，闭上 110ms
+  function startBlink() {
+    clearInterval(SPRITE.blinkTimer);
+    SPRITE.blinkTimer = setInterval(() => {
+      if (!SPRITE.ready || !SPRITE.blink) return;
+      const now = performance.now();
+      if (now < SPRITE.blinkUntil) return;
+      SPRITE.blinkUntil = now + 110;
+      el.lid.classList.add('closed');
+      setTimeout(() => el.lid.classList.remove('closed'), 110);
+    }, 1200 + Math.random() * 1500);
+  }
+
+  // 呼吸：极慢的上下浮动 + 极轻微缩放
+  function startBreath() {
+    const t0 = performance.now();
+    const loop = () => {
+      const t = (performance.now() - t0) / 1000;
+      const y = Math.sin(t / 2.6) * 2.4;
+      const sc = 1 + Math.sin(t / 2.6) * 0.0035;
+      el.charInner.style.transform = `translateY(${y}px) scale(${sc})`;
+      requestAnimationFrame(loop);
+    };
+    loop();
+  }
 
   let story = null;
   let S = null;            // 运行时状态
@@ -226,11 +310,10 @@
   function applyTransform(name, dur) {
     const t = TRANSFORMS[name] || TRANSFORMS.push_slow;
     const e = el.char;
-    e.style.transition = `transform ${dur != null ? dur : t.dur / 1000}s ease-out`;
-    e.style.transformOrigin = '50% 42%';
-    const scale = t.scale;
-    const y = t.shiftY || 0;
-    e.style.transform = `scale(${scale}) translateY(${y}%)`;
+    e.style.transition =
+      `transform ${dur != null ? dur : t.dur / 1000}s cubic-bezier(.22,.61,.36,1), opacity .8s`;
+    e.style.transformOrigin = '50% 100%';
+    e.style.transform = `translate(-50%, ${t.shiftY || 0}%) scale(${t.scale})`;
   }
 
   function candleBreath() {
@@ -274,7 +357,14 @@
           break;
         }
         case 'show': {
-          applyTransform(ins.at, ins.at === 'lean_in' ? 420 : 260);
+          const parts = (ins.img || '').split(/\s+/);
+          if (parts[0] === 'idimya') {
+            setExpression(parts[1] || 'calm');
+            el.char.style.opacity = '1';
+            applyTransform(ins.at, ins.at === 'lean_in' ? 900 : 500);
+          } else if (parts[0] === 'vig') {
+            el.vig.style.opacity = '1';
+          }
           break;
         }
         case 'with': {
@@ -361,14 +451,12 @@
       return;
     }
     el.bg.style.opacity = '1';
-    el.char.style.opacity = '1';
     el.vig.style.opacity = '1';
     // kv 与 bg 是同一张图：bg 作为静态底，char 承担推近演出
     const url = IMG[img] || IMG.kv;
     if (el.bg.dataset.src !== url) {
       el.bg.dataset.src = url;
       el.bg.style.backgroundImage = `url("${url}")`;
-      el.char.style.backgroundImage = `url("${url}")`;
       checkImage(url);
     }
   }
@@ -552,12 +640,15 @@
       history: [],
       label: 'start',
       pc: 0,
-      textSpeed: new URLSearchParams(location.search).has('fast') ? 0 : 26,
+      textSpeed: new URLSearchParams(location.search).has('fast') ? 4 : 26,
       running: false,
     };
     S.vars.smells_found = 0;
     S.vars.smell_line = '';
 
+    if (!new URLSearchParams(location.search).has('nosprite')) loadSprite();
+    startBlink();
+    startBreath();
     renderEndings();
     requestAnimationFrame(candleBreath);
     setInterval(() => { if (S.running) candleCrackle(); }, 5200 + Math.random() * 4000);

@@ -7,7 +7,7 @@ const fs = require('fs');
 const path = require('path');
 
 const DEMO = path.join(__dirname, '..', 'demo');
-const DOM_URL = 'http://localhost/demo/?fast=1';
+const DOM_URL = 'http://localhost/demo/?fast=1&nosprite=1';
 const wantPath = (process.argv[2] || '').split(',').filter((x) => x !== '').map(Number);
 
 const html = fs.readFileSync(path.join(DEMO, 'index.html'), 'utf8');

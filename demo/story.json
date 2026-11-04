@@ -20,7 +20,7 @@
    },
    {
     "op": "scene",
-    "img": "kv"
+    "img": "bistro"
    },
    {
     "op": "with",
@@ -47,7 +47,7 @@
   "ch0_arrive": [
    {
     "op": "scene",
-    "img": "kv"
+    "img": "bistro"
    },
    {
     "op": "with",
@@ -60,8 +60,8 @@
    },
    {
     "op": "show",
-    "img": "kv",
-    "at": "push_slow"
+    "img": "idimya amused",
+    "at": "sprite_base, push_slow"
    },
    {
     "op": "say",
@@ -105,8 +105,8 @@
    },
    {
     "op": "show",
-    "img": "kv",
-    "at": "lean_in"
+    "img": "idimya amused",
+    "at": "sprite_base, lean_in"
    },
    {
     "op": "with",
@@ -197,8 +197,8 @@
    },
    {
     "op": "show",
-    "img": "kv",
-    "at": "lean_back"
+    "img": "idimya suspicious",
+    "at": "sprite_base, lean_back"
    },
    {
     "op": "with",
@@ -235,8 +235,8 @@
   "ch0_q1": [
    {
     "op": "show",
-    "img": "kv",
-    "at": "push_slow"
+    "img": "idimya calm",
+    "at": "sprite_base, push_slow"
    },
    {
     "op": "with",
@@ -356,8 +356,8 @@
    },
    {
     "op": "show",
-    "img": "kv",
-    "at": "lean_in"
+    "img": "idimya hungry",
+    "at": "sprite_base, lean_in"
    },
    {
     "op": "with",
@@ -394,8 +394,8 @@
   "ch0_smell": [
    {
     "op": "show",
-    "img": "kv",
-    "at": "push_slow"
+    "img": "idimya calm",
+    "at": "sprite_base, push_slow"
    },
    {
     "op": "with",
@@ -461,8 +461,8 @@
   "ch0_q2": [
    {
     "op": "show",
-    "img": "kv",
-    "at": "push_slow"
+    "img": "idimya calm",
+    "at": "sprite_base, push_slow"
    },
    {
     "op": "with",
@@ -562,8 +562,8 @@
    },
    {
     "op": "show",
-    "img": "kv",
-    "at": "lean_in"
+    "img": "idimya amused",
+    "at": "sprite_base, lean_in"
    },
    {
     "op": "with",
@@ -610,8 +610,8 @@
   "ch0_q3": [
    {
     "op": "show",
-    "img": "kv",
-    "at": "push_slow"
+    "img": "idimya calm",
+    "at": "sprite_base, push_slow"
    },
    {
     "op": "with",
@@ -694,8 +694,8 @@
    },
    {
     "op": "show",
-    "img": "kv",
-    "at": "lean_back"
+    "img": "idimya suspicious",
+    "at": "sprite_base, lean_back"
    },
    {
     "op": "with",
@@ -731,8 +731,8 @@
    },
    {
     "op": "show",
-    "img": "kv",
-    "at": "lean_in"
+    "img": "idimya sly",
+    "at": "sprite_base, lean_in"
    },
    {
     "op": "with",
@@ -789,8 +789,8 @@
   "ch0_reversal": [
    {
     "op": "show",
-    "img": "kv",
-    "at": "push_slow"
+    "img": "idimya calm",
+    "at": "sprite_base, push_slow"
    },
    {
     "op": "with",
@@ -813,8 +813,8 @@
    },
    {
     "op": "show",
-    "img": "kv",
-    "at": "lean_in"
+    "img": "idimya hungry",
+    "at": "sprite_base, lean_in"
    },
    {
     "op": "with",
@@ -1000,8 +1000,8 @@
   "ch0_ending": [
    {
     "op": "show",
-    "img": "kv",
-    "at": "push_slow"
+    "img": "idimya calm",
+    "at": "sprite_base, push_slow"
    },
    {
     "op": "with",
@@ -1058,6 +1058,15 @@
    }
   ],
   "end_lie": [
+   {
+    "op": "show",
+    "img": "idimya suspicious",
+    "at": "sprite_base"
+   },
+   {
+    "op": "with",
+    "dur": 0.4
+   },
    {
     "op": "say",
     "who": "note",
@@ -1121,6 +1130,15 @@
    }
   ],
   "end_name": [
+   {
+    "op": "show",
+    "img": "idimya calm",
+    "at": "sprite_base"
+   },
+   {
+    "op": "with",
+    "dur": 0.4
+   },
    {
     "op": "say",
     "who": "note",
@@ -1189,6 +1207,15 @@
    }
   ],
   "end_scent": [
+   {
+    "op": "show",
+    "img": "idimya sly",
+    "at": "sprite_base"
+   },
+   {
+    "op": "with",
+    "dur": 0.4
+   },
    {
     "op": "say",
     "who": "note",

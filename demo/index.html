@@ -33,15 +33,48 @@
     container-type:size;
   }
 
-  #bg,#char{
+  #bg{
     position:absolute; inset:0;
     background-size:cover;
     background-position:center 46%;
     opacity:0;
-    transition:opacity 1s ease, transform .9s ease-out;
+    transition:opacity 1s ease, transform .9s ease-out, filter 1.2s ease;
     will-change:transform,opacity;
   }
-  #char{ mix-blend-mode:normal; }
+
+  /* 立绘：定位锚点（推进/退开由脚本改 transform） */
+  #char{
+    position:absolute;
+    left:50%;
+    bottom:0;
+    transform:translate(-50%, 0) scale(1);
+    transform-origin:50% 100%;
+    opacity:0;
+    transition:transform 1.6s cubic-bezier(.22,.61,.36,1), opacity .8s ease;
+    will-change:transform,opacity;
+    pointer-events:none;
+  }
+
+  /* 呼吸层：极慢浮动 */
+  #charInner{
+    position:absolute; inset:0;
+    background-repeat:no-repeat;
+    will-change:transform;
+  }
+
+  /* 眨眼层：和呼吸层完全同位，只叠眼睛那一小块 */
+  #lid{
+    position:absolute; inset:0;
+    background-image:url("../icancook/game/images/idimya/blink_patch.png");
+    background-repeat:no-repeat;
+    background-size:100% 100%;
+    opacity:0;
+    transition:opacity .05s linear;
+    pointer-events:none;
+  }
+  #lid.closed{opacity:1}
+  #charInner, #lid{ background-size:100% 100%; }
+
   #vig{
     position:absolute; inset:0;
     background:radial-gradient(ellipse at 50% 46%, rgba(0,0,0,0) 30%, rgba(0,0,0,.26) 64%, rgba(0,0,0,.72) 100%);
@@ -318,7 +351,7 @@
 <div id="stage">
 
   <div id="bg"></div>
-  <div id="char"></div>
+  <div id="char"><div id="charInner"></div><div id="lid"></div></div>
   <div id="vig"></div>
   <div id="grain"></div>
 
