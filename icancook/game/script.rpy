@@ -45,7 +45,7 @@ label start:
 
     $ chapter_name = "序章 · 重访第一夜"
 
-    scene black
+    scene kv
     with Dissolve(1.2)
 
     note "有些邀请是不该接受的。"

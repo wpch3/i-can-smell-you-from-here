@@ -218,8 +218,8 @@
 
   // ---------------------------------------------------------------- 演出
   const TRANSFORMS = {
-    push_slow: { dur: 26000, scale: 1.06 },
-    lean_in: { dur: 1400, scale: 1.19, shiftY: -7 },
+    push_slow: { dur: 26000, scale: 1.05 },
+    lean_in: { dur: 1600, scale: 1.12, shiftY: 0 },
     lean_back: { dur: 900, scale: 1.0, shiftY: 0 },
   };
 
@@ -265,7 +265,12 @@
           break;
         }
         case 'scene': {
-          setScene(ins.img);
+          if (ins.img === 'black') {
+            el.bg.style.filter = 'brightness(.35) saturate(.7)';
+          } else {
+            el.bg.style.filter = 'none';
+            setScene(ins.img);
+          }
           break;
         }
         case 'show': {
@@ -335,6 +340,19 @@
     el.text.className = 'text ' + sp.cls;
   }
 
+  function checkImage(url) {
+    const im = new Image();
+    im.onerror = () => {
+      console.error('背景图加载失败:', url);
+      const tip = document.createElement('div');
+      tip.style.cssText = 'position:absolute;left:50%;top:12%;transform:translateX(-50%);' +
+        'font-size:1.6cqh;color:#d9a05f;background:rgba(10,7,4,.9);padding:1cqh 1.6cqw;z-index:99';
+      tip.textContent = '背景图没取到：' + url + '（请用仓库根目录起 http 服务，或直接访问 /demo/）';
+      el.stage.appendChild(tip);
+    };
+    im.src = url;
+  }
+
   function setScene(img) {
     if (img === 'black') {
       el.bg.style.opacity = '0';
@@ -346,8 +364,13 @@
     el.char.style.opacity = '1';
     el.vig.style.opacity = '1';
     // kv 与 bg 是同一张图：bg 作为静态底，char 承担推近演出
-    el.bg.style.backgroundImage = `url("${IMG[img] || IMG.kv}")`;
-    el.char.style.backgroundImage = `url("${IMG[img] || IMG.kv}")`;
+    const url = IMG[img] || IMG.kv;
+    if (el.bg.dataset.src !== url) {
+      el.bg.dataset.src = url;
+      el.bg.style.backgroundImage = `url("${url}")`;
+      el.char.style.backgroundImage = `url("${url}")`;
+      checkImage(url);
+    }
   }
 
   function showChoices(options) {

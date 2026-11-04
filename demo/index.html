@@ -44,7 +44,7 @@
   #char{ mix-blend-mode:normal; }
   #vig{
     position:absolute; inset:0;
-    background:radial-gradient(ellipse at 50% 46%, rgba(0,0,0,0) 26%, rgba(0,0,0,.35) 62%, rgba(0,0,0,.86) 100%);
+    background:radial-gradient(ellipse at 50% 46%, rgba(0,0,0,0) 30%, rgba(0,0,0,.26) 64%, rgba(0,0,0,.72) 100%);
     pointer-events:none;
   }
   #grain{
@@ -103,10 +103,15 @@
     display:none;
     flex-direction:column;
     align-items:center;
-    justify-content:center;
+    justify-content:flex-end;
     gap:1.5cqh;
-    background:radial-gradient(ellipse at 50% 55%, rgba(6,4,2,.55), rgba(6,4,2,.82));
-    padding:0 8cqw;
+    background:linear-gradient(to top,
+      rgba(6,4,2,.94) 0%,
+      rgba(6,4,2,.80) 34%,
+      rgba(6,4,2,.34) 58%,
+      rgba(6,4,2,.06) 76%,
+      rgba(6,4,2,0) 88%);
+    padding:0 8cqw 9cqh;
   }
   #choices.show{display:flex}
   .choice{
@@ -116,7 +121,9 @@
     width:min(72cqw, 62em);
     padding:1.55cqh 2.2cqw;
     font:inherit; font-size:2.2cqh; color:#cfc3b2;
-    background:rgba(14,10,7,.82);
+    background:rgba(12,9,6,.72);
+    backdrop-filter:blur(1.5px);
+    -webkit-backdrop-filter:blur(1.5px);
     border:none;
     border-radius:1px;
     text-align:left;
@@ -130,7 +137,7 @@
     width:2px; height:1.9cqh; background:var(--gold);
     opacity:0; transition:opacity .22s; flex:0 0 auto;
   }
-  .choice:hover{background:rgba(30,22,15,.94); color:#f6e9d6}
+  .choice:hover{background:rgba(34,25,16,.92); color:#f6e9d6}
   .choice:hover .bar{opacity:1}
   @keyframes choiceIn{to{opacity:1; transform:translateY(0)}}
 
