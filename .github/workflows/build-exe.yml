@@ -1,7 +1,7 @@
 name: Build Windows EXE
 
 ## 在 GitHub 的 Windows runner 上用 Ren'Py 官方 SDK 打包成 .exe（免安装，解压即玩）
-## 产物：Actions → 本次运行 → Artifacts → icancook-win
+## 产物：推 tag 会自动发到 Releases（公开下载）；也可以在 Artifacts 里拿
 ## 手动触发：Actions → Build Windows EXE → Run workflow
 
 on:
@@ -9,6 +9,9 @@ on:
     tags:
       - "v*"
   workflow_dispatch:
+
+permissions:
+  contents: write
 
 env:
   RENPY_VERSION: "8.5.3"
@@ -112,6 +115,21 @@ jobs:
           if (-not $zip) { throw "no zip produced" }
           Expand-Archive $zip.FullName -DestinationPath "${{ github.workspace }}\icancook-win"
           Get-ChildItem "${{ github.workspace }}\icancook-win" | Select-Object Name, Length
+
+      - name: Publish GitHub Release (公开下载，不用登录)
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*.zip
+          name: ${{ github.ref_name }}
+          body: |
+            **我在这儿就能为你下厨了 / I Can Cook For You From Here** — 网页 Demo + Windows exe
+
+            - 下载 `icancook-*-win.zip`，解压后双击 `i_can_cook_for_you_from_here.exe`
+            - 免安装，Windows 10/11 x64
+            - 非官方恋爱向同人作品；原作 *I Can Smell You From Here* © catproblem9735
+
+            本构建由 GitHub Actions 自动打包（Ren'Py ${{ env.RENPY_VERSION }}）。
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
