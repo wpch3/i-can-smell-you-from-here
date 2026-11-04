@@ -37,11 +37,22 @@ node tools/smoke-test.js      # 真点一遍（需要 npm i jsdom）
 | `docs/ART_BIBLE.md` | 美术设定锁 + 可复用提示词模板 + UI / 音效规范 |
 | `docs/ROADMAP.md` | 里程碑 |
 
+## 下载 exe
+
+**[➜ GitHub Releases 直接下载](https://github.com/wpch3/i-can-smell-you-from-here/releases/latest)**
+`i_can_cook_for_you_from_here-0.1.0-win.zip` → 解压 → 双击 `i_can_cook_for_you_from_here.exe`
+（Windows 10/11 x64，免安装。Ren'Py 8.5.3 打包，约 40 MB）
+
 ## 出 exe
 
-推一个 `v*` tag，或在 GitHub → Actions → **Build Windows EXE** → Run workflow。
-产物在 Actions 运行的 **Artifacts → icancook-win**，解压双击 exe 即可玩。
-也可以本机用 Ren'Py 8.5.3 启动器打开 `icancook/`，Build Distributions → Windows。
+推 `v*` tag 即自动构建并**发布到 Releases**（公开下载，无需登录）：
+
+```bash
+git tag -f v0.1.6 && git push origin refs/tags/v0.1.6 --force
+```
+
+也可以在 Actions → **Build Windows EXE** → Run workflow（需先合并到 `main`）。
+本机则用 Ren'Py 8.5.3 启动器打开 `icancook/` → Build Distributions → Windows。
 
 ## 一句话
 
