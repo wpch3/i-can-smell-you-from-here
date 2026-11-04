@@ -1,2 +1,30 @@
-# i-can-smell-you-from-here
-制作该游戏的同人恋爱延续，画风风格一致
+# 我在这儿就能为你下厨了
+**I Can Cook For You From Here** — 非官方恋爱向同人续篇 · **Windows 桌面版（Ren'Py / Python）**
+
+原作 *I Can Smell You From Here* © **catproblem9735**（Godot，5 结局）。
+本项目为非商业同人，**不使用原作任何素材文件**（背景 / 立绘 / 音乐全部重制），仅沿用角色设定与画风语言。
+原作出处：https://kingdomofmarionettes.org/i-can-smell-you-from-here/
+
+---
+
+## 现在有什么
+
+| 路径 | 说明 |
+|---|---|
+| `assets/concept/key-visual-official.png` | ✅ **主视觉定稿**（唯一形象标准，锁定不再改） |
+| `assets/reference/original-first-date-screenshot.png` | 风格锚点：原作游戏内截图 |
+| `icancook/` | **游戏工程（Ren'Py 8.5.3）**，产出 Windows .exe |
+| `docs/TECH_STACK.md` | 技术选型：为什么是 Ren'Py + Python，怎么出 exe |
+| `docs/GAME_CONCEPT.md` | 概念书：故事、章节、系统、结局 |
+| `docs/ART_BIBLE.md` | 美术设定锁 + 可复用提示词模板 + UI / 音效规范 |
+| `docs/ROADMAP.md` | 里程碑 |
+
+## 出 exe
+
+推一个 `v*` tag，或在 GitHub → Actions → **Build Windows EXE** → Run workflow。
+产物在 Actions 运行的 **Artifacts → icancook-win**，解压双击 exe 即可玩。
+也可以本机用 Ren'Py 8.5.3 启动器打开 `icancook/`，Build Distributions → Windows。
+
+## 一句话
+
+原作让你为了**不被吃掉**而撒谎；这一作为了**不被看穿**而诚实。

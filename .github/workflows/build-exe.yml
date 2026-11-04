@@ -1,0 +1,85 @@
+name: Build Windows EXE
+
+## 在 GitHub 的 Windows runner 上用 Ren'Py 官方 SDK 打包成 .exe（免安装，解压即玩）
+## 产物：Actions → 本次运行 → Artifacts → icancook-win
+## 手动触发：Actions → Build Windows EXE → Run workflow
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+env:
+  RENPY_VERSION: "8.5.3"
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download Ren'Py SDK
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $url = "https://www.renpy.org/dl/$env:RENPY_VERSION/renpy-$env:RENPY_VERSION-sdk.zip"
+          Write-Host "Downloading $url"
+          Invoke-WebRequest -Uri $url -OutFile renpy-sdk.zip
+          Expand-Archive renpy-sdk.zip -DestinationPath "${{ github.workspace }}\sdk"
+
+      - name: Locate SDK root
+        id: locate
+        shell: pwsh
+        run: |
+          $root = Get-ChildItem "${{ github.workspace }}\sdk" -Directory |
+                  Where-Object { Test-Path (Join-Path $_.FullName "renpy.exe") } |
+                  Select-Object -First 1
+          if (-not $root) {
+            $exe = Get-ChildItem "${{ github.workspace }}\sdk" -Recurse -Filter "renpy.exe" |
+                   Select-Object -First 1
+            $root = $exe.Directory
+          }
+          Write-Host "SDK root: $($root.FullName)"
+          "RENPY_ROOT=$($root.FullName)" | Out-File -FilePath $env:GITHUB_ENV -Append
+
+      - name: Compile scripts (真编译，语法错会在这里炸)
+        shell: pwsh
+        run: |
+          & "$env:RENPY_ROOT\renpy.exe" "${{ github.workspace }}\icancook" compile
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+
+      - name: Lint
+        shell: pwsh
+        continue-on-error: true
+        run: |
+          & "$env:RENPY_ROOT\renpy.exe" "${{ github.workspace }}\icancook" lint
+
+      - name: Build Windows distribution
+        shell: pwsh
+        run: |
+          & "$env:RENPY_ROOT\renpy.exe" "$env:RENPY_ROOT\launcher" distribute `
+              "${{ github.workspace }}\icancook" `
+              --package win `
+              --no-update `
+              --destination "${{ github.workspace }}\dist"
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+          Get-ChildItem "${{ github.workspace }}\dist" -Recurse | Select-Object FullName, Length
+
+      - name: Unzip the built package for a ready-to-run folder
+        shell: pwsh
+        run: |
+          $zip = Get-ChildItem "${{ github.workspace }}\dist" -Filter "*.zip" | Select-Object -First 1
+          if (-not $zip) { throw "no zip produced" }
+          Expand-Archive $zip.FullName -DestinationPath "${{ github.workspace }}\icancook-win"
+          Get-ChildItem "${{ github.workspace }}\icancook-win" | Select-Object Name, Length
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: icancook-win
+          path: |
+            dist/**
+            icancook-win/**
+          if-no-files-found: error

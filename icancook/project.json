@@ -1,0 +1,6 @@
+{
+  "build_update": false,
+  "packages": ["pc", "win", "mac", "market"],
+  "renamed_all": true,
+  "renamed_steam": true
+}
