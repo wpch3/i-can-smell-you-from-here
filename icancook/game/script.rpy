@@ -14,15 +14,31 @@ image kv = "images/key_visual.jpg"
 image vig = "images/vignette.png"
 image black = Solid("#000000")
 image bistro = "images/bg_bistro.jpg"
+image kitchen = "images/bg_kitchen.jpg"
+image genkan = "images/bg_genkan.jpg"
+image morning = "images/bg_morning.jpg"
+image fridge = "images/bg_fridge.jpg"
 
-## ——— 立绘：从精灵表裁切（与网页 Demo 共用 sheet.json 的格子尺寸） ———
-## 表：2920×1303，5 格，每格 584×1303
-image idimya calm = im.Crop("images/idimya/sheet.png", (0, 0, 584, 1303))
-image idimya amused = im.Crop("images/idimya/sheet.png", (584, 0, 584, 1303))
-image idimya sly = im.Crop("images/idimya/sheet.png", (1168, 0, 584, 1303))
-image idimya suspicious = im.Crop("images/idimya/sheet.png", (1752, 0, 584, 1303))
-image idimya hungry = im.Crop("images/idimya/sheet.png", (2336, 0, 584, 1303))
-
+## ——— 立绘：从精灵表裁切（格子坐标由 tools/build_sprites.py 写进 sheet.json） ———
+## 造型 / 表情：base, apron, coat, ponytail  ×  calm, amused, sly, suspicious, hungry, smile_soft, eyes_down, laugh
+image idimya base calm = im.Crop("images/idimya/sheet.png", (0, 0, 598, 1312))
+image idimya base amused = im.Crop("images/idimya/sheet.png", (598, 0, 598, 1312))
+image idimya base sly = im.Crop("images/idimya/sheet.png", (1196, 0, 598, 1312))
+image idimya base suspicious = im.Crop("images/idimya/sheet.png", (1794, 0, 598, 1312))
+image idimya base hungry = im.Crop("images/idimya/sheet.png", (2392, 0, 598, 1312))
+image idimya base smile_soft = im.Crop("images/idimya/sheet.png", (2990, 0, 598, 1312))
+image idimya base eyes_down = im.Crop("images/idimya/sheet.png", (3588, 0, 598, 1312))
+image idimya base laugh = im.Crop("images/idimya/sheet.png", (4186, 0, 598, 1312))
+image idimya apron calm = im.Crop("images/idimya/sheet.png", (4784, 0, 598, 1312))
+image idimya apron amused = im.Crop("images/idimya/sheet.png", (5382, 0, 598, 1312))
+image idimya apron smile_soft = im.Crop("images/idimya/sheet.png", (5980, 0, 598, 1312))
+image idimya apron sly = im.Crop("images/idimya/sheet.png", (6578, 0, 598, 1312))
+image idimya coat calm = im.Crop("images/idimya/sheet.png", (7176, 0, 598, 1312))
+image idimya coat suspicious = im.Crop("images/idimya/sheet.png", (7774, 0, 598, 1312))
+image idimya coat sly = im.Crop("images/idimya/sheet.png", (8372, 0, 598, 1312))
+image idimya ponytail calm = im.Crop("images/idimya/sheet.png", (8970, 0, 598, 1312))
+image idimya ponytail amused = im.Crop("images/idimya/sheet.png", (9568, 0, 598, 1312))
+image idimya ponytail hungry = im.Crop("images/idimya/sheet.png", (10166, 0, 598, 1312))
 
 ## ——— 演出：让「她离你有多近」变成可感知的变量 ———————————————
 transform sprite_base:
@@ -79,7 +95,7 @@ label ch0_arrive:
 
     show vig
 
-    show idimya amused at sprite_base, push_slow
+    show idimya base amused at sprite_base, push_slow
 
     note "小酒馆在一条你从没注意过的巷子里。木墙比记忆中更高，也更暗。"
 
@@ -97,7 +113,7 @@ label ch0_arrive:
 
     n "（她把「不会吃你」这句话咽回去了。）"
 
-    show idimya amused at sprite_base, lean_in
+    show idimya base amused at sprite_base, lean_in
     with Dissolve(0.6)
 
     idimya "三周不见。你有没有想我？"
@@ -107,6 +123,7 @@ label ch0_arrive:
             $ trust += 1
             n "「想。想到有点睡不着。」"
 
+            show idimya base laugh at sprite_base, lean_in
             idimya "噢——"
             idimya "这句答得太快了。快到我都不好意思不信。"
 
@@ -122,7 +139,7 @@ label ch0_arrive:
             $ scent += 2
             n "「你呢？这三个月里，你约过几个人来这张桌子？」"
 
-            show idimya suspicious at sprite_base, lean_back
+            show idimya base eyes_down at sprite_base, lean_back
             with Dissolve(0.4)
             idimya "……"
             idimya "你是第一个被我问到还想反问我的。"
@@ -137,7 +154,7 @@ label ch0_arrive:
 
 label ch0_q1:
 
-    show idimya calm at sprite_base, push_slow
+    show idimya base calm at sprite_base, push_slow
     with Dissolve(0.8)
 
     note "她把烛台往你那边推了一点。火苗歪了一下，她的脸暗了一半，又亮回来。"
@@ -162,6 +179,7 @@ label ch0_q1:
             $ doubt += 2
             n "「因为你看起来不会伤害我。」"
 
+            show idimya base flat at sprite_base, lean_back
             idimya "「看起来」。"
             idimya "你挑了一个很聪明的词，然后把它用在了最不该用的地方。"
             $ doubt += 1
@@ -171,7 +189,7 @@ label ch0_q1:
             $ trust += 1
             n "「因为我很饿。」"
 
-            show idimya hungry at sprite_base, lean_in
+            show idimya base hungry at sprite_base, lean_in
             with Dissolve(0.5)
 
             idimya "……哈。"
@@ -187,7 +205,7 @@ label ch0_q1:
 
 label ch0_smell:
 
-    show idimya calm at sprite_base, push_slow
+    show idimya base calm at sprite_base, push_slow
     with Dissolve(0.6)
 
     note "你低下头。桌上的东西离你很近：烛台、一杯没动过的酒、一本合着的笔记本。"
@@ -213,7 +231,7 @@ label ch0_smell:
 
 label ch0_q2:
 
-    show idimya calm at sprite_base, push_slow
+    show idimya base calm at sprite_base, push_slow
     with Dissolve(0.6)
 
     idimya "第二个问题。"
@@ -239,12 +257,13 @@ label ch0_q2:
         "「我怕的是自己会习惯你。」":
             $ scent += 2
             $ trust += 1
-            show idimya amused at sprite_base, lean_in
+            show idimya base amused at sprite_base, lean_in
             with Dissolve(0.5)
 
             n "「我怕的是自己会习惯你。」"
 
             idimya "……"
+            show idimya base smile_soft at sprite_base, lean_in
             idimya "这句话，是你今天晚上说的最好听的一句。"
             idimya "也是我听得最认真的一句。"
             idimya "很危险。你说的。不是我。"
@@ -258,7 +277,7 @@ label ch0_q2:
 
 label ch0_q3:
 
-    show idimya calm at sprite_base, push_slow
+    show idimya base calm at sprite_base, push_slow
     with Dissolve(0.6)
 
     note "烛火低了一截。她伸手把蜡油按回烛芯里，动作很慢，像在给什么东西掖被子。"
@@ -281,7 +300,7 @@ label ch0_q3:
             $ doubt += 3
             n "「一个我可以骗过去的东西。」"
 
-            show idimya suspicious at sprite_base, lean_back
+            show idimya base suspicious at sprite_base, lean_back
             with Dissolve(0.4)
 
             idimya "那你现在应该已经骗过去了才对。"
@@ -292,7 +311,7 @@ label ch0_q3:
         "「你本来是什么，就是什么。别为我改。」":
             $ scent += 2
             $ trust += 2
-            show idimya sly at sprite_base, lean_in
+            show idimya base sly at sprite_base, lean_in
             with Dissolve(0.6)
 
             n "「你本来是什么，就是什么。别为我改。」"
@@ -314,7 +333,7 @@ label ch0_q3:
 
 label ch0_reversal:
 
-    show idimya calm at sprite_base, push_slow
+    show idimya base calm at sprite_base, push_slow
     with Dissolve(0.6)
 
     note "你把菜单推回去，合上，放在她手边。"
@@ -322,7 +341,7 @@ label ch0_reversal:
     n "「今晚你来点。」"
     n "「不过在你点之前——我想知道，你想吃什么。」"
 
-    show idimya hungry at sprite_base, lean_in
+    show idimya base eyes_down at sprite_base, lean_in
     with Dissolve(0.8)
 
     note "她的笑停了一下。不是僵住，是那种被人摸到了心口的位置、突然不知道要不要后退的停。"
@@ -380,7 +399,7 @@ label ch0_reversal:
 
 label ch0_ending:
 
-    show idimya calm at sprite_base, push_slow
+    show idimya base calm at sprite_base, push_slow
     with Dissolve(0.8)
 
     if doubt >= trust + 1:
@@ -401,7 +420,7 @@ label ch0_ending:
 
 label end_lie:
 
-    show idimya suspicious at sprite_base
+    show idimya base suspicious at sprite_base
     with Dissolve(0.4)
 
     note "她送你到门口，替你拉开门，冷风灌进来。"
@@ -425,7 +444,7 @@ label end_lie:
 
 label end_name:
 
-    show idimya calm at sprite_base
+    show idimya base calm at sprite_base
     with Dissolve(0.4)
 
     note "她陪你走到巷口，站定，没有跟出来。"
@@ -451,7 +470,7 @@ label end_name:
 
 label end_scent:
 
-    show idimya sly at sprite_base
+    show idimya base sly at sprite_base
     with Dissolve(0.4)
 
     note "她没送你。你走到门口时，她在背后开口。"
@@ -485,7 +504,25 @@ label ch0_after:
     scene black
     with Dissolve(1.6)
 
-    centered "{size=20}{color=#8b7b69}序章 · 完{/color}{/size}\n\n{color=#f0dcc2}第一章 · 门铃{/color}\n\n{size=18}{color=#8b7b69}她站在厨房里，背对着你。\n砧板上有什么东西，正在被切成很均匀的片。{/color}{/size}"
+    scene kitchen
+    with Dissolve(1.4)
+
+    show vig
+    show idimya apron smile_soft at sprite_base, push_slow
+
+    note "第一章 · 门铃"
+
+    note "她站在厨房里，背对着你。围裙的带子在腰后打了个很随意的结。"
+
+    note "砧板上有什么东西，正在被切成很均匀的片。"
+
+    note "她没有回头。"
+
+    idimya "门没锁。"
+
+    idimya "……我说过你不用敲的。"
+
+    centered "{size=20}{color=#8b7b69}序章 · 完{/color}{/size}\n\n{color=#f0dcc2}第一章 · 门铃 · 制作中{/color}"
 
     centered "{size=18}{color=#8b7b69}本次周目 · 她记住你的方式{/color}{/size}\n\n{color=#d9a05f}[chapter_name]{/color}"
 

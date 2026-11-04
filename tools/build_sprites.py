@@ -20,19 +20,43 @@ build_sprites.py — 把 AI 出的立绘源图加工成引擎可用的资产
 
 import json
 import subprocess
+import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 SRC = ROOT / "assets" / "sprites" / "idimya"
 OUT = ROOT / "icancook" / "game" / "images" / "idimya"
 
-# 表情 → 源文件（顺序即精灵表顺序）
-EXPRESSIONS = [
-    ("calm", "base_v1.png"),
-    ("amused", "expr_amused.png"),
-    ("sly", "expr_sly.png"),
-    ("suspicious", "expr_suspicious.png"),
-    ("hungry", "expr_hungry.png"),
+# 造型组：每套服装+发型 = 一组表情差分。剧情里用 `show idimya <造型>/<表情>` 调用。
+# 顺序即精灵表顺序；每组 512 宽的格位，方便引擎端直接按列号索引。
+GROUPS = [
+    # 造型名        基准图                表情后缀 → 文件
+    ("base",       "base_v1.png", [
+        ("calm",       None),
+        ("amused",     "expr_amused.png"),
+        ("sly",        "expr_sly.png"),
+        ("suspicious", "expr_suspicious.png"),
+        ("hungry",     "expr_hungry.png"),
+        ("smile_soft", "expr_smile_soft.png"),
+        ("eyes_down",  "expr_eyes_down.png"),
+        ("laugh",      "expr_laugh.png"),
+    ]),
+    ("apron",      "outfit_apron.png", [
+        ("calm",     None),
+        ("amused",   "expr_amused.png"),
+        ("smile_soft","expr_smile_soft.png"),
+        ("sly",      "expr_sly.png"),
+    ]),
+    ("coat",       "outfit_coat.png", [
+        ("calm",     None),
+        ("suspicious","expr_suspicious.png"),
+        ("sly",      "expr_sly.png"),
+    ]),
+    ("ponytail",   "hair_ponytail.png", [
+        ("calm",     None),
+        ("amused",   "expr_amused.png"),
+        ("hungry",   "expr_hungry.png"),
+    ]),
 ]
 
 BLINK_SRC = "blink_closed.png"
@@ -73,71 +97,95 @@ def main():
     tmp = OUT / "_tmp"
     tmp.mkdir(exist_ok=True)
 
-    # 1) 透明化
-    cut = {}
-    for name, fn in EXPRESSIONS + [("blink", BLINK_SRC)]:
-        src = SRC / fn
-        if not src.exists():
-            raise SystemExit(f"缺少源图：{src}")
-        dst = tmp / f"{name}.png"
-        alpha(src, dst)
-        cut[name] = dst
+    # 1) 每个 (造型, 表情) 生成透明图
+    jobs = []          # (造型, 表情, 透明图路径)
+    for group, base_file, faces in GROUPS:
+        for face, fn in faces:
+            src = SRC / (fn or base_file)
+            if not src.exists():
+                print(f"  !! 缺少源图，跳过：{src.name}")
+                continue
+            dst = tmp / f"{group}__{face}.png"
+            alpha(src, dst)
+            jobs.append((group, face, dst))
 
-    # 2) 统一裁切
-    l, t, w, h = trimbox(list(cut.values()))
-    # 像素取偶数，避免缩放时半像素
+    if not jobs:
+        raise SystemExit("没有可用源图")
+
+    # 2) 所有图共用并集裁切框，保证切换造型/表情都不跳位
+    l, t, w, h = trimbox([j[2] for j in jobs] + [tmp / "blink.png"]
+                         if (tmp / "blink.png").exists() else [j[2] for j in jobs])
     w += w % 2
     h += h % 2
     print(f"统一裁切框: {w}x{h}+{l}+{t}")
 
-    cells = []
-    for i, (name, _) in enumerate(EXPRESSIONS):
-        dst = OUT / f"{name}.png"
-        run("convert", str(cut[name]), "-crop", f"{w}x{h}+{l}+{t}", "+repage", str(dst))
-        cells.append({"name": name, "x": i * w, "y": 0, "w": w, "h": h})
+    frames = {}
+    order = []
+    for group, face, path in jobs:
+        name = f"{group}/{face}"
+        run("convert", str(path), "-crop", f"{w}x{h}+{l}+{t}", "+repage",
+            str(OUT / f"{group}__{face}.png"))
+        frames[name] = None
+        order.append(name)
 
-    # 3) 眨眼补丁：只保留眼部横带，做羽化
-    eye_png = tmp / "eye_raw.png"
-    run("convert", str(SRC / BLINK_SRC), "-crop", EYE_BOX, "+repage", str(eye_png))
-    # 羽化用一张模糊的白色圆角矩形做遮罩
-    out_info = subprocess.run(["identify", "-format", "%w %h", str(eye_png)],
-                              capture_output=True, text=True, check=True).stdout.split()
-    ew, eh = int(out_info[0]), int(out_info[1])
-    mask = tmp / "eye_mask.png"
-    run("convert", "-size", f"{ew}x{eh}", "xc:black",
-        "-fill", "white", "-draw", f"roundrectangle 6,6 {ew-7},{eh-7} 12,12",
-        "-blur", "0x6", str(mask))
-    patch = tmp / "eye_patch.png"
-    run("convert", str(eye_png), str(mask), "-alpha", "off",
-        "-compose", "CopyOpacity", "-composite", str(patch))
-    # 合成到全画布，位置与裁切框对齐
-    run("convert", "-size", f"{w}x{h}", "xc:none",
-        "(", str(patch), ")",
-        "-geometry", f"+{235 - l}+{235 - t}",
-        "-compose", "over", "-composite",
-        str(OUT / "blink_patch.png"))
-
-    # 4) 拼精灵表
-    run("convert", *[str(OUT / f"{n}.png") for n, _ in EXPRESSIONS],
+    # 3) 拼表（横向，按 order 顺序）
+    run("convert", *[str(OUT / (n.replace("/", "__") + ".png")) for n in order],
         "+append", str(OUT / "sheet.png"))
 
+    cols = len(order)
     manifest = {
         "image": "sheet.png",
         "cell": {"w": w, "h": h},
-        "frames": {c["name"]: [c["x"], c["y"], c["w"], c["h"]] for c in cells},
-        "blink_patch": {"file": "blink_patch.png", "w": w, "h": h},
+        "frames": {n: [i * w, 0, w, h] for i, n in enumerate(order)},
+        "blink_patch": "blink_patch.png",
+        "groups": {g: [f for (gg, f, _) in
+                       [(x[0], x[1], None) for x in jobs] if gg == g]
+                   for g, _, _ in GROUPS},
     }
+
+    # 4) 眨眼补丁
+    blink_src = SRC / BLINK_SRC
+    if blink_src.exists():
+        eye_png = tmp / "eye_raw.png"
+        run("convert", str(blink_src), "-fuzz", FUZZ, "-transparent", "black",
+            "-crop", EYE_BOX, "+repage", str(eye_png))
+        info = subprocess.run(["identify", "-format", "%w %h", str(eye_png)],
+                              capture_output=True, text=True, check=True).stdout.split()
+        ew, eh = int(info[0]), int(info[1])
+        mask = tmp / "eye_mask.png"
+        run("convert", "-size", f"{ew}x{eh}", "xc:black",
+            "-fill", "white", "-draw", f"roundrectangle 6,6 {ew-7},{eh-7} 12,12",
+            "-blur", "0x6", str(mask))
+        patch = tmp / "eye_patch.png"
+        run("convert", str(eye_png), str(mask), "-alpha", "off",
+            "-compose", "CopyOpacity", "-composite", str(patch))
+        run("convert", "-size", f"{w}x{h}", "xc:none", "(", str(patch), ")",
+            "-geometry", f"+{235 - l}+{235 - t}", "-compose", "over", "-composite",
+            str(OUT / "blink_patch.png"))
+
+    # 5) 单张成品：默认删除（精灵表已够用，省 20MB）；需要时加 --singles
+    if "--singles" in sys.argv:
+        for name in order:
+            src = OUT / (name.replace("/", "__") + ".png")
+            dst = OUT / (name.replace("/", "_") + ".png")
+            src.replace(dst)
+    else:
+        for name in order:
+            (OUT / (name.replace("/", "__") + ".png")).unlink(missing_ok=True)
+
     (OUT / "sheet.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=1),
                                     encoding="utf-8")
 
-    # 5) 清理临时
     for p in tmp.glob("*.png"):
         p.unlink()
     tmp.rmdir()
 
-    print("表情:", ", ".join(n for n, _ in EXPRESSIONS))
+    print(f"共 {cols} 格：")
+    for i, n in enumerate(order):
+        print(f"  [{i:2d}] {n}")
+    print("产物：")
     for f in sorted(OUT.glob("*")):
-        print(f"  {f.name:20s} {f.stat().st_size // 1024:6d} KB")
+        print(f"  {f.name:34s} {f.stat().st_size // 1024:6d} KB")
 
 
 if __name__ == "__main__":

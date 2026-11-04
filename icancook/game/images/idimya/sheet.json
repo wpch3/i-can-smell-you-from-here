@@ -1,44 +1,146 @@
 {
  "image": "sheet.png",
  "cell": {
-  "w": 584,
-  "h": 1304
+  "w": 598,
+  "h": 1312
  },
  "frames": {
-  "calm": [
+  "base/calm": [
    0,
    0,
-   584,
-   1304
+   598,
+   1312
   ],
-  "amused": [
-   584,
+  "base/amused": [
+   598,
    0,
-   584,
-   1304
+   598,
+   1312
   ],
-  "sly": [
-   1168,
+  "base/sly": [
+   1196,
    0,
-   584,
-   1304
+   598,
+   1312
   ],
-  "suspicious": [
-   1752,
+  "base/suspicious": [
+   1794,
    0,
-   584,
-   1304
+   598,
+   1312
   ],
-  "hungry": [
-   2336,
+  "base/hungry": [
+   2392,
    0,
-   584,
-   1304
+   598,
+   1312
+  ],
+  "base/smile_soft": [
+   2990,
+   0,
+   598,
+   1312
+  ],
+  "base/eyes_down": [
+   3588,
+   0,
+   598,
+   1312
+  ],
+  "base/laugh": [
+   4186,
+   0,
+   598,
+   1312
+  ],
+  "apron/calm": [
+   4784,
+   0,
+   598,
+   1312
+  ],
+  "apron/amused": [
+   5382,
+   0,
+   598,
+   1312
+  ],
+  "apron/smile_soft": [
+   5980,
+   0,
+   598,
+   1312
+  ],
+  "apron/sly": [
+   6578,
+   0,
+   598,
+   1312
+  ],
+  "coat/calm": [
+   7176,
+   0,
+   598,
+   1312
+  ],
+  "coat/suspicious": [
+   7774,
+   0,
+   598,
+   1312
+  ],
+  "coat/sly": [
+   8372,
+   0,
+   598,
+   1312
+  ],
+  "ponytail/calm": [
+   8970,
+   0,
+   598,
+   1312
+  ],
+  "ponytail/amused": [
+   9568,
+   0,
+   598,
+   1312
+  ],
+  "ponytail/hungry": [
+   10166,
+   0,
+   598,
+   1312
   ]
  },
- "blink_patch": {
-  "file": "blink_patch.png",
-  "w": 584,
-  "h": 1304
+ "blink_patch": "blink_patch.png",
+ "groups": {
+  "base": [
+   "calm",
+   "amused",
+   "sly",
+   "suspicious",
+   "hungry",
+   "smile_soft",
+   "eyes_down",
+   "laugh"
+  ],
+  "apron": [
+   "calm",
+   "amused",
+   "smile_soft",
+   "sly"
+  ],
+  "coat": [
+   "calm",
+   "suspicious",
+   "sly"
+  ],
+  "ponytail": [
+   "calm",
+   "amused",
+   "hungry"
+  ]
  }
 }

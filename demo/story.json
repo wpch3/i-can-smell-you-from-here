@@ -60,7 +60,7 @@
    },
    {
     "op": "show",
-    "img": "idimya amused",
+    "img": "idimya base amused",
     "at": "sprite_base, push_slow"
    },
    {
@@ -105,7 +105,7 @@
    },
    {
     "op": "show",
-    "img": "idimya amused",
+    "img": "idimya base amused",
     "at": "sprite_base, lean_in"
    },
    {
@@ -126,11 +126,11 @@
      },
      {
       "text": "绕过去。",
-      "pc": 21
+      "pc": 22
      },
      {
       "text": "反问她。",
-      "pc": 27
+      "pc": 28
      }
     ]
    },
@@ -142,6 +142,11 @@
     "op": "say",
     "who": "n",
     "text": "「想。想到有点睡不着。」"
+   },
+   {
+    "op": "show",
+    "img": "idimya base laugh",
+    "at": "sprite_base, lean_in"
    },
    {
     "op": "say",
@@ -156,7 +161,7 @@
    {
     "op": "jump",
     "label": null,
-    "pc": 35
+    "pc": 36
    },
    {
     "op": "set",
@@ -184,7 +189,7 @@
    {
     "op": "jump",
     "label": null,
-    "pc": 35
+    "pc": 36
    },
    {
     "op": "set",
@@ -197,7 +202,7 @@
    },
    {
     "op": "show",
-    "img": "idimya suspicious",
+    "img": "idimya base eyes_down",
     "at": "sprite_base, lean_back"
    },
    {
@@ -222,7 +227,7 @@
    {
     "op": "jump",
     "label": null,
-    "pc": 35
+    "pc": 36
    },
    {
     "op": "jump",
@@ -235,7 +240,7 @@
   "ch0_q1": [
    {
     "op": "show",
-    "img": "idimya calm",
+    "img": "idimya base calm",
     "at": "sprite_base, push_slow"
    },
    {
@@ -275,7 +280,7 @@
      },
      {
       "text": "「因为我很饿。」",
-      "pc": 20
+      "pc": 21
      }
     ]
    },
@@ -311,7 +316,7 @@
    {
     "op": "jump",
     "label": null,
-    "pc": 29
+    "pc": 30
    },
    {
     "op": "set",
@@ -321,6 +326,11 @@
     "op": "say",
     "who": "n",
     "text": "「因为你看起来不会伤害我。」"
+   },
+   {
+    "op": "show",
+    "img": "idimya base flat",
+    "at": "sprite_base, lean_back"
    },
    {
     "op": "say",
@@ -339,7 +349,7 @@
    {
     "op": "jump",
     "label": null,
-    "pc": 29
+    "pc": 30
    },
    {
     "op": "set",
@@ -356,7 +366,7 @@
    },
    {
     "op": "show",
-    "img": "idimya hungry",
+    "img": "idimya base hungry",
     "at": "sprite_base, lean_in"
    },
    {
@@ -381,7 +391,7 @@
    {
     "op": "jump",
     "label": null,
-    "pc": 29
+    "pc": 30
    },
    {
     "op": "jump",
@@ -394,7 +404,7 @@
   "ch0_smell": [
    {
     "op": "show",
-    "img": "idimya calm",
+    "img": "idimya base calm",
     "at": "sprite_base, push_slow"
    },
    {
@@ -461,7 +471,7 @@
   "ch0_q2": [
    {
     "op": "show",
-    "img": "idimya calm",
+    "img": "idimya base calm",
     "at": "sprite_base, push_slow"
    },
    {
@@ -522,7 +532,7 @@
    {
     "op": "jump",
     "label": null,
-    "pc": 27
+    "pc": 28
    },
    {
     "op": "set",
@@ -550,7 +560,7 @@
    {
     "op": "jump",
     "label": null,
-    "pc": 27
+    "pc": 28
    },
    {
     "op": "set",
@@ -562,7 +572,7 @@
    },
    {
     "op": "show",
-    "img": "idimya amused",
+    "img": "idimya base amused",
     "at": "sprite_base, lean_in"
    },
    {
@@ -578,6 +588,11 @@
     "op": "say",
     "who": "idimya",
     "text": "……"
+   },
+   {
+    "op": "show",
+    "img": "idimya base smile_soft",
+    "at": "sprite_base, lean_in"
    },
    {
     "op": "say",
@@ -597,7 +612,7 @@
    {
     "op": "jump",
     "label": null,
-    "pc": 27
+    "pc": 28
    },
    {
     "op": "jump",
@@ -610,7 +625,7 @@
   "ch0_q3": [
    {
     "op": "show",
-    "img": "idimya calm",
+    "img": "idimya base calm",
     "at": "sprite_base, push_slow"
    },
    {
@@ -694,7 +709,7 @@
    },
    {
     "op": "show",
-    "img": "idimya suspicious",
+    "img": "idimya base suspicious",
     "at": "sprite_base, lean_back"
    },
    {
@@ -731,7 +746,7 @@
    },
    {
     "op": "show",
-    "img": "idimya sly",
+    "img": "idimya base sly",
     "at": "sprite_base, lean_in"
    },
    {
@@ -789,7 +804,7 @@
   "ch0_reversal": [
    {
     "op": "show",
-    "img": "idimya calm",
+    "img": "idimya base calm",
     "at": "sprite_base, push_slow"
    },
    {
@@ -813,7 +828,7 @@
    },
    {
     "op": "show",
-    "img": "idimya hungry",
+    "img": "idimya base eyes_down",
     "at": "sprite_base, lean_in"
    },
    {
@@ -1000,7 +1015,7 @@
   "ch0_ending": [
    {
     "op": "show",
-    "img": "idimya calm",
+    "img": "idimya base calm",
     "at": "sprite_base, push_slow"
    },
    {
@@ -1060,7 +1075,7 @@
   "end_lie": [
    {
     "op": "show",
-    "img": "idimya suspicious",
+    "img": "idimya base suspicious",
     "at": "sprite_base"
    },
    {
@@ -1132,7 +1147,7 @@
   "end_name": [
    {
     "op": "show",
-    "img": "idimya calm",
+    "img": "idimya base calm",
     "at": "sprite_base"
    },
    {
@@ -1209,7 +1224,7 @@
   "end_scent": [
    {
     "op": "show",
-    "img": "idimya sly",
+    "img": "idimya base sly",
     "at": "sprite_base"
    },
    {
@@ -1288,8 +1303,56 @@
     "dur": 1.6
    },
    {
+    "op": "scene",
+    "img": "kitchen"
+   },
+   {
+    "op": "with",
+    "dur": 1.4
+   },
+   {
+    "op": "show",
+    "img": "vig",
+    "at": null
+   },
+   {
+    "op": "show",
+    "img": "idimya apron smile_soft",
+    "at": "sprite_base, push_slow"
+   },
+   {
+    "op": "say",
+    "who": "note",
+    "text": "第一章 · 门铃"
+   },
+   {
+    "op": "say",
+    "who": "note",
+    "text": "她站在厨房里，背对着你。围裙的带子在腰后打了个很随意的结。"
+   },
+   {
+    "op": "say",
+    "who": "note",
+    "text": "砧板上有什么东西，正在被切成很均匀的片。"
+   },
+   {
+    "op": "say",
+    "who": "note",
+    "text": "她没有回头。"
+   },
+   {
+    "op": "say",
+    "who": "idimya",
+    "text": "门没锁。"
+   },
+   {
+    "op": "say",
+    "who": "idimya",
+    "text": "……我说过你不用敲的。"
+   },
+   {
     "op": "centered",
-    "text": "{size=20}{color=#8b7b69}序章 · 完{/color}{/size}\\n\\n{color=#f0dcc2}第一章 · 门铃{/color}\\n\\n{size=18}{color=#8b7b69}她站在厨房里，背对着你。\\n砧板上有什么东西，正在被切成很均匀的片。{/color}{/size}"
+    "text": "{size=20}{color=#8b7b69}序章 · 完{/color}{/size}\\n\\n{color=#f0dcc2}第一章 · 门铃 · 制作中{/color}"
    },
    {
     "op": "centered",

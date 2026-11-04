@@ -9,6 +9,10 @@
   const IMG = {
     kv: '../icancook/game/images/key_visual.jpg',
     bistro: '../icancook/game/images/bg_bistro.jpg',
+    kitchen: '../icancook/game/images/bg_kitchen.jpg',
+    genkan: '../icancook/game/images/bg_genkan.jpg',
+    morning: '../icancook/game/images/bg_morning.jpg',
+    fridge: '../icancook/game/images/bg_fridge.jpg',
     vig: '../icancook/game/images/vignette.png',
   };
   const SPRITE_DIR = '../icancook/game/images/idimya/';
@@ -89,6 +93,7 @@
     char: $('#char'),
     charInner: $('#charInner'),
     lid: $('#lid'),
+    hairSway: $('#hairSway'),
     vig: $('#vig'),
     box: $('#box'),
     who: $('#who'),
@@ -117,7 +122,8 @@
     blinkUntil: 0,
   };
 
-  window.__spriteDebug = () => ({ ready: SPRITE.ready, frames: Object.keys(SPRITE.frames||{}), sheet: !!SPRITE.sheet });
+  window.__spriteDebug = () => ({ ready: SPRITE.ready, frames: Object.keys(SPRITE.frames || {}), sheet: !!SPRITE.sheet });
+  window.__setExpr = (n) => setExpression(n);
 
   function loadSprite() {
     SPRITE.frames = SPRITE.frames || {};
@@ -137,7 +143,7 @@
   }
 
   function setExpression(name) {
-    if (!SPRITE.frames || !SPRITE.frames[name]) name = 'calm';
+    if (!SPRITE.frames || !SPRITE.frames[name]) name = 'base/calm';
     SPRITE.name = name;
     paintSprite();
   }
@@ -158,6 +164,16 @@
       `${Math.round(w * Object.keys(SPRITE.frames).length * scale)}px ${Math.round(h * scale)}px`;
     el.charInner.style.backgroundPosition =
       `${-Math.round(f[0] * scale)}px ${-Math.round(f[1] * scale)}px`;
+    el.charInner.style.backgroundImage = `url("${SPRITE_DIR}sheet.png")`;
+    el.charInner.style.backgroundSize =
+      `${Math.round(w * Object.keys(SPRITE.frames).length * scale)}px ${Math.round(h * scale)}px`;
+    el.charInner.style.backgroundPosition =
+      `${-Math.round(f[0] * scale)}px ${-Math.round(f[1] * scale)}px`;
+
+    // 头发层：同图同位，靠 clip 只露头，轻微摆动
+    el.hairSway.style.backgroundImage = el.charInner.style.backgroundImage;
+    el.hairSway.style.backgroundSize = el.charInner.style.backgroundSize;
+    el.hairSway.style.backgroundPosition = el.charInner.style.backgroundPosition;
   }
 
   // 眨眼：每 3~7 秒一次，闭上 110ms
@@ -173,17 +189,51 @@
     }, 1200 + Math.random() * 1500);
   }
 
-  // 呼吸：极慢的上下浮动 + 极轻微缩放
-  function startBreath() {
+  // 头发摆动：两层不同相位，制造“发丝有重量”的错觉（厚涂不用变形网格）
+  function startHairSway() {
     const t0 = performance.now();
     const loop = () => {
       const t = (performance.now() - t0) / 1000;
-      const y = Math.sin(t / 2.6) * 2.4;
-      const sc = 1 + Math.sin(t / 2.6) * 0.0035;
-      el.charInner.style.transform = `translateY(${y}px) scale(${sc})`;
+      const sway = Math.sin(t / 3.1) * 1.1 + Math.sin(t / 1.37) * 0.35;
+      const tilt = Math.sin(t / 4.3) * 0.55;
+      el.hairSway.style.transform = `translateX(${sway.toFixed(2)}%) rotate(${tilt.toFixed(2)}deg)`;
       requestAnimationFrame(loop);
     };
     loop();
+  }
+
+  // 视点跟随 + 呼吸 + 头发摆动：合成一个 RAF 循环，避免多条循环互相覆盖 transform
+  const gaze = { x: 0, y: 0 };
+  function startLive() {
+    const t0 = performance.now();
+    let cx = 0, cy = 0;
+
+    el.stage.addEventListener('mousemove', (e) => {
+      const r = el.stage.getBoundingClientRect();
+      gaze.x = ((e.clientX - r.left) / r.width - 0.5) * 2;
+      gaze.y = ((e.clientY - r.top) / r.height - 0.5) * 2;
+    });
+
+    const loop = () => {
+      const t = (performance.now() - t0) / 1000;
+      cx += (gaze.x - cx) * 0.05;
+      cy += (gaze.y - cy) * 0.05;
+
+      const by = Math.sin(t / 2.6) * 2.4;                    // 呼吸位移
+      const bs = 1 + Math.sin(t / 2.6) * 0.0035;             // 呼吸缩放
+      el.charInner.style.transform =
+        `translate(${(cx * -1.2).toFixed(2)}%, ${(cy * -0.6 + by).toFixed(2)}%) scale(${bs.toFixed(4)})`;
+
+      if (el.hairSway) {
+        const sway = Math.sin(t / 3.1) * 0.9 + Math.sin(t / 1.37) * 0.3;
+        const tilt = Math.sin(t / 4.3) * 0.5;
+        el.hairSway.style.transform =
+          `translateX(${sway.toFixed(2)}%) rotate(${tilt.toFixed(2)}deg)`;
+      }
+      requestAnimationFrame(loop);
+    };
+    loop();
+    startBlink();
   }
 
   let story = null;
@@ -359,7 +409,10 @@
         case 'show': {
           const parts = (ins.img || '').split(/\s+/);
           if (parts[0] === 'idimya') {
-            setExpression(parts[1] || 'calm');
+            // Ren'Py 写法：show idimya <造型> <表情>
+            const group = parts[2] ? parts[1] : 'base';
+            const face = parts[2] || parts[1] || 'calm';
+            setExpression(`${group}/${face}`);
             el.char.style.opacity = '1';
             applyTransform(ins.at, ins.at === 'lean_in' ? 900 : 500);
           } else if (parts[0] === 'vig') {
@@ -647,8 +700,7 @@
     S.vars.smell_line = '';
 
     if (!new URLSearchParams(location.search).has('nosprite')) loadSprite();
-    startBlink();
-    startBreath();
+    startLive();
     renderEndings();
     requestAnimationFrame(candleBreath);
     setInterval(() => { if (S.running) candleCrackle(); }, 5200 + Math.random() * 4000);

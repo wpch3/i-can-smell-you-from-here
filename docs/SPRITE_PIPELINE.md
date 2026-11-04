@@ -5,7 +5,9 @@
 | 项 | 状态 |
 |---|---|
 | 立绘底图（黑底） | ✅ `assets/sprites/idimya/base_v1.png` |
-| 表情差分 | ✅ 5 个：`calm / amused / sly / suspicious / hungry` |
+| 表情差分 | ✅ 8 个：`calm / amused / sly / suspicious / hungry / smile_soft / eyes_down / laugh / flat` |
+| 造型（服装 / 发型） | ✅ 3 套：`apron`（围裙）、`coat`（大衣）、`ponytail`（马尾） |
+| 背景 | ✅ 5 张：小酒馆（夜）/ 玄关 / 厨房 / 冰箱走廊 / 早晨餐桌 |
 | 眨眼层 | ✅ `blink_closed.png` → 加工成 `blink_patch.png` |
 | 透明化 + 统一裁切 + 精灵表 | ✅ `tools/build_sprites.py` 一键生成 |
 | 引擎内动态立绘 | ✅ 呼吸 + 眨眼 + 表情切换 + 推近/退开 |
@@ -14,7 +16,8 @@
 产物（`icancook/game/images/idimya/`）：
 
 ```
-sheet.png        2920×1303  5 格横向精灵表
+sheet.png        18 格横向精灵表（10764×1312）
+sheet.json       每格坐标；键名形如 "apron/sly"
 sheet.json       每格坐标 + 尺寸（网页引擎与 Ren'Py 共用）
 blink_patch.png  584×1304   只有眼部可见的羽化补丁
 calm/amused/sly/suspicious/hungry.png   单张，备用
