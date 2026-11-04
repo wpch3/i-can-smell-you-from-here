@@ -77,12 +77,35 @@ jobs:
       - name: Build Windows distribution
         shell: pwsh
         run: |
-          & "$env:RENPY_ROOT\renpy.exe" "$env:RENPY_ROOT\launcher" distribute `
-              "${{ github.workspace }}\icancook" `
-              --package win `
-              --no-update `
-              --destination "${{ github.workspace }}\dist"
-          if ($LASTEXITCODE -ne 0) { exit 1 }
+          Write-Host "=== SDK lib dirs ==="
+          Get-ChildItem "$env:RENPY_ROOT\lib" -Directory | Select-Object Name | Format-Table
+          Write-Host "=== SDK root ==="
+          Get-ChildItem "$env:RENPY_ROOT" | Select-Object Name | Format-Table
+
+          $log = "${{ github.workspace }}\distribute.log"
+          $py = Get-ChildItem "$env:RENPY_ROOT\lib" -Directory -Filter "py3-windows*" | Select-Object -First 1
+          if ($py) {
+            Write-Host "Using python: $($py.FullName)\python.exe"
+            & "$($py.FullName)\python.exe" "$env:RENPY_ROOT\renpy.py" launcher distribute `
+                "${{ github.workspace }}\icancook" `
+                --package win `
+                --no-update `
+                --destination "${{ github.workspace }}\dist" *>&1 | Tee-Object -FilePath $log
+          } else {
+            & "$env:RENPY_ROOT\renpy.exe" launcher distribute `
+                "${{ github.workspace }}\icancook" `
+                --package win `
+                --no-update `
+                --destination "${{ github.workspace }}\dist" *>&1 | Tee-Object -FilePath $log
+          }
+
+          if ($LASTEXITCODE -ne 0) {
+            $text = (Get-Content $log -Raw)
+            if ($text.Length -gt 6000) { $text = $text.Substring($text.Length - 6000) }
+            $text = $text -replace "%", "%25" -replace "\r", "" -replace "\n", "%0A"
+            Write-Host "::error title=distribute failed::$text"
+            exit 1
+          }
           Get-ChildItem "${{ github.workspace }}\dist" -Recurse | Select-Object FullName, Length
 
       - name: Unzip the built package for a ready-to-run folder
