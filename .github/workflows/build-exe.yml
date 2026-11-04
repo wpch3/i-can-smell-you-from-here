@@ -77,30 +77,27 @@ jobs:
       - name: Build Windows distribution
         shell: pwsh
         run: |
-          Write-Host "=== SDK lib dirs ==="
-          Get-ChildItem "$env:RENPY_ROOT\lib" -Directory | Select-Object Name | Format-Table
-          Write-Host "=== SDK root ==="
-          Get-ChildItem "$env:RENPY_ROOT" | Select-Object Name | Format-Table
+          # 自己解析 SDK 根（root 下的 renpy.exe，排除 lib\ 里的解释器）
+          $exe = Get-ChildItem "${{ github.workspace }}\sdk" -Recurse -Filter "renpy.exe" |
+                 Where-Object { $_.FullName -notmatch "\\lib\\" } | Select-Object -First 1
+          if (-not $exe) { Write-Host "::error title=SDK not found::no renpy.exe outside lib"; exit 1 }
+          $root = $exe.Directory.FullName
+          Write-Host "SDK root: $root"
+          Get-ChildItem $root | Select-Object Name | Format-Table | Out-String | Write-Host
 
           $log = "${{ github.workspace }}\distribute.log"
-          $py = Get-ChildItem "$env:RENPY_ROOT\lib" -Directory -Filter "py3-windows*" | Select-Object -First 1
-          if ($py) {
-            Write-Host "Using python: $($py.FullName)\python.exe"
-            & "$($py.FullName)\python.exe" "$env:RENPY_ROOT\renpy.py" launcher distribute `
-                "${{ github.workspace }}\icancook" `
-                --package win `
-                --no-update `
-                --destination "${{ github.workspace }}\dist" *>&1 | Tee-Object -FilePath $log
-          } else {
-            & "$env:RENPY_ROOT\renpy.exe" launcher distribute `
-                "${{ github.workspace }}\icancook" `
-                --package win `
-                --no-update `
-                --destination "${{ github.workspace }}\dist" *>&1 | Tee-Object -FilePath $log
-          }
+          Push-Location $root
+          # 注意：第一个位置参数就是 basedir，必须绝对路径，否则会去找 <cwd>\launcher
+          & "$root\renpy.exe" "$root\launcher" distribute `
+              "${{ github.workspace }}\icancook" `
+              --package win `
+              --no-update `
+              --destination "${{ github.workspace }}\dist" *>&1 | Tee-Object -FilePath $log
+          $code = $LASTEXITCODE
+          Pop-Location
 
-          if ($LASTEXITCODE -ne 0) {
-            $text = (Get-Content $log -Raw)
+          if ($code -ne 0) {
+            $text = "SDK root: $root`n" + (Get-Content $log -Raw)
             if ($text.Length -gt 6000) { $text = $text.Substring($text.Length - 6000) }
             $text = $text -replace "%", "%25" -replace "\r", "" -replace "\n", "%0A"
             Write-Host "::error title=distribute failed::$text"
