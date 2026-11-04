@@ -47,8 +47,26 @@ jobs:
       - name: Compile scripts (真编译，语法错会在这里炸)
         shell: pwsh
         run: |
-          & "$env:RENPY_ROOT\renpy.exe" "${{ github.workspace }}\icancook" compile
-          if ($LASTEXITCODE -ne 0) { exit 1 }
+          $log = "${{ github.workspace }}\compile.log"
+          & "$env:RENPY_ROOT\renpy.exe" "${{ github.workspace }}\icancook" compile *>&1 |
+              Tee-Object -FilePath $log
+          $code = $LASTEXITCODE
+          if ($code -ne 0) {
+            # 把错误写进注解：日志站被墙时也能读到
+            $text = (Get-Content $log -Raw)
+            if ($text.Length -gt 6000) { $text = $text.Substring($text.Length - 6000) }
+            $text = $text -replace "%", "%25" -replace "\r", "" -replace "\n", "%0A"
+            Write-Host "::error title=Ren'Py compile failed::$text"
+            # 顺带把游戏目录里 Ren'Py 自己写的报错文件也贴出来
+            $errFile = "${{ github.workspace }}\icancook\errors.txt"
+            if (Test-Path $errFile) {
+              $e2 = (Get-Content $errFile -Raw)
+              if ($e2.Length -gt 6000) { $e2 = $e2.Substring(0, 6000) }
+              $e2 = $e2 -replace "%", "%25" -replace "\r", "" -replace "\n", "%0A"
+              Write-Host "::error title=errors.txt::$e2"
+            }
+            exit 1
+          }
 
       - name: Lint
         shell: pwsh
