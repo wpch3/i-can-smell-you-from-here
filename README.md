@@ -7,6 +7,22 @@
 
 ---
 
+## 立刻试玩
+
+```bash
+python3 -m http.server 8000 --bind 0.0.0.0
+# 打开 http://localhost:8000/
+```
+
+网页 Demo 不是另写的一套：它由 `tools/rpy2json.py` **从 exe 版同一份剧本自动转译**。
+改了 `icancook/game/script.rpy` 之后跑一次：
+
+```bash
+python3 tools/rpy2json.py icancook/game/script.rpy -o demo/story.json
+node tools/simulate.js        # 81 条分支路径的纯逻辑总检
+node tools/smoke-test.js      # 真点一遍（需要 npm i jsdom）
+```
+
 ## 现在有什么
 
 | 路径 | 说明 |
@@ -14,6 +30,8 @@
 | `assets/concept/key-visual-official.png` | ✅ **主视觉定稿**（唯一形象标准，锁定不再改） |
 | `assets/reference/original-first-date-screenshot.png` | 风格锚点：原作游戏内截图 |
 | `icancook/` | **游戏工程（Ren'Py 8.5.3）**，产出 Windows .exe |
+| `demo/` | **网页 Demo**（同一份剧本，浏览器直接玩） |
+| `tools/rpy2json.py` | 剧本转译器：`.rpy` → `demo/story.json` |
 | `docs/TECH_STACK.md` | 技术选型：为什么是 Ren'Py + Python，怎么出 exe |
 | `docs/GAME_CONCEPT.md` | 概念书：故事、章节、系统、结局 |
 | `docs/ART_BIBLE.md` | 美术设定锁 + 可复用提示词模板 + UI / 音效规范 |

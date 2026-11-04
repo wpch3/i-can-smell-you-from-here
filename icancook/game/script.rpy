@@ -105,7 +105,7 @@ label ch0_arrive:
             $ doubt += 1
 
         "反问她。":
-            $ scent += 1
+            $ scent += 2
             n "「你呢？这三个月里，你约过几个人来这张桌子？」"
 
             show kv at lean_back
@@ -369,20 +369,20 @@ label ch0_ending:
     show kv at push_slow
     with Dissolve(0.8)
 
-    if doubt >= trust + 2:
+    if doubt >= trust + 1:
 
         $ chapter_name = "结局 A · 她记住了你的谎话"
         jump end_lie
 
-    elif trust >= 4:
-
-        $ chapter_name = "结局 B · 她记住了你的名字"
-        jump end_name
-
-    else:
+    elif scent >= trust + 1:
 
         $ chapter_name = "结局 C · 她记住了你的味道"
         jump end_scent
+
+    else:
+
+        $ chapter_name = "结局 B · 她记住了你的名字"
+        jump end_name
 
 
 label end_lie:
