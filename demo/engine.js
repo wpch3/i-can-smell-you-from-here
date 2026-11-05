@@ -143,6 +143,13 @@
     src.start();
   }
 
+  // 玩家遇到问题时要能自己确认「拿到的是哪一版」：F12 里会看到这行，标题页角落也有版本号。
+  // 之前那个「点进去一片黑」的 bug 有相当概率是浏览器缓存造成的误报，先排除这个变量。
+  const VERSION = '0.5.6';
+  console.info(`她记住的方式 · 网页 Demo v${VERSION}`);
+  const verEl = document.getElementById('ver');
+  if (verEl) verEl.textContent = `v${VERSION}`;
+
   const $ = (s) => document.querySelector(s);
   const el = {
     stage: $('#stage'),
