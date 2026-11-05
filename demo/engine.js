@@ -146,7 +146,7 @@
 
   // 玩家遇到问题时要能自己确认「拿到的是哪一版」：F12 里会看到这行，标题页角落也有版本号。
   // 之前那个「点进去一片黑」的 bug 有相当概率是浏览器缓存造成的误报，先排除这个变量。
-  const VERSION = '0.6.0';
+  const VERSION = '0.6.1';
   console.info(`她记住的方式 · 网页 Demo v${VERSION}`);
   const verEl = document.getElementById('ver');
   if (verEl) verEl.textContent = `v${VERSION}`;
@@ -168,12 +168,16 @@
     barTop: $('#barTop'),
     barBottom: $('#barBottom'),
     bg: $('#bg'),
+    kv: $('#kv'),
     table: $('#table'),
     char: $('#char'),
     charBase: $('#charBase'),
+    charBody: $('#charBody'),
     charInner: $('#charInner'),
     lid: $('#lid'),
     layerHair: $('#layerHair'),
+    // 刘海层必须和底图里的头发**逐像素对齐**：错一个像素就是双轮廓
+    layerHairUnder: $('#layerHairUnder'),
     layerScarf: $('#layerScarf'),
     layerSpec: $('#layerSpec'),
     vig: $('#vig'),
@@ -209,6 +213,7 @@
   // 调试/汇报用：F12 里可以手动切场景与摆位，方便截图定位构图问题
   window.__scene = (n) => setScene(n);
   window.__layout = (m) => setLayout(m);
+  window.__at = (a, d) => applyTransform(a, d);
 
   function loadSprite() {
     SPRITE.frames = SPRITE.frames || {};
@@ -234,7 +239,14 @@
         }
 
         // L2 分层：同一格坐标系，直接叠
-        el.layerHair.style.backgroundImage = `url("${asset(SPRITE_DIR + 'layers/layer_bangs.png')}")`;
+        //
+        // 刘海要做两层：底层（不动）与上层（微小摆动）用的是**同一张切图**。
+        // 切图是从原图复制出来的，原图里那份头发还留在 #charInner 上；
+        // 如果只摆动一层，就会看到「双轮廓 / 部件重合」。
+        // 底层负责把原图那份盖住，上层再动，重叠处永远是同一张画。
+        const bangsUrl = `url("${asset(SPRITE_DIR + 'layers/layer_bangs.png')}")`;
+        el.layerHair.style.backgroundImage = bangsUrl;
+        if (el.layerHairUnder) el.layerHairUnder.style.backgroundImage = bangsUrl;
         el.layerScarf.style.backgroundImage = `url("${asset(SPRITE_DIR + 'layers/layer_scarf.png')}")`;
         el.layerSpec.style.backgroundImage = `url("${asset(SPRITE_DIR + 'layers/layer_spec.png')}")`;
       })
@@ -281,11 +293,20 @@
 
   /** 切换摆位。座位场景（圆桌）用 seat，其余用 stand。 */
   function setLayout(mode) {
-    if (layoutMode === mode) return;
+    const changed = layoutMode !== mode;
     layoutMode = mode;
-    // 前景桌面只在这类「她坐在桌子后面」的场景出现
-    if (el.table) el.table.style.opacity = mode === 'seat' ? '1' : '0';
-    paintSprite();
+    // 前景桌面只在这类「她坐在桌子后面」的场景出现。
+    // 注意这里不能跟着下面的 early return 走：广角镜头（setKv）会把桌面收成 0，
+    // 回到近景时必须重新置 1，否则她一直"没有桌子挡着"。
+    syncTable();
+    if (changed) paintSprite();
+  }
+
+  /** 桌面遮挡层的显隐：座位场景 + 不是广角镜头时才显示 */
+  function syncTable() {
+    if (!el.table) return;
+    const on = layoutMode === 'seat' && !kvOn;
+    el.table.style.opacity = on ? '1' : '0';
   }
 
   /** 按背景决定摆位：只有小酒馆是「圆桌 + 坐着」 */
@@ -317,7 +338,7 @@
       el.char.style.left = Math.round((L.cx - dispW / 2) * k) + 'px';
       el.char.style.top = Math.round(L.top * k) + 'px';
       el.char.style.bottom = 'auto';
-      el.char.style.transform = 'none';       // 位移交给 left/top，transform 留给演出
+      el.char.style.transform = baseTransform();   // 坐姿不用 transform 做位移
       el.charInner.style.width = '100%';
       el.charInner.style.height = '100%';
       el.charInner.style.backgroundImage = `url("${asset(SPRITE_DIR + 'sheet.png')}")`;
@@ -336,7 +357,7 @@
     el.char.style.left = '50%';
     el.char.style.top = 'auto';
     el.char.style.bottom = '0';
-    el.char.style.transform = 'translateX(-50%)';
+    el.char.style.transform = baseTransform();
     el.charInner.style.width = '100%';
     el.charInner.style.height = '100%';
     el.charInner.style.backgroundImage = `url("${asset(SPRITE_DIR + 'sheet.png')}")`;
@@ -353,9 +374,19 @@
     const isBase = SPRITE.name.startsWith('base/');
     el.layerHair.style.display = el.layerScarf.style.display =
       el.layerSpec.style.display = isBase ? 'block' : 'none';
+    if (el.layerHairUnder) el.layerHairUnder.style.display = isBase ? 'block' : 'none';
   }
 
-  // 眨眼：每 3~7 秒一次，闭上 110ms
+  /* 眨眼：每 1.2~2.7 秒一次，闭上 110ms。
+   *
+   * 两层坑（都真机复现过）：
+   *  ① blink_patch.png 原来是「眼皮横带 + 圆角矩形羽化」，框里还带着
+   *     鼻子、脸颊和围巾的一部分 —— 眨眼时脸中央浮出一个方块，
+   *     这就是用户看到的"闭眼部件重合"。
+   *  ② #lid 是 #char 的直接子元素，而呼吸/视点变换写在 #charInner 上，
+   *     所以眼睛在动、眼皮不动，两者永久性地相对漂移。
+   *     现在把 #charInner + 三层 + #lid 一起装进 #charBody，
+   *     呼吸/视点只动 #charBody —— 所有零件严格同一个坐标系。 */
   function startBlink() {
     clearInterval(SPRITE.blinkTimer);
     SPRITE.blinkTimer = setInterval(() => {
@@ -387,24 +418,49 @@
 
       const by = Math.sin(t / 2.6) * 2.4;                    // 呼吸位移
       const bs = 1 + Math.sin(t / 2.6) * 0.0035;             // 呼吸缩放
-      el.charInner.style.transform =
+      // 呼吸 + 视点：整组一起动（立绘 / 刘海 / 丝巾 / 高光 / 眼皮）
+      el.charBody.style.transform =
         `translate(${(cx * -1.2).toFixed(2)}%, ${(cy * -0.6 + by).toFixed(2)}%) scale(${bs.toFixed(4)})`;
 
-      // 刘海：小幅度、高频
-      const hSway = Math.sin(t / 2.7) * 0.55 + Math.sin(t / 1.13) * 0.18;
-      const hTilt = Math.sin(t / 3.9) * 0.35;
+      /* 刘海 / 丝巾：幅度必须小。
+       *
+       * 这两层是「从原图上抠下来的复制品」——原图里那份还在下面。
+       * 只要位移超过 1~2 像素，就会看到两层错开的轮廓（重影），
+       * 用户报的"部件错位"就是它。单靠加大羽化救不回来：
+       * 羽化只让边缘变糊，轮廓仍然成双。
+       * 所以这里把幅度压到 0.3% / 0.25deg 量级（≈1.5px），
+       * 肉眼看不出重影，但能感觉到空气在动。 */
+      const hSway = Math.sin(t / 2.7) * 0.30 + Math.sin(t / 1.13) * 0.10;
+      const hTilt = Math.sin(t / 3.9) * 0.22;
       el.layerHair.style.transform =
         `translateX(${hSway.toFixed(2)}%) rotate(${hTilt.toFixed(2)}deg)`;
 
-      // 丝巾尾端：大幅度、低频，且有相位延迟 —— 这一层最出效果
-      const sSway = Math.sin((t - 0.6) / 3.4) * 1.7 + Math.sin((t - 0.3) / 1.9) * 0.5;
-      const sTilt = Math.sin((t - 0.8) / 4.6) * 1.6;
+      const sSway = Math.sin((t - 0.6) / 3.4) * 0.55 + Math.sin((t - 0.3) / 1.9) * 0.16;
+      const sTilt = Math.sin((t - 0.8) / 4.6) * 0.45;
       el.layerScarf.style.transform =
-        `translate(${sSway.toFixed(2)}%, ${(Math.abs(sSway) * 0.12).toFixed(2)}%) rotate(${sTilt.toFixed(2)}deg)`;
+        `translate(${sSway.toFixed(2)}%, ${(Math.abs(sSway) * 0.10).toFixed(2)}%) rotate(${sTilt.toFixed(2)}deg)`;
 
       // 高光层：透明度呼吸，模拟烛光扫过
       el.layerSpec.style.opacity =
         (0.13 + Math.sin(t / 1.7) * 0.04 + Math.sin(t / 0.53) * 0.012).toFixed(3);
+
+      // 循环类演出：rack（焦点漂移）与 throb（心跳）
+      // Ren'Py 那边是 transform 的 repeat，这里每帧写一次即可。
+      if (loopFx === 'rack') {
+        const k = 0.5 - 0.5 * Math.cos((t % 4) / 4 * Math.PI * 2);   // 0→1→0
+        const light = 0.94 + Math.sin(t / 0.9) * 0.02;   // 保留烛光呼吸
+        el.char.style.filter =
+          `blur(${(k * 2.2).toFixed(2)}px) brightness(${light.toFixed(3)}) saturate(1.02)`;
+        el.char.style.transform = (layoutMode === 'seat'
+          ? '' : 'translateX(-50%) ') + `scale(${(1 + k * 0.02).toFixed(4)})`;
+      } else if (loopFx === 'throb') {
+        const beat = Math.abs(Math.sin(t * Math.PI / 0.85));          // 双峰=心跳
+        const dy = -(beat * 2).toFixed(2);
+        el.char.style.transform = (layoutMode === 'seat'
+          ? '' : 'translateX(-50%) ') + `translateY(${dy}px)`;
+        const light = 0.94 + Math.sin(t / 0.9) * 0.02;
+        el.char.style.filter = `brightness(${light.toFixed(3)}) saturate(1.02)`;
+      }
       requestAnimationFrame(loop);
     };
     loop();
@@ -551,21 +607,72 @@
     push_slow: { dur: 26000, scale: 1.05 },
     lean_in: { dur: 1600, scale: 1.12, shiftY: 0 },
     lean_back: { dur: 900, scale: 1.0, shiftY: 0 },
+    // `at sprite_base` 单独出现 = 站着不动。Ren'Py 那边就是 zoom 0.92 常数，
+    // 网页这边如果兜底成 push_slow，就会莫名其妙自己慢慢放大。
+    none: { dur: 200, scale: 1.0, shiftY: 0 },
+    // 循环类（Ren'Py 里是 repeat）：不加 transition，交给 RAF 每帧写。
+    // rack = 焦点漂移（模糊呼吸），throb = 心跳位移。
+    rack: { dur: 0, scale: 1.0, loop: 'rack' },
+    throb: { dur: 0, scale: 1.0, loop: 'throb' },
   };
 
-  function applyTransform(name, dur) {
-    const t = TRANSFORMS[name] || TRANSFORMS.push_slow;
+  /** 当前生效的循环演出（'rack' / 'throb' / null），由 startLive 的 RAF 读取 */
+  let loopFx = null;
+
+  /* Ren'Py 里 `show ... at sprite_base, lean_in` 会被原样转成
+   * at="sprite_base, lean_in"（整串）。旧代码直接拿整串去查 TRANSFORMS，
+   * 永远查不到 → 22 处 lean_in 全部退化成默认的 26 秒 push_slow，
+   * 想表现"她凑近"的地方其实一点没动。
+   * 这里把整串拆开，取第一个认识的演出名。 */
+  function pickTransform(at) {
+    if (!at) return 'push_slow';
+    const names = String(at).split(',').map((x) => x.trim());
+    for (const n of names) {
+      const key = n.replace(/\(.*\)$/, '');       // bar_in_top(0.9) → bar_in_top
+      if (TRANSFORMS[key]) return key;
+    }
+    // 只剩摆位锚点（sprite_base / sprite_seat）= 不动
+    if (names.some((n) => n.startsWith('sprite_'))) return 'none';
+    return 'push_slow';
+  }
+
+  function applyTransform(at, dur) {
+    const t = TRANSFORMS[pickTransform(at)] || TRANSFORMS.push_slow;
     const e = el.char;
+    if (t.loop) {
+      loopFx = t.loop;
+      e.style.transition = 'transform .6s ease, opacity .8s';
+      e.style.transformOrigin = '50% 100%';
+      // 循环类不改缩放，只保留底座变换
+      e.style.transform = layoutMode === 'seat'
+        ? 'none' : 'translateX(-50%) translateY(0%)';
+      return;
+    }
+    loopFx = null;
     e.style.transition =
       `transform ${dur != null ? dur : t.dur / 1000}s cubic-bezier(.22,.61,.36,1), opacity .8s`;
-    e.style.transformOrigin = '50% 100%';
-    e.style.transform = `translate(-50%, ${t.shiftY || 0}%) scale(${t.scale})`;
+    if (layoutMode === 'seat') {
+      // 坐姿：位移由 left/top 决定，这里只叠缩放，且绕底边中心
+      e.style.transformOrigin = '50% 100%';
+      e.style.transform = `scale(${t.scale})`;
+    } else {
+      e.style.transformOrigin = '50% 100%';
+      e.style.transform = `translateX(-50%) translateY(${t.shiftY || 0}%) scale(${t.scale})`;
+    }
+  }
+
+  function baseTransform() {
+    return layoutMode === 'seat' ? 'none' : 'translateX(-50%)';
   }
 
   function candleBreath() {
-    // 烛光呼吸：轻微明暗起伏
-    const k = 0.94 + Math.sin(Date.now() / 900) * 0.02;
-    el.char.style.filter = `brightness(${k}) saturate(1.02)`;
+    // 烛光呼吸：轻微明暗起伏。
+    // 有循环演出（rack/throb）在跑时让位 —— 两条 RAF 同时写 el.char.style.filter
+    // 会互相覆盖，表现得像「眨眼/心跳时亮度乱跳」。
+    if (!loopFx) {
+      const k = 0.94 + Math.sin(Date.now() / 900) * 0.02;
+      el.char.style.filter = `brightness(${k}) saturate(1.02)`;
+    }
     requestAnimationFrame(candleBreath);
   }
 
@@ -614,6 +721,9 @@
             setExpression(`${group}/${face}`);
             el.char.style.opacity = '1';
             applyTransform(ins.at, ins.at === 'lean_in' ? 900 : 500);
+          } else if (parts[0] === 'kv') {
+            // 广角定稿：她坐在桌后，桌子挡住腰。开场先给这个全景。
+            setKv(true);
           } else if (parts[0] === 'vig') {
             el.vig.style.opacity = '1';
           } else if (parts[0] === 'bar_top') {
@@ -621,6 +731,12 @@
           } else if (parts[0] === 'bar_bottom') {
             showBars('bottom');
           }
+          break;
+        }
+        case 'hide': {
+          const what = (ins.img || '').split(/\s+/)[0];
+          if (what === 'kv') setKv(false);
+          if (what === 'idimya') el.char.style.opacity = '0';
           break;
         }
         case 'with': {
@@ -766,6 +882,21 @@
     im.src = url;
   }
 
+  /* 广角镜头（key_visual）。
+   * 定稿 key_visual 里她已经是「坐在桌后、桌子挡住腰」的完整构图，
+   * 开场先播它，观众就先认定她坐下了；之后再切到立绘近景，
+   * 只会被读成"镜头推近"，不会再有"她怎么站着"的疑问。
+   * 显示广角时必须把立绘和桌面遮挡层都收掉 —— 否则两套"她"会叠在一起。
+   */
+  let kvOn = false;
+  function setKv(on) {
+    if (!el.kv) return;
+    kvOn = on;
+    el.kv.style.opacity = on ? '1' : '0';
+    if (on) el.char.style.opacity = '0';
+    syncTable();
+  }
+
   function setScene(img) {
     if (img === 'black') {
       el.bg.style.opacity = '0';
@@ -776,6 +907,7 @@
     }
     el.bg.style.opacity = '1';
     el.vig.style.opacity = '1';
+    setKv(false);
     setLayout(layoutFor(img));
     // kv 与 bg 是同一张图：bg 作为静态底，char 承担推近演出
     const url = IMG[img] || IMG.kv;

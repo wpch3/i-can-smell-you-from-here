@@ -91,13 +91,12 @@
    },
    {
     "op": "show",
-    "img": "idimya base amused",
-    "at": "sprite_seat, push_slow"
+    "img": "kv",
+    "at": null
    },
    {
-    "op": "show",
-    "img": "table_front",
-    "at": null
+    "op": "with",
+    "dur": 1.6
    },
    {
     "op": "say",
@@ -108,6 +107,24 @@
     "op": "say",
     "who": "note",
     "text": "她已经坐在那儿了。烛台摆在她手边，一盏只够照亮两个人的火。"
+   },
+   {
+    "op": "hide",
+    "img": "kv"
+   },
+   {
+    "op": "show",
+    "img": "idimya base amused",
+    "at": "sprite_seat, push_slow"
+   },
+   {
+    "op": "show",
+    "img": "table_front",
+    "at": null
+   },
+   {
+    "op": "with",
+    "dur": 0.9
    },
    {
     "op": "say",
@@ -158,15 +175,15 @@
     "options": [
      {
       "text": "说实话。",
-      "pc": 17
+      "pc": 21
      },
      {
       "text": "绕过去。",
-      "pc": 23
+      "pc": 27
      },
      {
       "text": "反问她。",
-      "pc": 29
+      "pc": 33
      }
     ]
    },
@@ -197,7 +214,7 @@
    {
     "op": "jump",
     "label": null,
-    "pc": 37
+    "pc": 41
    },
    {
     "op": "set",
@@ -225,7 +242,7 @@
    {
     "op": "jump",
     "label": null,
-    "pc": 37
+    "pc": 41
    },
    {
     "op": "set",
@@ -263,7 +280,7 @@
    {
     "op": "jump",
     "label": null,
-    "pc": 37
+    "pc": 41
    },
    {
     "op": "jump",
@@ -4109,6 +4126,11 @@
     "text": "她吸了一口气，很轻，但你听见了。"
    },
    {
+    "op": "show",
+    "img": "idimya base calm",
+    "at": "sprite_base, throb"
+   },
+   {
     "op": "play",
     "channel": "sound",
     "target": "sfx_breath_soft",
@@ -4134,15 +4156,15 @@
     "options": [
      {
       "text": "「那十七个日期里，有几个是我们认识之后？」",
-      "pc": 12
+      "pc": 13
      },
      {
       "text": "「你吃下去之后，会记得多久？」",
-      "pc": 17
+      "pc": 18
      },
      {
       "text": "「如果有一天我变成其中一个，你会写哪一天？」",
-      "pc": 21
+      "pc": 22
      }
     ]
    },
@@ -4165,7 +4187,7 @@
    {
     "op": "jump",
     "label": null,
-    "pc": 26
+    "pc": 27
    },
    {
     "op": "set",
@@ -4182,7 +4204,7 @@
    {
     "op": "jump",
     "label": null,
-    "pc": 26
+    "pc": 27
    },
    {
     "op": "set",
@@ -4203,7 +4225,7 @@
    {
     "op": "jump",
     "label": null,
-    "pc": 26
+    "pc": 27
    },
    {
     "op": "end"
@@ -4388,7 +4410,7 @@
    {
     "op": "show",
     "img": "idimya base flat",
-    "at": "sprite_base"
+    "at": "sprite_base, rack(4.0)"
    },
    {
     "op": "with",

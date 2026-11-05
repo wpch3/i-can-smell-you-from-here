@@ -168,16 +168,26 @@ label ch0_arrive:
 
     show vig
 
+    ## 开场用**广角**：定稿 key_visual 本来就是「她坐在桌后、桌子挡住腰」的
+    ## 完整构图（有烛台、有笔记本、有手），比把立绘硬贴在 bg 上可信得多。
+    ## 两句旁白之后再切到立绘近景 —— 她已经在观众心里"坐下"了，
+    ## 后面的近景就只会被读成"镜头推近"，不会再被读成"她站起来了"。
+    show kv
+    with Dissolve(1.6)
+
+    note "小酒馆在一条你从没注意过的巷子里。木墙比记忆中更高，也更暗。"
+
+    note "她已经坐在那儿了。烛台摆在她手边，一盏只够照亮两个人的火。"
+
+    ## 广角 → 近景
+    hide kv
     show idimya base amused at sprite_seat, push_slow
     ## 顺序要紧：桌面必须 show 在立绘**之后**（zorder 更大），
     ## 才能压在她身上，把腰以下挡掉 —— 于是"站姿立绘"看起来是坐着的。
     ## 注意不能在纯黑场景之前 show：这层不透明部分会跟着一起淡出，
     ## 变成"桌子浮在黑幕上"。
     show table_front
-
-    note "小酒馆在一条你从没注意过的巷子里。木墙比记忆中更高，也更暗。"
-
-    note "她已经坐在那儿了。烛台摆在她手边，一盏只够照亮两个人的火。"
+    with Dissolve(0.9)
 
     idimya "你来了。"
 
@@ -1461,6 +1471,10 @@ label ch3_ask:
 
     note "她吸了一口气，很轻，但你听见了。"
 
+    ## 心跳：整段用 throb 压着，幅度 2px、周期 0.85s —— 只在"她在等你开口"这一段，
+    ## 前后都不加。加得太密会变成噪音，反而没有心跳的感觉。
+    show idimya base calm at sprite_base, throb
+
     play sound sfx_breath_soft
 
     idimya "问吧。"
@@ -1549,7 +1563,9 @@ label ch3_answer_memory:
 
 label ch3_answer_you:
 
-    show idimya base flat at sprite_base
+    ## 这句话是全篇最重的一句，所以这里用 rack：焦点慢慢虚掉再回来，
+    ## 像是你的视线在发散。只在她「看着你，看了很久」的时候用一次。
+    show idimya base flat at sprite_base, rack(4.0)
     with Dissolve(0.5)
 
     note "她看着你，看了很久。"

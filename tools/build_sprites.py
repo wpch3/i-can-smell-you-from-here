@@ -12,7 +12,8 @@ build_sprites.py — 把 AI 出的立绘源图加工成引擎可用的资产
 
 做法：
   1. 黑底转透明（fuzz 容差可调），所有差分共用同一裁切框，保证切换表情不跳位
-  2. 眨眼：从 blink_closed 里取出眼部横带，做羽化遮罩，其余全透明
+  2. 眨眼：把 blink_closed 与 base_v1 逐像素求差得到"眼睛蒙版"，
+     只显影闭着的眼皮（不是矩形横带——那会在脸上留方块）
   3. 拼表：横向排列，写入坐标清单
 
 用法：python3 tools/build_sprites.py
@@ -21,6 +22,8 @@ build_sprites.py — 把 AI 出的立绘源图加工成引擎可用的资产
 import json
 import subprocess
 import sys
+
+import numpy as np
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -101,8 +104,8 @@ BEAUTY = ["-unsharp", "0x1.3+0.9+0.02",
           "-brightness-contrast", "1x7"]
 
 BLINK_SRC = "blink_closed.png"
-# 眼部横带（源图坐标 768×1376，实测位）
-EYE_BOX = "300x100+235+235"
+# 眼睛可能出现的位置（源图坐标 768×1376）。闭眼蒙版只允许落在这个横带里。
+EX0, EY0, EX1, EY1 = 150, 205, 640, 292
 # 表情借用框：比眼睛略大，带上眼周/眉/颧骨的明暗，粘贴后才不"贴片"。
 # 所有源图（base / apron / coat / ponytail / hairup / expr_* / blink_closed）
 # 出自同一套构图，五官完全对齐，所以可以直接按绝对坐标互贴。
@@ -121,6 +124,8 @@ EYE_ALIGN = {
 # 表情图（expr_* / blink）都以 base_v1 为基准出图
 EXPR_ANCHOR = (374.5, 260.2)
 FUZZ = "11%"
+# 源图尺寸（所有 assets/sprites/idimya/*.png 都是这个规格）
+SW_SRC, SH_SRC = 768, 1376
 
 
 def run(*args):
@@ -282,6 +287,8 @@ def main():
     if not jobs:
         raise SystemExit("没有可用源图")
 
+    sw, sh = SW_SRC, SH_SRC
+
     # 2) 所有图共用并集裁切框，保证切换造型/表情都不跳位
     l, t, w, h = trimbox([j[2] for j in jobs] + [tmp / "blink.png"]
                          if (tmp / "blink.png").exists() else [j[2] for j in jobs])
@@ -346,25 +353,59 @@ def main():
                    for g, _, _ in GROUPS},
     }
 
-    # 4) 眨眼补丁
+        # 4) 眨眼补丁
+    #
+    # 这里的蒙版必须是**两只眼睛的形状**，不能是「一条圆角矩形横带」。
+    # 旧做法用 roundrectangle 羽化，框里带着鼻子、脸颊和围巾，
+    # 一闭眼就在脸中央浮出一个方块 —— 用户报的"闭眼部件重合"就是这个。
+    #
+    # 蒙版来源：把 Open 版和 Closed 版的**脸部区域逐像素求差**，
+    # 差异自然就集中在两只眼睛上（实测 4357 px，bbox 245,187–540,287），
+    # 再膨胀几圈盖住眼皮阴影，最后只让这一块显影 blink_closed 的像素。
+    # 这样蒙版天生只含眼睛，不可能把鼻子/围巾带进来。
     blink_src = SRC / BLINK_SRC
     if blink_src.exists():
-        eye_png = tmp / "eye_raw.png"
+        base_src = SRC / FACE_SRC                # base_v1.png，所有表情的基础脸
+        def _rgba(path):
+            raw = subprocess.run(["convert", str(path), "-fuzz", FUZZ,
+                                  "-transparent", "black", "-depth", "8", "rgba:-"],
+                                 capture_output=True, check=True).stdout
+            return np.frombuffer(raw, dtype=np.uint8).reshape(sh, sw, 4).astype(np.int16)
+
+        a_img, b_img = _rgba(base_src), _rgba(blink_src)
+        # 裁切后的整格尺寸 (w,h) 对应源图 (l,t) 起点，这里在源图坐标系里做
+        diff = np.abs(a_img[..., :3] - b_img[..., :3]).max(axis=2)
+        eye_band = np.zeros(diff.shape, bool)
+        eye_band[EY0:EY1, EX0:EX1] = True      # 只允许出现在脸部横带内
+        mask = (diff > 14) & eye_band
+        # 膨胀：眼皮阴影、睫毛要整块盖住，否则闭眼后还留着睁眼的眼角
+        from numpy.lib.stride_tricks import sliding_window_view
+        for _ in range(3):
+            pad = np.pad(mask.astype(np.uint8), 2, mode="edge")
+            mask = sliding_window_view(pad, (5, 5)).max(axis=(2, 3)) > 0
+        # 眉毛线以上一律不进蒙版：闭眼不该把眉毛一起擦淡
+        mask[:EY0 - 6, :] = False
+        # 与原图 alpha 取交集（透明区不进蒙版）
+        mask &= b_img[..., 3] > 10
+
+        mask_png = tmp / "eye_mask_src.png"
+        subprocess.run(["convert", "-size", f"{sw}x{sh}", "-depth", "8", "gray:-",
+                        str(mask_png)],
+                       input=(mask.astype(np.uint8) * 255).tobytes(), check=True)
+        run("convert", str(mask_png), "-blur", "0x5", str(tmp / "eye_mask_b.png"))
+
+        b_rgba = tmp / "blink_rgba.png"
         run("convert", str(blink_src), "-fuzz", FUZZ, "-transparent", "black",
-            "-crop", EYE_BOX, "+repage", str(eye_png))
-        info = subprocess.run(["identify", "-format", "%w %h", str(eye_png)],
-                              capture_output=True, text=True, check=True).stdout.split()
-        ew, eh = int(info[0]), int(info[1])
-        mask = tmp / "eye_mask.png"
-        run("convert", "-size", f"{ew}x{eh}", "xc:black",
-            "-fill", "white", "-draw", f"roundrectangle 6,6 {ew-7},{eh-7} 12,12",
-            "-blur", "0x6", str(mask))
-        patch = tmp / "eye_patch.png"
-        run("convert", str(eye_png), str(mask), "-alpha", "off",
-            "-compose", "CopyOpacity", "-composite", str(patch))
-        run("convert", "-size", f"{w}x{h}", "xc:none", "(", str(patch), ")",
-            "-geometry", f"+{235 - l}+{235 - t}", "-compose", "over", "-composite",
-            *BEAUTY, str(OUT / "blink_patch.png"))
+            "-depth", "8", str(b_rgba))
+        patch_src = tmp / "eye_patch_src.png"
+        run("convert", str(b_rgba), str(tmp / "eye_mask_b.png"),
+            "-alpha", "off", "-compose", "CopyOpacity", "-composite", str(patch_src))
+        # 对齐到整格裁切框 + 统一调色，和 sheet 里的格子完全同源同色
+        run("convert", "-size", f"{w}x{h}", "xc:none", "(",
+            str(patch_src), ")", "-geometry", f"+{-l}+{-t}",
+            "-compose", "over", "-composite", *BEAUTY,
+            str(OUT / "blink_patch.png"))
+        print(f"眨眼补丁：眼睛蒙版 {int(mask.sum())} px")
 
     # 5) 单张成品：默认删除（精灵表已够用，省 20MB）；需要时加 --singles
     if "--singles" in sys.argv:
