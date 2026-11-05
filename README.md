@@ -20,7 +20,8 @@ python3 -m http.server 8000 --bind 0.0.0.0
 ```bash
 python3 tools/rpy2json.py icancook/game/script.rpy -o demo/story.json
 node tools/simulate.js        # 全部固定路径 + 3000 条随机路径的纯逻辑总检
-python3 tools/check_script.py                   # 静态检查：引号/图名/label/变量
+python3 tools/build_props.py                    # 前景桌面遮挡层（改过 bg_bistro 就要重跑）
+python3 tools/check_script.py                   # 静态检查：引号/图名/label/变量/摆位
 node tools/smoke-test.js "0,0,0,0,0,0,0,0,0"   # 真点一遍（需要 npm i jsdom）
 ```
 
@@ -36,6 +37,7 @@ node tools/smoke-test.js "0,0,0,0,0,0,0,0,0"   # 真点一遍（需要 npm i jsd
 | `tools/build_sprites.py` | 立绘管线：造型 × 表情 → 网格精灵表 + `im.Crop` 注册块 |
 | `tools/build_layers.py` | L2 分层：切出刘海 / 丝巾 / 高光三张独立层 |
 | `tools/gen_audio.py` | 程序化合成 4 条环境音 + 7 个音效（零版权素材） |
+| `tools/build_props.py` | 前景道具层：从 `bg_bistro` 抠出桌沿以下的 `table_front.png`（让她「坐」在桌后，接缝自检 RMSE=0） |
 | `tools/check_script.py` | 剧本静态检查，补 Ren'Py 编译器的盲区 |
 | `docs/TECH_STACK.md` | 技术选型：为什么是 Ren'Py + Python，怎么出 exe |
 | `docs/GAME_CONCEPT.md` | 概念书：故事、章节、系统、结局 |
