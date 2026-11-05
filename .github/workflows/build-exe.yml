@@ -47,12 +47,26 @@ jobs:
           Write-Host "SDK root: $($root.FullName)"
           "RENPY_ROOT=$($root.FullName)" | Out-File -FilePath $env:GITHUB_ENV -Append
 
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
       - name: 静态检查（引号 / 图名 / label / 变量）
         shell: pwsh
         run: |
           # Ren'Py 的 compile 只查语法，不查"你 show 的图存不存在"。
           # 这一步在编译前就跑，错了立刻失败，问题定位比 lint 日志清楚。
-          python tools/check_script.py
+          $log = "${{ github.workspace }}\check.log"
+          python tools/check_script.py *>&1 | Tee-Object -FilePath $log
+          if ($LASTEXITCODE -ne 0) {
+            $text = (Get-Content $log -Raw)
+            if (-not $text) { $text = "(check_script 无输出)" }
+            if ($text.Length -gt 4000) { $text = $text.Substring(0, 4000) }
+            $text = $text -replace "%", "%25" -replace "\r", "" -replace "\n", "%0A"
+            Write-Host "::error title=静态检查失败::$text"
+            exit 1
+          }
 
       - name: Compile scripts (真编译，语法错会在这里炸)
         shell: pwsh
