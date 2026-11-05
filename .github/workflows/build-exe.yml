@@ -75,7 +75,21 @@ jobs:
         shell: pwsh
         continue-on-error: true
         run: |
-          & "$env:RENPY_ROOT\renpy.exe" "${{ github.workspace }}\icancook" lint
+          # 0 = 无问题；1 = 有 warning（例如"脚本里定义了但没用到的图片"）。
+          # 不阻断构建，但把结果贴进日志 + 注解，免得问题越积越多。
+          $log = "${{ github.workspace }}\lint.log"
+          & "$env:RENPY_ROOT\renpy.exe" "${{ github.workspace }}\icancook" lint *>&1 |
+              Tee-Object -FilePath $log
+          $code = $LASTEXITCODE
+          if ($code -ne 0) {
+            $text = (Get-Content $log -Raw)
+            if (-not $text) { $text = "(lint 无输出)" }
+            if ($text.Length -gt 5000) { $text = $text.Substring($text.Length - 5000) }
+            $text = $text -replace "%", "%25" -replace "\r", "" -replace "\n", "%0A"
+            Write-Host "::warning title=Ren'Py lint 报告::$text"
+          } else {
+            Write-Host "lint 通过，无告警"
+          }
 
       - name: Build Windows distribution
         shell: pwsh
