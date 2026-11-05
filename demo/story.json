@@ -12,7 +12,10 @@
   "promise": null,
   "chapter_name": "",
   "seasoning": "\"\"          # 第二章：你最后放下的那一样东西",
-  "ch2_trust": 0
+  "ch2_trust": 0,
+  "jars_read": 0,
+  "ch3_asked": "\"\"          # 第三章：你最后问的那个问题",
+  "ch3_trust": 0
  },
  "labels": {
   "start": [
@@ -3578,8 +3581,1317 @@
     "text": "{size=18}{color=#8b7b69}第二章 · 完{/color}{/size}\\n\\n{color=#d9a05f}[chapter_name]{/color}"
    },
    {
+    "op": "jump",
+    "label": "ch3_title"
+   },
+   {
+    "op": "end"
+   }
+  ],
+  "ch3_title": [
+   {
+    "op": "stop",
+    "channel": "ambience",
+    "fade": 2.0
+   },
+   {
+    "op": "with",
+    "dur": 1.2
+   },
+   {
     "op": "centered",
-    "text": "{size=17}{color=#8b7b69}第三章 · 十七个日期{/color}\\n\\n{size=15}{color=#6b5c4d}你终于问出了那个问题。\\n她也终于愿意回答。\\n\\n（制作中）{/color}"
+    "text": "{size=17}{color=#8b7b69}第三章 · 十七个日期{/color}\\n\\n{size=15}{color=#6b5c4d}你终于问出了那个问题。\\n她也终于愿意回答。{/color}"
+   },
+   {
+    "op": "show",
+    "img": "bar_top",
+    "at": "bar_in_top(0.8)"
+   },
+   {
+    "op": "show",
+    "img": "bar_bottom",
+    "at": "bar_in_bottom(0.8)"
+   },
+   {
+    "op": "scene",
+    "img": "fridge"
+   },
+   {
+    "op": "with",
+    "dur": 2.0
+   },
+   {
+    "op": "play",
+    "channel": "ambience",
+    "target": "amb_fridge",
+    "fade": 3.0
+   },
+   {
+    "op": "show",
+    "img": "vig",
+    "at": null
+   },
+   {
+    "op": "wait",
+    "sec": 2.6
+   },
+   {
+    "op": "say",
+    "who": "note",
+    "text": "又过了几个晚上。"
+   },
+   {
+    "op": "if",
+    "cond": "seasoning == \"盐\"",
+    "pc": 12,
+    "else_pc": 15
+   },
+   {
+    "op": "say",
+    "who": "note",
+    "text": "桌上还放着那罐盐。位置没动过。"
+   },
+   {
+    "op": "say",
+    "who": "note",
+    "text": "罐子旁边压着一张小纸片，上面只写了两个字：诚实。"
+   },
+   {
+    "op": "jump",
+    "label": null,
+    "pc": 24
+   },
+   {
+    "op": "if",
+    "cond": "seasoning == \"糖\"",
+    "pc": 16,
+    "else_pc": 19
+   },
+   {
+    "op": "say",
+    "who": "note",
+    "text": "桌上放着一小碟黄糖，边缘的黏已经干了。"
+   },
+   {
+    "op": "say",
+    "who": "note",
+    "text": "碟子旁边压着一张小纸片，上面只写了两个字：讨好。"
+   },
+   {
+    "op": "jump",
+    "label": null,
+    "pc": 24
+   },
+   {
+    "op": "if",
+    "cond": "seasoning == \"那一瓶没有标签的东西\"",
+    "pc": 20,
+    "else_pc": 23
+   },
+   {
+    "op": "say",
+    "who": "note",
+    "text": "那个没有标签的瓶子不见了。"
+   },
+   {
+    "op": "say",
+    "who": "note",
+    "text": "架子空出一格，正好是它的形状。"
+   },
+   {
+    "op": "jump",
+    "label": null,
+    "pc": 24
+   },
+   {
+    "op": "say",
+    "who": "note",
+    "text": "桌上什么都没有。干净得像没有人做过饭。"
+   },
+   {
+    "op": "say",
+    "who": "note",
+    "text": "有些事你一直没问。不是因为不想知道，是因为你知道问了就得记住。"
+   },
+   {
+    "op": "play",
+    "channel": "sound",
+    "target": "sfx_door",
+    "fade": null
+   },
+   {
+    "op": "say",
+    "who": "note",
+    "text": "今晚她不在厨房。"
+   },
+   {
+    "op": "say",
+    "who": "note",
+    "text": "你听见浴室的水声。然后你站在冰箱前面，手已经放在门上了。"
+   },
+   {
+    "op": "play",
+    "channel": "sound",
+    "target": "sfx_breath_soft",
+    "fade": null
+   },
+   {
+    "op": "say",
+    "who": "note",
+    "text": "你打开了门。"
+   },
+   {
+    "op": "menu",
+    "options": [
+     {
+      "text": "读最上面那一排的日期。",
+      "pc": 31
+     },
+     {
+      "text": "读最下面那一排。",
+      "pc": 35
+     },
+     {
+      "text": "什么都不读。只是站着，让它开在那里。",
+      "pc": 39
+     }
+    ]
+   },
+   {
+    "op": "set",
+    "expr": "jars_read += 2"
+   },
+   {
+    "op": "set",
+    "expr": "scent += 2"
+   },
+   {
+    "op": "jump",
+    "label": "ch3_read_top"
+   },
+   {
+    "op": "jump",
+    "label": null,
+    "pc": 42
+   },
+   {
+    "op": "set",
+    "expr": "jars_read += 2"
+   },
+   {
+    "op": "set",
+    "expr": "doubt += 1"
+   },
+   {
+    "op": "jump",
+    "label": "ch3_read_bottom"
+   },
+   {
+    "op": "jump",
+    "label": null,
+    "pc": 42
+   },
+   {
+    "op": "set",
+    "expr": "ch3_trust += 2"
+   },
+   {
+    "op": "jump",
+    "label": "ch3_stand"
+   },
+   {
+    "op": "jump",
+    "label": null,
+    "pc": 42
+   },
+   {
+    "op": "end"
+   }
+  ],
+  "ch3_read_top": [
+   {
+    "op": "say",
+    "who": "note",
+    "text": "最上面一排，从左到右，日期是倒着的。"
+   },
+   {
+    "op": "say",
+    "who": "note",
+    "text": "最近的在左边，最旧的在右边。像有人一直在往前面插。"
+   },
+   {
+    "op": "show",
+    "img": "idimya base calm",
+    "at": "sprite_base, push_slow"
+   },
+   {
+    "op": "with",
+    "dur": 1.2
+   },
+   {
+    "op": "say",
+    "who": "note",
+    "text": "水声停了。"
+   },
+   {
+    "op": "say",
+    "who": "idimya",
+    "text": "你在看日期。"
+   },
+   {
+    "op": "say",
+    "who": "n",
+    "text": "「……嗯。」"
+   },
+   {
+    "op": "say",
+    "who": "idimya",
+    "text": "那你数到第几个了。"
+   },
+   {
+    "op": "say",
+    "who": "n",
+    "text": "「四个。」"
+   },
+   {
+    "op": "say",
+    "who": "idimya",
+    "text": "……四个。"
+   },
+   {
+    "op": "say",
+    "who": "idimya",
+    "text": "那还行。"
+   },
+   {
+    "op": "say",
+    "who": "note",
+    "text": "她说「还行」的时候，语气像是在说一件可以挽回的事。"
+   },
+   {
+    "op": "set",
+    "expr": "ch3_trust += 1"
+   },
+   {
+    "op": "jump",
+    "label": "ch3_ask"
+   },
+   {
+    "op": "end"
+   }
+  ],
+  "ch3_read_bottom": [
+   {
+    "op": "say",
+    "who": "note",
+    "text": "最下面一排的日期，和上面不一样。"
+   },
+   {
+    "op": "say",
+    "who": "note",
+    "text": "上面的日期之间隔了几天，几周，甚至一年。"
+   },
+   {
+    "op": "say",
+    "who": "note",
+    "text": "最下面那一排——它们隔得太近了。"
+   },
+   {
+    "op": "play",
+    "channel": "sound",
+    "target": "sfx_breath_catch",
+    "fade": null
+   },
+   {
+    "op": "say",
+    "who": "note",
+    "text": "你数了一下。七个。"
+   },
+   {
+    "op": "say",
+    "who": "note",
+    "text": "七个日期，挤在四十一天里。"
+   },
+   {
+    "op": "show",
+    "img": "idimya base flat",
+    "at": "sprite_base"
+   },
+   {
+    "op": "with",
+    "dur": 0.8
+   },
+   {
+    "op": "say",
+    "who": "note",
+    "text": "你已经知道那不是「记得的日子」了。那是「吃过的日子」。"
+   },
+   {
+    "op": "say",
+    "who": "idimya",
+    "text": "……你数了下面的。"
+   },
+   {
+    "op": "say",
+    "who": "note",
+    "text": "她没有生气。这比生气更让人害怕。"
+   },
+   {
+    "op": "say",
+    "who": "idimya",
+    "text": "上面那排是我舍不得忘的。"
+   },
+   {
+    "op": "say",
+    "who": "idimya",
+    "text": "下面那排是我没法忘的。"
+   },
+   {
+    "op": "set",
+    "expr": "doubt += 2"
+   },
+   {
+    "op": "set",
+    "expr": "scent += 1"
+   },
+   {
+    "op": "jump",
+    "label": "ch3_ask"
+   },
+   {
+    "op": "end"
+   }
+  ],
+  "ch3_stand": [
+   {
+    "op": "say",
+    "who": "note",
+    "text": "你什么都没读。"
+   },
+   {
+    "op": "say",
+    "who": "note",
+    "text": "你只是站在那里，让冷光打在你脸上，闻到十七种不同的、被封起来的气味。"
+   },
+   {
+    "op": "play",
+    "channel": "sound",
+    "target": "sfx_breath_soft",
+    "fade": null
+   },
+   {
+    "op": "show",
+    "img": "idimya base calm",
+    "at": "sprite_base, push_slow"
+   },
+   {
+    "op": "with",
+    "dur": 1.4
+   },
+   {
+    "op": "say",
+    "who": "note",
+    "text": "她站在厨房门口，头发还是湿的。"
+   },
+   {
+    "op": "say",
+    "who": "idimya",
+    "text": "你没有打开任何一个。"
+   },
+   {
+    "op": "say",
+    "who": "n",
+    "text": "「没有。」"
+   },
+   {
+    "op": "say",
+    "who": "idimya",
+    "text": "为什么。"
+   },
+   {
+    "op": "say",
+    "who": "n",
+    "text": "「因为我不想只挑一个知道。」"
+   },
+   {
+    "op": "say",
+    "who": "note",
+    "text": "她很久没有说话。"
+   },
+   {
+    "op": "show",
+    "img": "idimya base eyes_down",
+    "at": "sprite_base"
+   },
+   {
+    "op": "with",
+    "dur": 0.7
+   },
+   {
+    "op": "say",
+    "who": "idimya",
+    "text": "……你这样很麻烦。"
+   },
+   {
+    "op": "say",
+    "who": "idimya",
+    "text": "我准备了很多种回答，一种都用不上。"
+   },
+   {
+    "op": "set",
+    "expr": "ch3_trust += 2"
+   },
+   {
+    "op": "set",
+    "expr": "trust += 2"
+   },
+   {
+    "op": "jump",
+    "label": "ch3_ask"
+   },
+   {
+    "op": "end"
+   }
+  ],
+  "ch3_ask": [
+   {
+    "op": "scene",
+    "img": "fridge"
+   },
+   {
+    "op": "with",
+    "dur": 0.8
+   },
+   {
+    "op": "show",
+    "img": "vig",
+    "at": null
+   },
+   {
+    "op": "show",
+    "img": "idimya base calm",
+    "at": "sprite_base"
+   },
+   {
+    "op": "say",
+    "who": "note",
+    "text": "她把冰箱门关上了。很轻。"
+   },
+   {
+    "op": "say",
+    "who": "note",
+    "text": "厨房一下子安静下来，只剩下压缩机的声音。"
+   },
+   {
+    "op": "say",
+    "who": "note",
+    "text": "她吸了一口气，很轻，但你听见了。"
+   },
+   {
+    "op": "play",
+    "channel": "sound",
+    "target": "sfx_breath_soft",
+    "fade": null
+   },
+   {
+    "op": "say",
+    "who": "idimya",
+    "text": "问吧。"
+   },
+   {
+    "op": "say",
+    "who": "idimya",
+    "text": "你今晚只可以问一个问题。我会回答。"
+   },
+   {
+    "op": "say",
+    "who": "idimya",
+    "text": "但我不会说第二次。"
+   },
+   {
+    "op": "menu",
+    "options": [
+     {
+      "text": "「那十七个日期里，有几个是我们认识之后？」",
+      "pc": 12
+     },
+     {
+      "text": "「你吃下去之后，会记得多久？」",
+      "pc": 17
+     },
+     {
+      "text": "「如果有一天我变成其中一个，你会写哪一天？」",
+      "pc": 21
+     }
+    ]
+   },
+   {
+    "op": "set",
+    "expr": "ch3_asked = \"after\""
+   },
+   {
+    "op": "set",
+    "expr": "scent += 3"
+   },
+   {
+    "op": "set",
+    "expr": "ch3_trust += 1"
+   },
+   {
+    "op": "jump",
+    "label": "ch3_answer_after"
+   },
+   {
+    "op": "jump",
+    "label": null,
+    "pc": 26
+   },
+   {
+    "op": "set",
+    "expr": "ch3_asked = \"memory\""
+   },
+   {
+    "op": "set",
+    "expr": "ch3_trust += 1"
+   },
+   {
+    "op": "jump",
+    "label": "ch3_answer_memory"
+   },
+   {
+    "op": "jump",
+    "label": null,
+    "pc": 26
+   },
+   {
+    "op": "set",
+    "expr": "ch3_asked = \"you\""
+   },
+   {
+    "op": "set",
+    "expr": "scent += 2"
+   },
+   {
+    "op": "set",
+    "expr": "doubt += 2"
+   },
+   {
+    "op": "jump",
+    "label": "ch3_answer_you"
+   },
+   {
+    "op": "jump",
+    "label": null,
+    "pc": 26
+   },
+   {
+    "op": "end"
+   }
+  ],
+  "ch3_answer_after": [
+   {
+    "op": "show",
+    "img": "idimya base amused",
+    "at": "sprite_base, lean_in"
+   },
+   {
+    "op": "with",
+    "dur": 0.7
+   },
+   {
+    "op": "say",
+    "who": "idimya",
+    "text": "一个。"
+   },
+   {
+    "op": "say",
+    "who": "n",
+    "text": "「……一个？」"
+   },
+   {
+    "op": "say",
+    "who": "idimya",
+    "text": "只有一个。"
+   },
+   {
+    "op": "play",
+    "channel": "sound",
+    "target": "sfx_breath_catch",
+    "fade": null
+   },
+   {
+    "op": "say",
+    "who": "idimya",
+    "text": "你认识我以后，我只吃过一次。"
+   },
+   {
+    "op": "say",
+    "who": "n",
+    "text": "（你想起第一章那个晚上。厨房里有一把椅子。她一直站着。）"
+   },
+   {
+    "op": "say",
+    "who": "idimya",
+    "text": "那天我在楼下站了一会儿。"
+   },
+   {
+    "op": "say",
+    "who": "idimya",
+    "text": "我本来不是去等你。"
+   },
+   {
+    "op": "say",
+    "who": "note",
+    "text": "她转过头，看着冰箱。"
+   },
+   {
+    "op": "say",
+    "who": "idimya",
+    "text": "所以你现在知道，为什么那天我让你把外套挂回去了。"
+   },
+   {
+    "op": "show",
+    "img": "idimya base eyes_down",
+    "at": "sprite_base"
+   },
+   {
+    "op": "with",
+    "dur": 0.6
+   },
+   {
+    "op": "say",
+    "who": "idimya",
+    "text": "空着的地方，总得挂点什么。"
+   },
+   {
+    "op": "set",
+    "expr": "trust += 3"
+   },
+   {
+    "op": "jump",
+    "label": "ch3_end"
+   },
+   {
+    "op": "end"
+   }
+  ],
+  "ch3_answer_memory": [
+   {
+    "op": "show",
+    "img": "idimya base calm",
+    "at": "sprite_base"
+   },
+   {
+    "op": "with",
+    "dur": 0.6
+   },
+   {
+    "op": "say",
+    "who": "idimya",
+    "text": "很久。"
+   },
+   {
+    "op": "say",
+    "who": "idimya",
+    "text": "比人记得自己的名字还久。"
+   },
+   {
+    "op": "say",
+    "who": "n",
+    "text": "「那你会想起来的是味道，还是那个人？」"
+   },
+   {
+    "op": "show",
+    "img": "idimya base suspicious",
+    "at": "sprite_base, lean_in"
+   },
+   {
+    "op": "with",
+    "dur": 0.5
+   },
+   {
+    "op": "say",
+    "who": "idimya",
+    "text": "我刚刚说了，你只能问一个问题。"
+   },
+   {
+    "op": "wait",
+    "sec": 1.0
+   },
+   {
+    "op": "show",
+    "img": "idimya base smile_soft",
+    "at": "sprite_base, lean_in"
+   },
+   {
+    "op": "with",
+    "dur": 0.9
+   },
+   {
+    "op": "say",
+    "who": "idimya",
+    "text": "……味道先回来。"
+   },
+   {
+    "op": "say",
+    "who": "idimya",
+    "text": "人是后来的。"
+   },
+   {
+    "op": "say",
+    "who": "idimya",
+    "text": "有时候人回来得很晚，晚到我已经不知道该把它放在哪一排。"
+   },
+   {
+    "op": "say",
+    "who": "note",
+    "text": "你听懂了：最下面那一排，就是那些「人回来得太晚」的罐子。"
+   },
+   {
+    "op": "set",
+    "expr": "scent += 2"
+   },
+   {
+    "op": "set",
+    "expr": "trust += 2"
+   },
+   {
+    "op": "jump",
+    "label": "ch3_end"
+   },
+   {
+    "op": "end"
+   }
+  ],
+  "ch3_answer_you": [
+   {
+    "op": "show",
+    "img": "idimya base flat",
+    "at": "sprite_base"
+   },
+   {
+    "op": "with",
+    "dur": 0.5
+   },
+   {
+    "op": "say",
+    "who": "note",
+    "text": "她看着你，看了很久。"
+   },
+   {
+    "op": "say",
+    "who": "note",
+    "text": "久到你能听见自己耳朵里的血流声。"
+   },
+   {
+    "op": "play",
+    "channel": "sound",
+    "target": "sfx_heartbeat",
+    "fade": null
+   },
+   {
+    "op": "show",
+    "img": "idimya base sly",
+    "at": "sprite_base, lean_in"
+   },
+   {
+    "op": "with",
+    "dur": 0.8
+   },
+   {
+    "op": "say",
+    "who": "idimya",
+    "text": "今天的日期。"
+   },
+   {
+    "op": "say",
+    "who": "idimya",
+    "text": "……我开玩笑的。"
+   },
+   {
+    "op": "say",
+    "who": "note",
+    "text": "她没有笑。"
+   },
+   {
+    "op": "show",
+    "img": "idimya base eyes_down",
+    "at": "sprite_base"
+   },
+   {
+    "op": "with",
+    "dur": 0.7
+   },
+   {
+    "op": "say",
+    "who": "idimya",
+    "text": "我不会写日期。"
+   },
+   {
+    "op": "say",
+    "who": "idimya",
+    "text": "我会把你放在上面那一排，然后永远不打开。"
+   },
+   {
+    "op": "say",
+    "who": "n",
+    "text": "（你不知道这算不算被爱。）"
+   },
+   {
+    "op": "set",
+    "expr": "doubt += 1"
+   },
+   {
+    "op": "set",
+    "expr": "trust += 2"
+   },
+   {
+    "op": "jump",
+    "label": "ch3_end"
+   },
+   {
+    "op": "end"
+   }
+  ],
+  "ch3_end": [
+   {
+    "op": "scene",
+    "img": "kitchen"
+   },
+   {
+    "op": "with",
+    "dur": 1.2
+   },
+   {
+    "op": "play",
+    "channel": "ambience",
+    "target": "amb_kitchen",
+    "fade": 3.0
+   },
+   {
+    "op": "show",
+    "img": "vig",
+    "at": null
+   },
+   {
+    "op": "show",
+    "img": "idimya apron calm",
+    "at": "sprite_base, push_slow"
+   },
+   {
+    "op": "with",
+    "dur": 0.8
+   },
+   {
+    "op": "say",
+    "who": "note",
+    "text": "后来她去烧水。你坐在那把唯一的椅子上。"
+   },
+   {
+    "op": "if",
+    "cond": "seasoning == \"盐\"",
+    "pc": 8,
+    "else_pc": 12
+   },
+   {
+    "op": "say",
+    "who": "idimya",
+    "text": "上次那盘咸了。"
+   },
+   {
+    "op": "say",
+    "who": "idimya",
+    "text": "我后来又做了一遍，还是咸。"
+   },
+   {
+    "op": "say",
+    "who": "idimya",
+    "text": "……我大概是想再听你说一次真话。"
+   },
+   {
+    "op": "jump",
+    "label": null,
+    "pc": 20
+   },
+   {
+    "op": "if",
+    "cond": "seasoning == \"糖\"",
+    "pc": 13,
+    "else_pc": 16
+   },
+   {
+    "op": "say",
+    "who": "idimya",
+    "text": "上次那盘太甜，我吃得很慢。"
+   },
+   {
+    "op": "say",
+    "who": "idimya",
+    "text": "不是因为不好吃。是因为我不想吃完。"
+   },
+   {
+    "op": "jump",
+    "label": null,
+    "pc": 20
+   },
+   {
+    "op": "if",
+    "cond": "seasoning == \"那一瓶没有标签的东西\"",
+    "pc": 17,
+    "else_pc": 20
+   },
+   {
+    "op": "say",
+    "who": "idimya",
+    "text": "那瓶东西我扔了。"
+   },
+   {
+    "op": "say",
+    "who": "idimya",
+    "text": "留在家里，我每天都会想再闻一次。"
+   },
+   {
+    "op": "jump",
+    "label": null,
+    "pc": 20
+   },
+   {
+    "op": "play",
+    "channel": "sound",
+    "target": "sfx_cloth",
+    "fade": null
+   },
+   {
+    "op": "show",
+    "img": "idimya apron smile_soft",
+    "at": "sprite_base, lean_in"
+   },
+   {
+    "op": "with",
+    "dur": 0.7
+   },
+   {
+    "op": "say",
+    "who": "idimya",
+    "text": "你今晚不走，对吧。"
+   },
+   {
+    "op": "say",
+    "who": "note",
+    "text": "这不是问句。"
+   },
+   {
+    "op": "menu",
+    "options": [
+     {
+      "text": "「不走。」",
+      "pc": 26
+     },
+     {
+      "text": "「我明天要上班。」",
+      "pc": 30
+     },
+     {
+      "text": "「你先告诉我，你在楼下等的是谁。」",
+      "pc": 33
+     }
+    ]
+   },
+   {
+    "op": "set",
+    "expr": "ch3_trust += 2"
+   },
+   {
+    "op": "set",
+    "expr": "trust += 2"
+   },
+   {
+    "op": "jump",
+    "label": "ch3_stay"
+   },
+   {
+    "op": "jump",
+    "label": null,
+    "pc": 38
+   },
+   {
+    "op": "set",
+    "expr": "ch3_trust += 1"
+   },
+   {
+    "op": "jump",
+    "label": "ch3_leave"
+   },
+   {
+    "op": "jump",
+    "label": null,
+    "pc": 38
+   },
+   {
+    "op": "set",
+    "expr": "ch3_asked = \"who\""
+   },
+   {
+    "op": "set",
+    "expr": "scent += 2"
+   },
+   {
+    "op": "set",
+    "expr": "doubt += 2"
+   },
+   {
+    "op": "jump",
+    "label": "ch3_who"
+   },
+   {
+    "op": "jump",
+    "label": null,
+    "pc": 38
+   },
+   {
+    "op": "end"
+   }
+  ],
+  "ch3_stay": [
+   {
+    "op": "show",
+    "img": "idimya apron amused",
+    "at": "sprite_base, lean_in"
+   },
+   {
+    "op": "with",
+    "dur": 0.6
+   },
+   {
+    "op": "say",
+    "who": "idimya",
+    "text": "很好。"
+   },
+   {
+    "op": "say",
+    "who": "idimya",
+    "text": "那我把沙发收拾一下。"
+   },
+   {
+    "op": "say",
+    "who": "n",
+    "text": "「……沙发？」"
+   },
+   {
+    "op": "say",
+    "who": "idimya",
+    "text": "沙发。"
+   },
+   {
+    "op": "say",
+    "who": "idimya",
+    "text": "你以为是什么。"
+   },
+   {
+    "op": "say",
+    "who": "note",
+    "text": "她笑起来的时候，你几乎忘了冰箱里有什么。"
+   },
+   {
+    "op": "set",
+    "expr": "chapter_name = \"第三章结局 · 她给了你沙发\""
+   },
+   {
+    "op": "unlock",
+    "flag": "ch3_sofa"
+   },
+   {
+    "op": "jump",
+    "label": "ch3_finish"
+   },
+   {
+    "op": "end"
+   }
+  ],
+  "ch3_leave": [
+   {
+    "op": "show",
+    "img": "idimya apron flat",
+    "at": "sprite_base"
+   },
+   {
+    "op": "with",
+    "dur": 0.5
+   },
+   {
+    "op": "say",
+    "who": "idimya",
+    "text": "嗯。"
+   },
+   {
+    "op": "say",
+    "who": "idimya",
+    "text": "上班要紧。"
+   },
+   {
+    "op": "say",
+    "who": "note",
+    "text": "她说得很平静。平静得像早就知道你会这么说。"
+   },
+   {
+    "op": "show",
+    "img": "idimya apron smile_soft",
+    "at": "sprite_base, lean_in"
+   },
+   {
+    "op": "with",
+    "dur": 0.8
+   },
+   {
+    "op": "say",
+    "who": "idimya",
+    "text": "明天也是这个时间？"
+   },
+   {
+    "op": "say",
+    "who": "n",
+    "text": "「……你不问我为什么还来？」"
+   },
+   {
+    "op": "say",
+    "who": "idimya",
+    "text": "不问。"
+   },
+   {
+    "op": "say",
+    "who": "idimya",
+    "text": "问了你就不来了。"
+   },
+   {
+    "op": "set",
+    "expr": "chapter_name = \"第三章结局 · 她算准了你会回来\""
+   },
+   {
+    "op": "unlock",
+    "flag": "ch3_counted"
+   },
+   {
+    "op": "jump",
+    "label": "ch3_finish"
+   },
+   {
+    "op": "end"
+   }
+  ],
+  "ch3_who": [
+   {
+    "op": "play",
+    "channel": "sound",
+    "target": "sfx_breath_catch",
+    "fade": null
+   },
+   {
+    "op": "show",
+    "img": "idimya apron flat",
+    "at": "sprite_base"
+   },
+   {
+    "op": "with",
+    "dur": 0.4
+   },
+   {
+    "op": "say",
+    "who": "note",
+    "text": "空气停了半秒。"
+   },
+   {
+    "op": "show",
+    "img": "idimya apron sly",
+    "at": "sprite_base, lean_in"
+   },
+   {
+    "op": "with",
+    "dur": 0.7
+   },
+   {
+    "op": "say",
+    "who": "idimya",
+    "text": "……你今晚的问题已经用完了。"
+   },
+   {
+    "op": "say",
+    "who": "idimya",
+    "text": "但这个问题，我可以免费回答。"
+   },
+   {
+    "op": "wait",
+    "sec": 1.2
+   },
+   {
+    "op": "play",
+    "channel": "sound",
+    "target": "sfx_breath_catch",
+    "fade": null
+   },
+   {
+    "op": "say",
+    "who": "idimya",
+    "text": "我在楼下等的，从来都是同一个人。"
+   },
+   {
+    "op": "say",
+    "who": "note",
+    "text": "她说完就去洗杯子了。水声很大。"
+   },
+   {
+    "op": "say",
+    "who": "n",
+    "text": "（你不知道「同一个人」指的是谁。你只知道，她没有看你。）"
+   },
+   {
+    "op": "set",
+    "expr": "chapter_name = \"第三章结局 · 她等的从来是同一个人\""
+   },
+   {
+    "op": "unlock",
+    "flag": "ch3_same"
+   },
+   {
+    "op": "jump",
+    "label": "ch3_finish"
+   },
+   {
+    "op": "end"
+   }
+  ],
+  "ch3_finish": [
+   {
+    "op": "stop",
+    "channel": "ambience",
+    "fade": 2.4
+   },
+   {
+    "op": "scene",
+    "img": "black"
+   },
+   {
+    "op": "with",
+    "dur": 1.8
+   },
+   {
+    "op": "hide",
+    "img": "bar_top"
+   },
+   {
+    "op": "hide",
+    "img": "bar_bottom"
+   },
+   {
+    "op": "with",
+    "dur": 0.7
+   },
+   {
+    "op": "centered",
+    "text": "{size=18}{color=#8b7b69}第三章 · 完{/color}{/size}\\n\\n{color=#d9a05f}[chapter_name]{/color}"
+   },
+   {
+    "op": "centered",
+    "text": "{size=17}{color=#8b7b69}第四章 · 早餐{/color}\\n\\n{size=15}{color=#6b5c4d}天亮了。桌上摆着两副碗筷。\\n一副是你的。另一副，昨天晚上就在那里。\\n\\n（制作中）{/color}"
    },
    {
     "op": "return"

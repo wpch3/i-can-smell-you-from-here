@@ -57,7 +57,7 @@ const $ = (id) => doc.getElementById(id);
   let last = '';
   let lastCenter = '';
 
-  while (steps++ < 4000) {
+  while (steps++ < 12000) {
     await sleep(12);
 
     const txt = $('text').textContent.trim();
@@ -119,7 +119,7 @@ const $ = (id) => doc.getElementById(id);
     // 结束判定：任意一章的章末独白出现即停（剧本已进到第二章预告）
     if (transcript.length && steps > 40) {
       const ended = transcript.some((t) =>
-        t.includes('第二章 · 完'));
+        t.includes('第三章 · 完'));
       if (ended) break;
     }
 

@@ -235,6 +235,78 @@ def sfx_heartbeat():
     return out
 
 
+def sfx_breath(kind="soft", sec=2.6):
+    """她在场的呼吸声。
+
+    为什么这个比配音重要：人耳对"呼吸"的判定阈值极低 —— 只要房间里有
+    一个不规则的、带包络的气流声，大脑就会自动补出"有人在这里"。
+    而配音要求玩家听得懂、听得清，反而容易出戏。
+
+    soft  = 平稳呼吸（她坐着，看着你）
+    catch = 短促吸气再屏住（她被你某句话戳到了）
+    """
+    rng = random.Random(91)
+    n = int(sec * SR)
+    out = [0.0] * n
+    if kind == "soft":
+        cycles = [(0.0, 1.5), (1.5, 1.1)]
+    else:
+        cycles = [(0.0, 1.2)]
+    for start, dur in cycles:
+        m = int(dur * SR)
+        air = bandpass([rng.uniform(-1, 1) for _ in range(m)], 0.16, 0.55)
+        # 吸气短而亮、呼气长而闷
+        env = []
+        inhale = int(m * 0.34)
+        for i in range(m):
+            if i < inhale:
+                v = (i / inhale) ** 1.6
+            else:
+                k = (i - inhale) / max(1, m - inhale)
+                v = math.exp(-k * 3.4)
+            env.append(v)
+        breath = [air[i] * env[i] for i in range(m)]
+        place(out, breath, start, 0.55)
+    if kind == "catch":
+        # 屏住：吸气后加一段极轻的颤抖
+        m = int(0.9 * SR)
+        hold = gain(sine(m, 145.0), 0.03)
+        hold = [hold[i] * (0.6 + 0.4 * math.sin(2 * math.pi * i / (SR * 0.13)))
+                for i in range(m)]
+        place(out, hold, 1.24, 0.5)
+    return out
+
+
+def sfx_cloth():
+    """布料摩擦：她转身 / 抬手 / 把外套挂上椅背。"""
+    rng = random.Random(97)
+    m = int(0.85 * SR)
+    x = [rng.uniform(-1, 1) for _ in range(m)]
+    x = bandpass(x, 0.08, 0.42)
+    # 摩擦不是均匀的：分成三小段，中间有顿
+    env = []
+    for i in range(m):
+        t = i / SR
+        seg = math.exp(-((t % 0.28) - 0.05) ** 2 / 0.004)
+        env.append(seg * math.exp(-t * 1.2))
+    return [x[i] * env[i] for i in range(m)]
+
+
+def sfx_door():
+    """门：合页的短响 + 门板合上的闷声。"""
+    rng = random.Random(101)
+    out = [0.0] * int(1.3 * SR)
+    m = int(0.5 * SR)
+    creak = bandpass([rng.uniform(-1, 1) for _ in range(m)], 0.25, 0.75)
+    creak = [creak[i] * envelope(m, 0.05, 0.42, 1.4)[i] for i in range(m)]
+    place(out, creak, 0.0, 0.22)
+    m2 = int(0.55 * SR)
+    thud = bandpass([rng.uniform(-1, 1) for _ in range(m2)], 0.02, 0.12)
+    thud = [thud[i] * envelope(m2, 0.004, 0.5, 3.0)[i] for i in range(m2)]
+    place(out, thud, 0.62, 0.9)
+    return out
+
+
 def main():
     print("生成音频：")
     write("amb_kitchen.wav", amb_kitchen())
@@ -244,6 +316,10 @@ def main():
     write("sfx_knife.wav", sfx_knife(), peak=0.8)
     write("sfx_bell.wav", sfx_bell(), peak=0.8)
     write("sfx_heartbeat.wav", sfx_heartbeat(), peak=0.75)
+    write("sfx_breath_soft.wav", sfx_breath("soft"), peak=0.55)
+    write("sfx_breath_catch.wav", sfx_breath("catch"), peak=0.6)
+    write("sfx_cloth.wav", sfx_cloth(), peak=0.6)
+    write("sfx_door.wav", sfx_door(), peak=0.8)
     total = sum(p.stat().st_size for p in OUT.glob("*.wav")) // 1024
     print(f"合计 {total} KB → {OUT}")
 

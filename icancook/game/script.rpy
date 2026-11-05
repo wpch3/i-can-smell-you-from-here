@@ -29,6 +29,10 @@ define audio.amb_morning = "audio/amb_morning.wav"
 define audio.sfx_knife = "audio/sfx_knife.wav"
 define audio.sfx_bell = "audio/sfx_bell.wav"
 define audio.sfx_heartbeat = "audio/sfx_heartbeat.wav"
+define audio.sfx_breath_soft = "audio/sfx_breath_soft.wav"
+define audio.sfx_breath_catch = "audio/sfx_breath_catch.wav"
+define audio.sfx_cloth = "audio/sfx_cloth.wav"
+define audio.sfx_door = "audio/sfx_door.wav"
 
 ## ——— 立绘：从精灵表裁切（坐标由 tools/build_sprites.py 自动生成，勿手改） ———
 image idimya base calm = im.Crop("images/idimya/sheet.png", (0, 0, 598, 1360))
@@ -92,6 +96,9 @@ default promise = None
 default chapter_name = ""
 default seasoning = ""          # 第二章：你最后放下的那一样东西
 default ch2_trust = 0           # 第二章局部计数（不影响第一章的账本）
+default jars_read = 0           # 第三章：你读了几张标签
+default ch3_asked = ""          # 第三章：你最后问的那个问题
+default ch3_trust = 0           # 第三章局部计数
 
 label start:
 
@@ -1242,6 +1249,430 @@ label ch2_end:
 
     centered "{size=18}{color=#8b7b69}第二章 · 完{/color}{/size}\n\n{color=#d9a05f}[chapter_name]{/color}"
 
-    centered "{size=17}{color=#8b7b69}第三章 · 十七个日期{/color}\n\n{size=15}{color=#6b5c4d}你终于问出了那个问题。\n她也终于愿意回答。\n\n（制作中）{/color}"
+    jump ch3_title
+
+## ——————————————————————————————————————————————————————————————
+## Chapter 3 — 十七个日期
+## 核心：冰箱。十七个罐子，十七个日期。她终于愿意解释。
+## 这一章不吓人，它是"明白了"——明白了比吓人难受得多。
+## ——————————————————————————————————————————————————————————————
+
+label ch3_title:
+
+    stop ambience fadeout 2.0
+    with Dissolve(1.2)
+
+    centered "{size=17}{color=#8b7b69}第三章 · 十七个日期{/color}\n\n{size=15}{color=#6b5c4d}你终于问出了那个问题。\n她也终于愿意回答。{/color}"
+
+    show bar_top at bar_in_top(0.8)
+    show bar_bottom at bar_in_bottom(0.8)
+
+    scene fridge
+    with Dissolve(2.0)
+
+    play ambience amb_fridge fadein 3.0
+
+    show vig
+
+    # 开头先不说话，让冰箱自己响三秒
+    pause 2.6
+
+    note "又过了几个晚上。"
+
+    # 她记得你上次放下的东西。这一句让"选择"跨章生效，玩家会背脊一凉。
+    if seasoning == "盐":
+        note "桌上还放着那罐盐。位置没动过。"
+        note "罐子旁边压着一张小纸片，上面只写了两个字：诚实。"
+    elif seasoning == "糖":
+        note "桌上放着一小碟黄糖，边缘的黏已经干了。"
+        note "碟子旁边压着一张小纸片，上面只写了两个字：讨好。"
+    elif seasoning == "那一瓶没有标签的东西":
+        note "那个没有标签的瓶子不见了。"
+        note "架子空出一格，正好是它的形状。"
+    else:
+        note "桌上什么都没有。干净得像没有人做过饭。"
+
+    note "有些事你一直没问。不是因为不想知道，是因为你知道问了就得记住。"
+
+    play sound sfx_door
+
+    note "今晚她不在厨房。"
+    note "你听见浴室的水声。然后你站在冰箱前面，手已经放在门上了。"
+
+    play sound sfx_breath_soft
+
+    note "你打开了门。"
+
+    menu:
+        "读最上面那一排的日期。":
+            $ jars_read += 2
+            $ scent += 2
+            jump ch3_read_top
+
+        "读最下面那一排。":
+            $ jars_read += 2
+            $ doubt += 1
+            jump ch3_read_bottom
+
+        "什么都不读。只是站着，让它开在那里。":
+            $ ch3_trust += 2
+            jump ch3_stand
+
+
+label ch3_read_top:
+
+    note "最上面一排，从左到右，日期是倒着的。"
+    note "最近的在左边，最旧的在右边。像有人一直在往前面插。"
+
+    show idimya base calm at sprite_base, push_slow
+    with Dissolve(1.2)
+
+    note "水声停了。"
+
+    idimya "你在看日期。"
+    n "「……嗯。」"
+
+    idimya "那你数到第几个了。"
+    n "「四个。」"
+
+    idimya "……四个。"
+    idimya "那还行。"
+
+    note "她说「还行」的时候，语气像是在说一件可以挽回的事。"
+
+    $ ch3_trust += 1
+    jump ch3_ask
+
+
+label ch3_read_bottom:
+
+    note "最下面一排的日期，和上面不一样。"
+    note "上面的日期之间隔了几天，几周，甚至一年。"
+    note "最下面那一排——它们隔得太近了。"
+
+    play sound sfx_breath_catch
+
+    note "你数了一下。七个。"
+    note "七个日期，挤在四十一天里。"
+
+    show idimya base flat at sprite_base
+    with Dissolve(0.8)
+
+    note "你已经知道那不是「记得的日子」了。那是「吃过的日子」。"
+
+    idimya "……你数了下面的。"
+
+    note "她没有生气。这比生气更让人害怕。"
+
+    idimya "上面那排是我舍不得忘的。"
+    idimya "下面那排是我没法忘的。"
+
+    $ doubt += 2
+    $ scent += 1
+    jump ch3_ask
+
+
+label ch3_stand:
+
+    note "你什么都没读。"
+    note "你只是站在那里，让冷光打在你脸上，闻到十七种不同的、被封起来的气味。"
+
+    play sound sfx_breath_soft
+
+    show idimya base calm at sprite_base, push_slow
+    with Dissolve(1.4)
+
+    note "她站在厨房门口，头发还是湿的。"
+
+    idimya "你没有打开任何一个。"
+    n "「没有。」"
+
+    idimya "为什么。"
+
+    n "「因为我不想只挑一个知道。」"
+
+    note "她很久没有说话。"
+
+    show idimya base eyes_down at sprite_base
+    with Dissolve(0.7)
+
+    idimya "……你这样很麻烦。"
+    idimya "我准备了很多种回答，一种都用不上。"
+
+    $ ch3_trust += 2
+    $ trust += 2
+    jump ch3_ask
+
+
+label ch3_ask:
+
+    scene fridge
+    with Dissolve(0.8)
+
+    show vig
+    show idimya base calm at sprite_base
+
+    note "她把冰箱门关上了。很轻。"
+    note "厨房一下子安静下来，只剩下压缩机的声音。"
+
+    note "她吸了一口气，很轻，但你听见了。"
+
+    play sound sfx_breath_soft
+
+    idimya "问吧。"
+    idimya "你今晚只可以问一个问题。我会回答。"
+    idimya "但我不会说第二次。"
+
+    menu:
+        "「那十七个日期里，有几个是我们认识之后？」":
+            $ ch3_asked = "after"
+            $ scent += 3
+            $ ch3_trust += 1
+            jump ch3_answer_after
+
+        "「你吃下去之后，会记得多久？」":
+            $ ch3_asked = "memory"
+            $ ch3_trust += 1
+            jump ch3_answer_memory
+
+        "「如果有一天我变成其中一个，你会写哪一天？」":
+            $ ch3_asked = "you"
+            $ scent += 2
+            $ doubt += 2
+            jump ch3_answer_you
+
+
+label ch3_answer_after:
+
+    show idimya base amused at sprite_base, lean_in
+    with Dissolve(0.7)
+
+    idimya "一个。"
+    n "「……一个？」"
+    idimya "只有一个。"
+    play sound sfx_breath_catch
+
+    idimya "你认识我以后，我只吃过一次。"
+
+    n "（你想起第一章那个晚上。厨房里有一把椅子。她一直站着。）"
+
+    idimya "那天我在楼下站了一会儿。"
+    idimya "我本来不是去等你。"
+
+    note "她转过头，看着冰箱。"
+
+    idimya "所以你现在知道，为什么那天我让你把外套挂回去了。"
+
+    show idimya base eyes_down at sprite_base
+    with Dissolve(0.6)
+
+    idimya "空着的地方，总得挂点什么。"
+
+    $ trust += 3
+    jump ch3_end
+
+
+label ch3_answer_memory:
+
+    show idimya base calm at sprite_base
+    with Dissolve(0.6)
+
+    idimya "很久。"
+    idimya "比人记得自己的名字还久。"
+
+    n "「那你会想起来的是味道，还是那个人？」"
+
+    show idimya base suspicious at sprite_base, lean_in
+    with Dissolve(0.5)
+
+    idimya "我刚刚说了，你只能问一个问题。"
+
+    pause 1.0
+
+    show idimya base smile_soft at sprite_base, lean_in
+    with Dissolve(0.9)
+
+    idimya "……味道先回来。"
+    idimya "人是后来的。"
+    idimya "有时候人回来得很晚，晚到我已经不知道该把它放在哪一排。"
+
+    note "你听懂了：最下面那一排，就是那些「人回来得太晚」的罐子。"
+
+    $ scent += 2
+    $ trust += 2
+    jump ch3_end
+
+
+label ch3_answer_you:
+
+    show idimya base flat at sprite_base
+    with Dissolve(0.5)
+
+    note "她看着你，看了很久。"
+    note "久到你能听见自己耳朵里的血流声。"
+
+    play sound sfx_heartbeat
+
+    show idimya base sly at sprite_base, lean_in
+    with Dissolve(0.8)
+
+    idimya "今天的日期。"
+    idimya "……我开玩笑的。"
+
+    note "她没有笑。"
+
+    show idimya base eyes_down at sprite_base
+    with Dissolve(0.7)
+
+    idimya "我不会写日期。"
+    idimya "我会把你放在上面那一排，然后永远不打开。"
+
+    n "（你不知道这算不算被爱。）"
+
+    $ doubt += 1
+    $ trust += 2
+    jump ch3_end
+
+
+label ch3_end:
+
+    scene kitchen
+    with Dissolve(1.2)
+
+    play ambience amb_kitchen fadein 3.0
+
+    show vig
+    show idimya apron calm at sprite_base, push_slow
+    with Dissolve(0.8)
+
+    note "后来她去烧水。你坐在那把唯一的椅子上。"
+
+    if seasoning == "盐":
+        idimya "上次那盘咸了。"
+        idimya "我后来又做了一遍，还是咸。"
+        idimya "……我大概是想再听你说一次真话。"
+    elif seasoning == "糖":
+        idimya "上次那盘太甜，我吃得很慢。"
+        idimya "不是因为不好吃。是因为我不想吃完。"
+    elif seasoning == "那一瓶没有标签的东西":
+        idimya "那瓶东西我扔了。"
+        idimya "留在家里，我每天都会想再闻一次。"
+    else:
+        pass
+
+    play sound sfx_cloth
+
+    show idimya apron smile_soft at sprite_base, lean_in
+    with Dissolve(0.7)
+
+    idimya "你今晚不走，对吧。"
+
+    note "这不是问句。"
+
+    menu:
+        "「不走。」":
+            $ ch3_trust += 2
+            $ trust += 2
+            jump ch3_stay
+
+        "「我明天要上班。」":
+            $ ch3_trust += 1
+            jump ch3_leave
+
+        "「你先告诉我，你在楼下等的是谁。」":
+            $ ch3_asked = "who"
+            $ scent += 2
+            $ doubt += 2
+            jump ch3_who
+
+
+label ch3_stay:
+
+    show idimya apron amused at sprite_base, lean_in
+    with Dissolve(0.6)
+
+    idimya "很好。"
+    idimya "那我把沙发收拾一下。"
+
+    n "「……沙发？」"
+    idimya "沙发。"
+    idimya "你以为是什么。"
+
+    note "她笑起来的时候，你几乎忘了冰箱里有什么。"
+
+    $ chapter_name = "第三章结局 · 她给了你沙发"
+    $ persistent.ch3_sofa = True
+    jump ch3_finish
+
+
+label ch3_leave:
+
+    show idimya apron flat at sprite_base
+    with Dissolve(0.5)
+
+    idimya "嗯。"
+    idimya "上班要紧。"
+
+    note "她说得很平静。平静得像早就知道你会这么说。"
+
+    show idimya apron smile_soft at sprite_base, lean_in
+    with Dissolve(0.8)
+
+    idimya "明天也是这个时间？"
+    n "「……你不问我为什么还来？」"
+    idimya "不问。"
+    idimya "问了你就不来了。"
+
+    $ chapter_name = "第三章结局 · 她算准了你会回来"
+    $ persistent.ch3_counted = True
+    jump ch3_finish
+
+
+label ch3_who:
+
+    play sound sfx_breath_catch
+
+    show idimya apron flat at sprite_base
+    with Dissolve(0.4)
+
+    note "空气停了半秒。"
+
+    show idimya apron sly at sprite_base, lean_in
+    with Dissolve(0.7)
+
+    idimya "……你今晚的问题已经用完了。"
+    idimya "但这个问题，我可以免费回答。"
+
+    pause 1.2
+
+    play sound sfx_breath_catch
+
+    idimya "我在楼下等的，从来都是同一个人。"
+
+    note "她说完就去洗杯子了。水声很大。"
+
+    n "（你不知道「同一个人」指的是谁。你只知道，她没有看你。）"
+
+    $ chapter_name = "第三章结局 · 她等的从来是同一个人"
+    $ persistent.ch3_same = True
+    jump ch3_finish
+
+
+label ch3_finish:
+
+    $ renpy.save_persistent()
+
+    stop ambience fadeout 2.4
+
+    scene black
+    with Dissolve(1.8)
+
+    hide bar_top
+    hide bar_bottom
+    with Dissolve(0.7)
+
+    centered "{size=18}{color=#8b7b69}第三章 · 完{/color}{/size}\n\n{color=#d9a05f}[chapter_name]{/color}"
+
+    centered "{size=17}{color=#8b7b69}第四章 · 早餐{/color}\n\n{size=15}{color=#6b5c4d}天亮了。桌上摆着两副碗筷。\n一副是你的。另一副，昨天晚上就在那里。\n\n（制作中）{/color}"
 
     return

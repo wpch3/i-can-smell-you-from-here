@@ -551,8 +551,15 @@
           if (ins.channel === 'ambience') {
             playAmb(ins.target, ins.fade || 2.0);
           } else {
-            // sound / voice：一次性音效，路径里只有文件名
-            playSfx(ins.target, 0.55);
+            // sound / voice：一次性音效。Ren'Py 里是 audio.xxx 别名，
+            // 转译后只剩 xxx，正好与 audio/xxx.wav 对应。
+            const vols = {
+              sfx_bell: 0.55, sfx_knife: 0.6, sfx_heartbeat: 0.5,
+              sfx_breath_soft: 0.34, sfx_breath_catch: 0.42,
+              sfx_cloth: 0.4, sfx_door: 0.5,
+            };
+            void vols;
+            playSfx(ins.target, vols[ins.target] ?? 0.5);
           }
           break;
         }
@@ -969,6 +976,11 @@
         ['ch2_shared', '她给你留了半盘'],
         ['ch2_taste', '她记住了你放的那一撮'],
         ['ch2_seen', '她已经知道你会回来'],
+      ]],
+      ['第三章 · 十七个日期', [
+        ['ch3_sofa', '她给了你沙发'],
+        ['ch3_counted', '她算准了你会回来'],
+        ['ch3_same', '她等的从来是同一个人'],
       ]],
     ];
     el.endList.innerHTML = groups.map(([title, items]) => {
