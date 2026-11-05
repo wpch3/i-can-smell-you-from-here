@@ -31,35 +31,16 @@
     if (AC.state === 'suspended') AC.resume();
     return AC;
   }
-  function ambience() {
-    const c = ac(); if (!c) return;
-    // 房间底噪：低通白噪
-    const buf = c.createBuffer(1, c.sampleRate * 4, c.sampleRate);
-    const d = buf.getChannelData(0);
-    let last = 0;
-    for (let i = 0; i < d.length; i++) {
-      const w = Math.random() * 2 - 1;
-      last = (last + 0.02 * w) / 1.02;
-      d[i] = last * 3.2;
-    }
-    const src = c.createBufferSource(); src.buffer = buf; src.loop = true;
-    const lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 420;
-    const g = c.createGain(); g.gain.value = 0.05;
-    src.connect(lp); lp.connect(g); g.connect(c.destination);
-    src.start();
-    window.__amb = { g, lp };
+  // 环境音音量：她说话时压低（听觉上的「聚光」），旁白时回来。
+  // 这里直接操作 playAmb 建的那条 gain —— 不再另建一套合成底噪。
+  const AMB_BASE = 0.32;
+  function ambLevel(v, dur) {
+    const c = ac(); if (!c || !ambGain) return;
+    ambGain.gain.cancelScheduledValues(c.currentTime);
+    ambGain.gain.linearRampToValueAtTime(v, c.currentTime + dur);
   }
-  function herVoice() {
-    // 她说话时：环境音压低（听觉上的「聚光」）
-    const a = window.__amb; if (!a) return;
-    a.g.gain.cancelScheduledValues(a.g.currentTime);
-    a.g.gain.linearRampToValueAtTime(0.018, a.g.currentTime + 0.25);
-  }
-  function normalVoice() {
-    const a = window.__amb; if (!a) return;
-    a.g.gain.cancelScheduledValues(a.g.currentTime);
-    a.g.gain.linearRampToValueAtTime(0.05, a.g.currentTime + 0.4);
-  }
+  function herVoice() { ambLevel(AMB_BASE * 0.42, 0.28); }
+  function normalVoice() { ambLevel(AMB_BASE, 0.45); }
   function blip(kind) {
     const c = ac(); if (!c) return;
     const t = c.currentTime;
@@ -93,14 +74,22 @@
   const bufCache = {};
   let ambNode = null, ambGain = null, ambTarget = null;
 
+  // 音频永远不能拖住剧本：给整个加载过程设 4 秒上限，超时就当没有这条声音。
+  // （真实浏览器里 decodeAudioData 在页面被后台化、或 wav 损坏时可能永不 resolve）
+  function withTimeout(p, ms, fallback = null) {
+    return Promise.race([p, new Promise((r) => setTimeout(() => r(fallback), ms))]);
+  }
+
   async function loadBuf(name) {
     if (bufCache[name]) return bufCache[name];
     const c = ac(); if (!c) return null;
     try {
-      const r = await fetch(AUDIO_DIR + name + '.wav');
-      const ab = await r.arrayBuffer();
-      bufCache[name] = await c.decodeAudioData(ab);
-      return bufCache[name];
+      return await withTimeout((async () => {
+        const r = await fetch(AUDIO_DIR + name + '.wav');
+        const ab = await r.arrayBuffer();
+        bufCache[name] = await c.decodeAudioData(ab);
+        return bufCache[name];
+      })(), 4000);
     } catch (e) {
       console.warn('音频加载失败', name, e);
       return null;
@@ -127,7 +116,7 @@
     src.buffer = buf; src.loop = true;
     const g = c.createGain();
     g.gain.setValueAtTime(0.0001, c.currentTime);
-    g.gain.linearRampToValueAtTime(0.32, c.currentTime + fade);
+    g.gain.linearRampToValueAtTime(AMB_BASE, c.currentTime + fade);
     src.connect(g); g.connect(c.destination);
     src.start();
     ambNode = src; ambGain = g;
@@ -390,6 +379,7 @@
       return Promise.resolve();
     }
 
+    setNextHint(false);
     let i = 0;
     let hold = 0;          // 标点停顿：还要等几个 tick 才继续出字
     el.text.textContent = '';
@@ -428,6 +418,11 @@
   }
 
   // ---------------------------------------------------------------- 等待推进
+  function setNextHint(on) {
+    if (!el.next) return;
+    el.next.classList.toggle('hide', !on);
+  }
+
   function waitAdvance() {
     return new Promise((resolve) => { waiting = resolve; });
   }
@@ -467,6 +462,7 @@
     if (!code) { console.error('missing label', name); return; }
 
     let guard = 0;
+    try {
     while (S.pc < code.length) {
       if (++guard > 5000) { console.error('infinite loop at', name, S.pc); return; }
       const ins = code[S.pc];
@@ -480,7 +476,9 @@
           const done = typeText(ins.text);
           await done;
           pushHistory(ins.who, fillPlaceholders(ins.text));
+          setNextHint(true);          // 文字出完了：告诉玩家"可以点了"
           await waitAdvance();
+          setNextHint(false);
           break;
         }
         case 'scene': {
@@ -599,6 +597,27 @@
           return;
       }
     }
+    } catch (e) {
+      // 剧本执行出异常时，绝对不要静默停住 —— 那和"卡死"对玩家来说没区别。
+      console.error('剧本执行异常 @', name, S.pc, e);
+      showFatal(e, `${name} 第 ${S.pc} 条`);
+    }
+  }
+
+  function showFatal(e, where) {
+    let tip = document.getElementById('fatal');
+    if (!tip) {
+      tip = document.createElement('div');
+      tip.id = 'fatal';
+      tip.style.cssText = 'position:absolute;left:50%;top:8%;transform:translateX(-50%);'
+        + 'max-width:80cqw;padding:1.6cqh 2cqw;z-index:999;'
+        + 'background:rgba(40,10,8,.95);border:1px solid #a8443a;'
+        + 'color:#e8dcc8;font-size:1.6cqh;line-height:1.7;white-space:pre-wrap';
+      document.getElementById('stage').appendChild(tip);
+    }
+    tip.textContent = `剧本出错了（${where}）：${e && e.message ? e.message : e}\n`
+      + '请把这段截给开发者；点这里继续。';
+    tip.onclick = () => tip.remove();
   }
 
   // ---------------------------------------------------------------- UI
@@ -993,12 +1012,12 @@
     }).join('');
   }
 
-  el.startBtn.addEventListener('click', async () => {
+  el.startBtn.addEventListener('click', () => {
     el.title.classList.add('hidden');
-    await wait(400);
     el.stage.classList.add('playing');
-    ambience();
     S.running = true;
+    // 音频只做「顺手启动」，绝不 await —— 它慢一点不该让玩家看着黑屏等
+    try { ac(); } catch (e) { /* 浏览器不支持就算了 */ }
     runLabel('start');
   });
 

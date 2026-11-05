@@ -45,8 +45,44 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const click = (n) => n.dispatchEvent(new window.MouseEvent('click', { bubbles: true }));
 const $ = (id) => doc.getElementById(id);
 
+/* 结构回归检查 —— 血泪教训：
+ * 曾经 index.html 多了一个 </div>，把 #box（对白框）挤出了 #stage。
+ * 显隐规则是 `#stage.playing #box{opacity:1}`，于是对白框永远是 opacity:0，
+ * 玩家看到的就是「黑屏 + 有声音 + 点得动，但没有一个字」，以为卡死了。
+ * jsdom 不会真正合成 opacity，但能验证选择器层级，这就够了。
+ */
+function checkStructure() {
+  const problems = [];
+  const need = ['stage', 'bg', 'char', 'box', 'who', 'text', 'next', 'choices', 'center', 'title', 'vig', 'grain'];
+  for (const id of need) if (!$(id)) problems.push(`缺少元素 #${id}`);
+
+  const stage = $('stage');
+  if (stage) {
+    // 所有演出层都必须真的在舞台里面，否则 #stage 的后代选择器全部失效
+    for (const id of ['bg', 'char', 'vig', 'grain', 'box', 'choices', 'center', 'title']) {
+      const e = $(id);
+      if (e && !stage.contains(e)) problems.push(`#${id} 掉到 #stage 外面了（检查 index.html 的 <div> 是否配对）`);
+    }
+    // 模拟开场 + 第一句台词后的状态，确认对白框真的会被点亮
+    // （engine 在 typeText 里会摘掉 .empty，只测 .playing 会漏掉这一层）
+    stage.classList.add('playing');
+    $('box').classList.remove('empty');
+    const ok = $('box').matches('#stage.playing #box') && !$('box').classList.contains('empty');
+    if (!ok) problems.push('#stage.playing #box 选择器匹配失败 —— 对白框永远不可见');
+    stage.classList.remove('playing');
+    $('box').classList.add('empty');
+  }
+
+  if (problems.length) {
+    problems.forEach((p) => console.error('✗ 结构检查: ' + p));
+    process.exit(1);
+  }
+  console.log('结构检查: ✅');
+}
+
 (async () => {
   await sleep(400);
+  checkStructure();
   click($('startBtn'));
   await sleep(700);
 

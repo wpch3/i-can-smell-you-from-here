@@ -141,14 +141,20 @@
   #text.note{color:#a89a88; font-style:normal}
   #text.you{color:#cfc6b8}
 
+  /* 「继续」提示：文字 + 小三角。纯三角太隐晦，玩家会以为卡住了。 */
   #next{
-    position:absolute; right:4.6cqw; bottom:2.4cqh;
-    width:0; height:0;
-    border-left:.85cqh solid transparent;
-    border-right:.85cqh solid transparent;
-    border-top:1.1cqh solid rgba(240,230,215,.75);
+    position:absolute; right:4.4cqw; bottom:2.2cqh;
+    display:flex; align-items:center; gap:.8cqw;
+    font-size:1.5cqh; letter-spacing:.12em;
+    color:rgba(232,220,200,.62);
     animation:breathe 1.9s ease-in-out infinite;
-    transition:opacity .3s;
+    transition:opacity .28s;
+  }
+  #next::after{
+    content:''; width:0; height:0;
+    border-left:.75cqh solid transparent;
+    border-right:.75cqh solid transparent;
+    border-top:1cqh solid rgba(240,230,215,.8);
   }
   #next.hide{opacity:0}
   @keyframes breathe{0%,100%{opacity:.28; transform:translateY(0)}50%{opacity:.85; transform:translateY(.32cqh)}}
@@ -452,14 +458,14 @@
     <div id="layerSpec" class="layer"></div>
     <div id="lid"></div>
   </div>
-  </div>
+
   <div id="vig"></div>
   <div id="grain"></div>
 
   <div id="box" class="empty">
     <div id="who"></div>
     <div id="text"></div>
-    <div id="next"></div>
+    <div id="next">继续</div>
   </div>
 
   <div id="choices"></div>
