@@ -1,0 +1,213 @@
+{
+ "image": "sheet.png",
+ "cell": {
+  "w": 598,
+  "h": 1360
+ },
+ "cols": 6,
+ "rows": 5,
+ "frames": {
+  "base/calm": [
+   0,
+   0,
+   598,
+   1360
+  ],
+  "base/amused": [
+   598,
+   0,
+   598,
+   1360
+  ],
+  "base/sly": [
+   1196,
+   0,
+   598,
+   1360
+  ],
+  "base/suspicious": [
+   1794,
+   0,
+   598,
+   1360
+  ],
+  "base/hungry": [
+   2392,
+   0,
+   598,
+   1360
+  ],
+  "base/smile_soft": [
+   2990,
+   0,
+   598,
+   1360
+  ],
+  "base/eyes_down": [
+   0,
+   1360,
+   598,
+   1360
+  ],
+  "base/laugh": [
+   598,
+   1360,
+   598,
+   1360
+  ],
+  "base/flat": [
+   1196,
+   1360,
+   598,
+   1360
+  ],
+  "apron/calm": [
+   1794,
+   1360,
+   598,
+   1360
+  ],
+  "apron/amused": [
+   2392,
+   1360,
+   598,
+   1360
+  ],
+  "apron/smile_soft": [
+   2990,
+   1360,
+   598,
+   1360
+  ],
+  "apron/sly": [
+   0,
+   2720,
+   598,
+   1360
+  ],
+  "apron/flat": [
+   598,
+   2720,
+   598,
+   1360
+  ],
+  "coat/calm": [
+   1196,
+   2720,
+   598,
+   1360
+  ],
+  "coat/suspicious": [
+   1794,
+   2720,
+   598,
+   1360
+  ],
+  "coat/sly": [
+   2392,
+   2720,
+   598,
+   1360
+  ],
+  "coat/flat": [
+   2990,
+   2720,
+   598,
+   1360
+  ],
+  "ponytail/calm": [
+   0,
+   4080,
+   598,
+   1360
+  ],
+  "ponytail/amused": [
+   598,
+   4080,
+   598,
+   1360
+  ],
+  "ponytail/hungry": [
+   1196,
+   4080,
+   598,
+   1360
+  ],
+  "ponytail/sly": [
+   1794,
+   4080,
+   598,
+   1360
+  ],
+  "ponytail/flat": [
+   2392,
+   4080,
+   598,
+   1360
+  ],
+  "hairup/calm": [
+   2990,
+   4080,
+   598,
+   1360
+  ],
+  "hairup/amused": [
+   0,
+   5440,
+   598,
+   1360
+  ],
+  "hairup/smile_soft": [
+   598,
+   5440,
+   598,
+   1360
+  ],
+  "hairup/sly": [
+   1196,
+   5440,
+   598,
+   1360
+  ]
+ },
+ "blink_patch": "blink_patch.png",
+ "groups": {
+  "base": [
+   "calm",
+   "amused",
+   "sly",
+   "suspicious",
+   "hungry",
+   "smile_soft",
+   "eyes_down",
+   "laugh",
+   "flat"
+  ],
+  "apron": [
+   "calm",
+   "amused",
+   "smile_soft",
+   "sly",
+   "flat"
+  ],
+  "coat": [
+   "calm",
+   "suspicious",
+   "sly",
+   "flat"
+  ],
+  "ponytail": [
+   "calm",
+   "amused",
+   "hungry",
+   "sly",
+   "flat"
+  ],
+  "hairup": [
+   "calm",
+   "amused",
+   "smile_soft",
+   "sly"
+  ]
+ }
+}

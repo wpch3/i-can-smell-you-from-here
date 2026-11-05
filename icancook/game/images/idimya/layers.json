@@ -1,0 +1,59 @@
+{
+ "cell": {
+  "w": 598,
+  "h": 1360
+ },
+ "layers": {
+  "scarf": {
+   "file": "layers/layer_scarf.png",
+   "box": [
+    382,
+    396,
+    130,
+    300
+   ],
+   "pivot": [
+    0.3,
+    0.02
+   ],
+   "canvas": [
+    598,
+    1360
+   ]
+  },
+  "bangs": {
+   "file": "layers/layer_bangs.png",
+   "box": [
+    110,
+    10,
+    390,
+    210
+   ],
+   "pivot": [
+    0.5,
+    0.1
+   ],
+   "canvas": [
+    598,
+    1360
+   ]
+  },
+  "spec": {
+   "file": "layers/layer_spec.png",
+   "box": [
+    250,
+    230,
+    300,
+    220
+   ],
+   "pivot": [
+    0.5,
+    0.5
+   ],
+   "canvas": [
+    598,
+    1360
+   ]
+  }
+ }
+}

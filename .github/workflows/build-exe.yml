@@ -1,0 +1,179 @@
+name: Build Windows EXE
+
+## 在 GitHub 的 Windows runner 上用 Ren'Py 官方 SDK 打包成 .exe（免安装，解压即玩）
+## 产物：推 tag 会自动发到 Releases（公开下载）；也可以在 Artifacts 里拿
+## 手动触发：Actions → Build Windows EXE → Run workflow
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  RENPY_VERSION: "8.5.3"
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download Ren'Py SDK
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $url = "https://www.renpy.org/dl/$env:RENPY_VERSION/renpy-$env:RENPY_VERSION-sdk.zip"
+          Write-Host "Downloading $url"
+          Invoke-WebRequest -Uri $url -OutFile renpy-sdk.zip
+          Expand-Archive renpy-sdk.zip -DestinationPath "${{ github.workspace }}\sdk"
+
+      - name: Locate SDK root
+        id: locate
+        shell: pwsh
+        run: |
+          $root = Get-ChildItem "${{ github.workspace }}\sdk" -Directory |
+                  Where-Object { Test-Path (Join-Path $_.FullName "renpy.exe") } |
+                  Select-Object -First 1
+          if (-not $root) {
+            $exe = Get-ChildItem "${{ github.workspace }}\sdk" -Recurse -Filter "renpy.exe" |
+                   Select-Object -First 1
+            $root = $exe.Directory
+          }
+          Write-Host "SDK root: $($root.FullName)"
+          "RENPY_ROOT=$($root.FullName)" | Out-File -FilePath $env:GITHUB_ENV -Append
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: 静态检查（引号 / 图名 / label / 变量）
+        shell: pwsh
+        run: |
+          # Ren'Py 的 compile 只查语法，不查"你 show 的图存不存在"。
+          # 这一步在编译前就跑，错了立刻失败，问题定位比 lint 日志清楚。
+          $log = "${{ github.workspace }}\check.log"
+          python tools/check_script.py *>&1 | Tee-Object -FilePath $log
+          if ($LASTEXITCODE -ne 0) {
+            $text = (Get-Content $log -Raw)
+            if (-not $text) { $text = "(check_script 无输出)" }
+            if ($text.Length -gt 4000) { $text = $text.Substring(0, 4000) }
+            $text = $text -replace "%", "%25" -replace "\r", "" -replace "\n", "%0A"
+            Write-Host "::error title=静态检查失败::$text"
+            exit 1
+          }
+
+      - name: Compile scripts (真编译，语法错会在这里炸)
+        shell: pwsh
+        run: |
+          $log = "${{ github.workspace }}\compile.log"
+          & "$env:RENPY_ROOT\renpy.exe" "${{ github.workspace }}\icancook" compile *>&1 |
+              Tee-Object -FilePath $log
+          $code = $LASTEXITCODE
+          if ($code -ne 0) {
+            # 把错误写进注解：日志站被墙时也能读到
+            $text = (Get-Content $log -Raw)
+            if ($text.Length -gt 6000) { $text = $text.Substring($text.Length - 6000) }
+            $text = $text -replace "%", "%25" -replace "\r", "" -replace "\n", "%0A"
+            Write-Host "::error title=Ren'Py compile failed::$text"
+            # 顺带把游戏目录里 Ren'Py 自己写的报错文件也贴出来
+            $errFile = "${{ github.workspace }}\icancook\errors.txt"
+            if (Test-Path $errFile) {
+              $e2 = (Get-Content $errFile -Raw)
+              if ($e2.Length -gt 6000) { $e2 = $e2.Substring(0, 6000) }
+              $e2 = $e2 -replace "%", "%25" -replace "\r", "" -replace "\n", "%0A"
+              Write-Host "::error title=errors.txt::$e2"
+            }
+            exit 1
+          }
+
+      - name: Lint
+        shell: pwsh
+        continue-on-error: true
+        run: |
+          # 0 = 无问题；1 = 有 warning（例如"脚本里定义了但没用到的图片"）。
+          # 不阻断构建，但把结果贴进日志 + 注解，免得问题越积越多。
+          $log = "${{ github.workspace }}\lint.log"
+          & "$env:RENPY_ROOT\renpy.exe" "${{ github.workspace }}\icancook" lint *>&1 |
+              Tee-Object -FilePath $log
+          $code = $LASTEXITCODE
+          Write-Host "lint exit code = $code"
+          Write-Host "--- lint.log 行数: $((Get-Content $log).Count) ---"
+          Get-Content $log | Select-Object -Last 60 | ForEach-Object { Write-Host $_ }
+          if ($code -ne 0) {
+            $text = (Get-Content $log -Raw)
+            if (-not $text) { $text = "(lint 无输出)" }
+            if ($text.Length -gt 5000) { $text = $text.Substring($text.Length - 5000) }
+            $text = $text -replace "%", "%25" -replace "\r", "" -replace "\n", "%0A"
+            Write-Host "::warning title=Ren'Py lint 报告::$text"
+          } else {
+            Write-Host "lint 通过，无告警"
+          }
+
+      - name: Build Windows distribution
+        shell: pwsh
+        run: |
+          # 自己解析 SDK 根（root 下的 renpy.exe，排除 lib\ 里的解释器）
+          $exe = Get-ChildItem "${{ github.workspace }}\sdk" -Recurse -Filter "renpy.exe" |
+                 Where-Object { $_.FullName -notmatch "\\lib\\" } | Select-Object -First 1
+          if (-not $exe) { Write-Host "::error title=SDK not found::no renpy.exe outside lib"; exit 1 }
+          $root = $exe.Directory.FullName
+          Write-Host "SDK root: $root"
+          Get-ChildItem $root | Select-Object Name | Format-Table | Out-String | Write-Host
+
+          $log = "${{ github.workspace }}\distribute.log"
+          Push-Location $root
+          # 注意：第一个位置参数就是 basedir，必须绝对路径，否则会去找 <cwd>\launcher
+          & "$root\renpy.exe" "$root\launcher" distribute `
+              "${{ github.workspace }}\icancook" `
+              --package win `
+              --no-update `
+              --destination "${{ github.workspace }}\dist" *>&1 | Tee-Object -FilePath $log
+          $code = $LASTEXITCODE
+          Pop-Location
+
+          if ($code -ne 0) {
+            $text = "SDK root: $root`n" + (Get-Content $log -Raw)
+            if ($text.Length -gt 6000) { $text = $text.Substring($text.Length - 6000) }
+            $text = $text -replace "%", "%25" -replace "\r", "" -replace "\n", "%0A"
+            Write-Host "::error title=distribute failed::$text"
+            exit 1
+          }
+          Get-ChildItem "${{ github.workspace }}\dist" -Recurse | Select-Object FullName, Length
+
+      - name: Unzip the built package for a ready-to-run folder
+        shell: pwsh
+        run: |
+          $zip = Get-ChildItem "${{ github.workspace }}\dist" -Filter "*.zip" | Select-Object -First 1
+          if (-not $zip) { throw "no zip produced" }
+          Expand-Archive $zip.FullName -DestinationPath "${{ github.workspace }}\icancook-win"
+          Get-ChildItem "${{ github.workspace }}\icancook-win" | Select-Object Name, Length
+
+      - name: Publish GitHub Release (公开下载，不用登录)
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*.zip
+          name: ${{ github.ref_name }}
+          body: |
+            **我在这儿就能为你下厨了 / I Can Cook For You From Here** — 网页 Demo + Windows exe
+
+            - 下载 `icancook-*-win.zip`，解压后双击 `i_can_cook_for_you_from_here.exe`
+            - 免安装，Windows 10/11 x64
+            - 非官方恋爱向同人作品；原作 *I Can Smell You From Here* © catproblem9735
+
+            本构建由 GitHub Actions 自动打包（Ren'Py ${{ env.RENPY_VERSION }}）。
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: icancook-win
+          path: |
+            dist/**
+            icancook-win/**
+          if-no-files-found: error
