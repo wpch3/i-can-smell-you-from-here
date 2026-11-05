@@ -19,6 +19,14 @@ import re
 import sys
 from pathlib import Path
 
+# Windows 的控制台默认是 GBK / cp1252，脚本里的中文和 ✅ 会直接抛
+# UnicodeEncodeError —— 这不是检查失败，是"打印失败"。先兜住。
+for stream in (sys.stdout, sys.stderr):
+    try:
+        stream.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
+
 ROOT = Path(__file__).resolve().parent.parent
 GAME = ROOT / "icancook" / "game"
 SCRIPT = GAME / "script.rpy"
