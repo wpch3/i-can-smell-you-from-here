@@ -62,28 +62,18 @@
     will-change:transform;
   }
 
-  /* 头发层：与 charInner 完全同位，但只显示头部区域（靠 clip-path 裁）
-     位移由脚本按正弦微调 → 厚涂画风不需要变形网格也能“飘” */
-  #hairSway{
+  /* L2 分层：每层都是整格大小的透明图，只显示自己被切出来的那块。
+     只做刚性位移 + 旋转，绝不拉伸 —— 厚涂笔触不会被撕开。 */
+  .layer{
     position:absolute; inset:0;
     background-repeat:no-repeat;
-    height:34%;
-    clip-path:polygon(20% 0, 80% 0, 84% 62%, 78% 100%, 62% 96%, 46% 100%, 30% 94%, 16% 100%, 16% 58%);
-    transform-origin:50% 12%;
+    background-size:100% 100%;
+    pointer-events:none;
     will-change:transform;
-    opacity:.999;
-    pointer-events:none;
   }
-
-  /* 头发遮罩影子：让被掀起来的部分透出一点背景，制造“发丝离开肩膀”的错觉 */
-  #hairMask{
-    position:absolute; inset:0;
-    background:linear-gradient(to bottom, rgba(0,0,0,0) 55%, rgba(0,0,0,.35) 100%);
-    height:34%;
-    clip-path:polygon(24% 40%, 76% 40%, 80% 100%, 20% 100%);
-    opacity:.5;
-    pointer-events:none;
-  }
+  #layerHair{ transform-origin:50% 4%; }
+  #layerScarf{ transform-origin:22% 2%; }
+  #layerSpec{ mix-blend-mode:screen; opacity:.18; }
 
   /* 眨眼层：和呼吸层完全同位，只叠眼睛那一小块 */
   #lid{
@@ -376,9 +366,11 @@
   <div id="bg"></div>
   <div id="char">
     <div id="charInner"></div>
-    <div id="hairSway"></div>
+    <div id="layerHair" class="layer"></div>
+    <div id="layerScarf" class="layer"></div>
+    <div id="layerSpec" class="layer"></div>
     <div id="lid"></div>
-    <div id="hairMask"></div>
+  </div>
   </div>
   <div id="vig"></div>
   <div id="grain"></div>

@@ -93,7 +93,9 @@
     char: $('#char'),
     charInner: $('#charInner'),
     lid: $('#lid'),
-    hairSway: $('#hairSway'),
+    layerHair: $('#layerHair'),
+    layerScarf: $('#layerScarf'),
+    layerSpec: $('#layerSpec'),
     vig: $('#vig'),
     box: $('#box'),
     who: $('#who'),
@@ -132,12 +134,19 @@
       .then((m) => {
         SPRITE.cell = m.cell;
         SPRITE.frames = m.frames;
+        SPRITE.cols = m.cols || Object.keys(m.frames).length;
+        SPRITE.rows = m.rows || 1;
         const sheet = new Image();
         sheet.onload = () => { SPRITE.sheet = sheet; SPRITE.ready = true; };
         sheet.src = SPRITE_DIR + m.image;
         const bl = new Image();
         bl.onload = () => { SPRITE.blink = bl; };
         bl.src = SPRITE_DIR + m.blink_patch.file;
+
+        // L2 分层：同一格坐标系，直接叠
+        el.layerHair.style.backgroundImage = `url("${SPRITE_DIR}layers/layer_bangs.png")`;
+        el.layerScarf.style.backgroundImage = `url("${SPRITE_DIR}layers/layer_scarf.png")`;
+        el.layerSpec.style.backgroundImage = `url("${SPRITE_DIR}layers/layer_spec.png")`;
       })
       .catch((e) => console.warn('立绘表加载失败', e));
   }
@@ -161,19 +170,15 @@
     el.charInner.style.height = '100%';
     el.charInner.style.backgroundImage = `url("${SPRITE_DIR}sheet.png")`;
     el.charInner.style.backgroundSize =
-      `${Math.round(w * Object.keys(SPRITE.frames).length * scale)}px ${Math.round(h * scale)}px`;
-    el.charInner.style.backgroundPosition =
-      `${-Math.round(f[0] * scale)}px ${-Math.round(f[1] * scale)}px`;
-    el.charInner.style.backgroundImage = `url("${SPRITE_DIR}sheet.png")`;
-    el.charInner.style.backgroundSize =
-      `${Math.round(w * Object.keys(SPRITE.frames).length * scale)}px ${Math.round(h * scale)}px`;
+      `${Math.round(w * SPRITE.cols * scale)}px ${Math.round(h * SPRITE.rows * scale)}px`;
     el.charInner.style.backgroundPosition =
       `${-Math.round(f[0] * scale)}px ${-Math.round(f[1] * scale)}px`;
 
-    // 头发层：同图同位，靠 clip 只露头，轻微摆动
-    el.hairSway.style.backgroundImage = el.charInner.style.backgroundImage;
-    el.hairSway.style.backgroundSize = el.charInner.style.backgroundSize;
-    el.hairSway.style.backgroundPosition = el.charInner.style.backgroundPosition;
+    // L2 的三层只从 base/calm 切出来，换到别的造型时必须藏起来，
+    // 否则会叠上一层「短发 + 蓝吊带」的刘海和丝巾，比不动还糟。
+    const isBase = SPRITE.name.startsWith('base/');
+    el.layerHair.style.display = el.layerScarf.style.display =
+      el.layerSpec.style.display = isBase ? 'block' : 'none';
   }
 
   // 眨眼：每 3~7 秒一次，闭上 110ms
@@ -189,20 +194,7 @@
     }, 1200 + Math.random() * 1500);
   }
 
-  // 头发摆动：两层不同相位，制造“发丝有重量”的错觉（厚涂不用变形网格）
-  function startHairSway() {
-    const t0 = performance.now();
-    const loop = () => {
-      const t = (performance.now() - t0) / 1000;
-      const sway = Math.sin(t / 3.1) * 1.1 + Math.sin(t / 1.37) * 0.35;
-      const tilt = Math.sin(t / 4.3) * 0.55;
-      el.hairSway.style.transform = `translateX(${sway.toFixed(2)}%) rotate(${tilt.toFixed(2)}deg)`;
-      requestAnimationFrame(loop);
-    };
-    loop();
-  }
-
-  // 视点跟随 + 呼吸 + 头发摆动：合成一个 RAF 循环，避免多条循环互相覆盖 transform
+  // 视点跟随 + 呼吸 + L2 分层摆动：合成一个 RAF 循环，避免多条循环互相覆盖 transform
   const gaze = { x: 0, y: 0 };
   function startLive() {
     const t0 = performance.now();
@@ -224,12 +216,21 @@
       el.charInner.style.transform =
         `translate(${(cx * -1.2).toFixed(2)}%, ${(cy * -0.6 + by).toFixed(2)}%) scale(${bs.toFixed(4)})`;
 
-      if (el.hairSway) {
-        const sway = Math.sin(t / 3.1) * 0.9 + Math.sin(t / 1.37) * 0.3;
-        const tilt = Math.sin(t / 4.3) * 0.5;
-        el.hairSway.style.transform =
-          `translateX(${sway.toFixed(2)}%) rotate(${tilt.toFixed(2)}deg)`;
-      }
+      // 刘海：小幅度、高频
+      const hSway = Math.sin(t / 2.7) * 0.55 + Math.sin(t / 1.13) * 0.18;
+      const hTilt = Math.sin(t / 3.9) * 0.35;
+      el.layerHair.style.transform =
+        `translateX(${hSway.toFixed(2)}%) rotate(${hTilt.toFixed(2)}deg)`;
+
+      // 丝巾尾端：大幅度、低频，且有相位延迟 —— 这一层最出效果
+      const sSway = Math.sin((t - 0.6) / 3.4) * 1.7 + Math.sin((t - 0.3) / 1.9) * 0.5;
+      const sTilt = Math.sin((t - 0.8) / 4.6) * 1.6;
+      el.layerScarf.style.transform =
+        `translate(${sSway.toFixed(2)}%, ${(Math.abs(sSway) * 0.12).toFixed(2)}%) rotate(${sTilt.toFixed(2)}deg)`;
+
+      // 高光层：透明度呼吸，模拟烛光扫过
+      el.layerSpec.style.opacity =
+        (0.13 + Math.sin(t / 1.7) * 0.04 + Math.sin(t / 0.53) * 0.012).toFixed(3);
       requestAnimationFrame(loop);
     };
     loop();

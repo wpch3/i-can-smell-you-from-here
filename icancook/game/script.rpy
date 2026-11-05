@@ -19,26 +19,33 @@ image genkan = "images/bg_genkan.jpg"
 image morning = "images/bg_morning.jpg"
 image fridge = "images/bg_fridge.jpg"
 
-## ——— 立绘：从精灵表裁切（格子坐标由 tools/build_sprites.py 写进 sheet.json） ———
-## 造型 / 表情：base, apron, coat, ponytail  ×  calm, amused, sly, suspicious, hungry, smile_soft, eyes_down, laugh
-image idimya base calm = im.Crop("images/idimya/sheet.png", (0, 0, 598, 1312))
-image idimya base amused = im.Crop("images/idimya/sheet.png", (598, 0, 598, 1312))
-image idimya base sly = im.Crop("images/idimya/sheet.png", (1196, 0, 598, 1312))
-image idimya base suspicious = im.Crop("images/idimya/sheet.png", (1794, 0, 598, 1312))
-image idimya base hungry = im.Crop("images/idimya/sheet.png", (2392, 0, 598, 1312))
-image idimya base smile_soft = im.Crop("images/idimya/sheet.png", (2990, 0, 598, 1312))
-image idimya base eyes_down = im.Crop("images/idimya/sheet.png", (3588, 0, 598, 1312))
-image idimya base laugh = im.Crop("images/idimya/sheet.png", (4186, 0, 598, 1312))
-image idimya apron calm = im.Crop("images/idimya/sheet.png", (4784, 0, 598, 1312))
-image idimya apron amused = im.Crop("images/idimya/sheet.png", (5382, 0, 598, 1312))
-image idimya apron smile_soft = im.Crop("images/idimya/sheet.png", (5980, 0, 598, 1312))
-image idimya apron sly = im.Crop("images/idimya/sheet.png", (6578, 0, 598, 1312))
-image idimya coat calm = im.Crop("images/idimya/sheet.png", (7176, 0, 598, 1312))
-image idimya coat suspicious = im.Crop("images/idimya/sheet.png", (7774, 0, 598, 1312))
-image idimya coat sly = im.Crop("images/idimya/sheet.png", (8372, 0, 598, 1312))
-image idimya ponytail calm = im.Crop("images/idimya/sheet.png", (8970, 0, 598, 1312))
-image idimya ponytail amused = im.Crop("images/idimya/sheet.png", (9568, 0, 598, 1312))
-image idimya ponytail hungry = im.Crop("images/idimya/sheet.png", (10166, 0, 598, 1312))
+## ——— 立绘：从精灵表裁切（坐标由 tools/build_sprites.py 自动生成，勿手改） ———
+image idimya base calm = im.Crop("images/idimya/sheet.png", (0, 0, 598, 1360))
+image idimya base amused = im.Crop("images/idimya/sheet.png", (598, 0, 598, 1360))
+image idimya base sly = im.Crop("images/idimya/sheet.png", (1196, 0, 598, 1360))
+image idimya base suspicious = im.Crop("images/idimya/sheet.png", (1794, 0, 598, 1360))
+image idimya base hungry = im.Crop("images/idimya/sheet.png", (2392, 0, 598, 1360))
+image idimya base smile_soft = im.Crop("images/idimya/sheet.png", (2990, 0, 598, 1360))
+image idimya base eyes_down = im.Crop("images/idimya/sheet.png", (0, 1360, 598, 1360))
+image idimya base laugh = im.Crop("images/idimya/sheet.png", (598, 1360, 598, 1360))
+image idimya apron calm = im.Crop("images/idimya/sheet.png", (1196, 1360, 598, 1360))
+image idimya apron amused = im.Crop("images/idimya/sheet.png", (1794, 1360, 598, 1360))
+image idimya apron smile_soft = im.Crop("images/idimya/sheet.png", (2392, 1360, 598, 1360))
+image idimya apron sly = im.Crop("images/idimya/sheet.png", (2990, 1360, 598, 1360))
+image idimya apron flat = im.Crop("images/idimya/sheet.png", (0, 2720, 598, 1360))
+image idimya coat calm = im.Crop("images/idimya/sheet.png", (598, 2720, 598, 1360))
+image idimya coat suspicious = im.Crop("images/idimya/sheet.png", (1196, 2720, 598, 1360))
+image idimya coat sly = im.Crop("images/idimya/sheet.png", (1794, 2720, 598, 1360))
+image idimya coat flat = im.Crop("images/idimya/sheet.png", (2392, 2720, 598, 1360))
+image idimya ponytail calm = im.Crop("images/idimya/sheet.png", (2990, 2720, 598, 1360))
+image idimya ponytail amused = im.Crop("images/idimya/sheet.png", (0, 4080, 598, 1360))
+image idimya ponytail hungry = im.Crop("images/idimya/sheet.png", (598, 4080, 598, 1360))
+image idimya ponytail sly = im.Crop("images/idimya/sheet.png", (1196, 4080, 598, 1360))
+image idimya ponytail flat = im.Crop("images/idimya/sheet.png", (1794, 4080, 598, 1360))
+image idimya hairup calm = im.Crop("images/idimya/sheet.png", (2392, 4080, 598, 1360))
+image idimya hairup amused = im.Crop("images/idimya/sheet.png", (2990, 4080, 598, 1360))
+image idimya hairup smile_soft = im.Crop("images/idimya/sheet.png", (0, 5440, 598, 1360))
+## ——— 立绘注册结束
 
 ## ——— 演出：让「她离你有多近」变成可感知的变量 ———————————————
 transform sprite_base:
@@ -522,8 +529,369 @@ label ch0_after:
 
     idimya "……我说过你不用敲的。"
 
-    centered "{size=20}{color=#8b7b69}序章 · 完{/color}{/size}\n\n{color=#f0dcc2}第一章 · 门铃 · 制作中{/color}"
-
     centered "{size=18}{color=#8b7b69}本次周目 · 她记住你的方式{/color}{/size}\n\n{color=#d9a05f}[chapter_name]{/color}"
+
+    jump ch1_title
+
+
+## ============================================================
+## 第一章 · 门铃
+## ============================================================
+## 这一章的重点不是「她会不会吃你」，而是「她允许你看到多少」。
+## 采用了 L2 分层动态立绘（丝巾/刘海/hair 摆动），并在厨房段落
+## 用围裙造型 + 背对你（用 lean_back + flat 表现）。
+
+label ch1_title:
+
+    $ chapter_name = "第一章 · 门铃"
+
+    scene black
+    with Dissolve(1.2)
+
+    note "第一章"
+    note "门铃"
+
+    jump ch1_genkan
+
+
+label ch1_genkan:
+
+    scene genkan
+    with Dissolve(1.8)
+
+    show vig
+
+    note "你按了门铃。"
+
+    note "里面没有脚步声。过了很久，门自己开了一条缝——像是有人早就站在门后，只是等你先按下去。"
+
+    show idimya hairup calm at sprite_base, push_slow
+    with Dissolve(0.8)
+
+    note "她头发是随便盘起来的，几缕落在颈侧。没有化妆。"
+
+    idimya "你迟到了四分钟。"
+
+    n "（她没有看表。）"
+
+    idimya "进来吧。鞋子放那边，别踩到垫子外面。"
+
+    note "玄关很窄。你侧着身进来，闻到炖东西的味道——很浓，很甜，压着一层别的什么。"
+
+    idimya "外套挂那儿。"
+
+    menu:
+        "照做。":
+            $ trust += 1
+            note "你把外套挂在那件长外套旁边。它的下摆有一块洗过很多次的痕迹。"
+
+            idimya "……好。"
+            idimya "你比我想的听话。"
+
+        "先问一句：那件外套是谁的？":
+            $ scent += 2
+            $ doubt += 1
+            n "「那件外套，是谁的？」"
+
+            show idimya hairup calm at sprite_base, lean_back
+            with Dissolve(0.4)
+
+            idimya "……"
+            idimya "上一个在这里挂过外套的人。"
+            idimya "他没有拿走。"
+            idimya "你可以理解成我留了个纪念。"
+
+            note "她没有笑。这比笑更糟。"
+
+        "不脱，站门口。":
+            $ doubt += 2
+            n "（你没有动。）"
+
+            show idimya hairup calm at sprite_base, lean_back
+            with Dissolve(0.4)
+
+            idimya "行。那就站着。"
+            idimya "饭凉了会很难吃，不过这是你的选择。"
+
+            note "她转身走进厨房。你站在玄关，看着自己的鞋，忽然意识到——她一次都没催你。"
+
+            note "过了大概一分钟，你还是脱了鞋。"
+
+    jump ch1_kitchen
+
+
+label ch1_kitchen:
+
+    scene kitchen
+    with Dissolve(1.6)
+
+    show vig
+
+    show idimya apron calm at sprite_base, push_slow
+    with Dissolve(0.8)
+
+    note "厨房比你想象的小，也比你想的干净。干净到不像有人天天在这里做饭。"
+
+    note "砧板上有一块切得很整齐的东西。你只看了一眼，就把视线移开了。"
+
+    idimya "别站那儿。过来，帮我把这个端过去。"
+
+    note "她背对着你，围裙带子在腰后打了个很随便的结。"
+
+    idimya "我问你一件事。"
+
+    idimya "上次你说，下次你来做。还算数吗？"
+
+    menu:
+        "算数。现在就做。":
+            $ trust += 2
+            $ promise = "现在做"
+            n "「算数。现在就可以。」"
+
+            show idimya apron smile_soft at sprite_base, lean_in
+            with Dissolve(0.5)
+
+            idimya "现在？"
+            idimya "……好。那这顿我来吃。"
+
+            note "她往旁边让开半步，把灶台前的位置让给你。这是今晚她第一次把什么东西让给你。"
+
+            jump ch1_cook
+
+        "算数，但改天。":
+            $ doubt += 1
+            n "「算数。但改天吧，今天是你做。」"
+
+            idimya "改天。"
+            idimya "……行。我记性好，你知道的。"
+
+            note "她把「改天」两个字说得很轻，像在把它放进某个抽屉。"
+
+            jump ch1_knife
+
+        "反悔。我做不到。":
+            $ scent += 1
+            $ trust += 1
+            n "「我做不到。我那天是随口说的。」"
+
+            show idimya apron flat at sprite_base, lean_back
+            with Dissolve(0.4)
+
+            note "她停了很久。锅里的东西在响。"
+
+            idimya "谢谢你没继续骗我。"
+            idimya "……但我现在有点难过。这很奇怪，对吧？"
+            idimya "我吃人的时候都不会难过。"
+
+            jump ch1_knife
+
+
+label ch1_cook:
+
+    note "你打开冰箱拿东西。"
+
+    scene fridge
+    with Dissolve(1.0)
+
+    show vig
+
+    note "冷光打在你脸上。"
+    note "架子上很整齐。非常整齐。每一格都标了日期。"
+
+    note "你数了一下。有十七个。"
+    note "不是十七盒东西。是十七个日期。"
+
+    menu:
+        "关上门，装作没看见。":
+            $ doubt += 1
+            n "（你把门关上了。）"
+
+            scene kitchen
+            with Dissolve(0.8)
+            show vig
+            show idimya apron calm at sprite_base, push_slow
+
+            idimya "找到你要的了？"
+            n "「找到了。」"
+            idimya "你脸色不太好。"
+            idimya "……厨房灯有点暗，对吧。"
+
+        "问她：这些日期是什么？":
+            $ scent += 2
+            $ trust += 2
+            n "「这些日期是什么？」"
+
+            scene kitchen
+            with Dissolve(0.8)
+            show vig
+            show idimya apron smile_soft at sprite_base, lean_in
+
+            idimya "……你是第一个问的人。"
+            idimya "以前的人要么不打开，要么打开了就再也没说过话。"
+            idimya "那些是我记得的日子。有些是好的，有些不是。"
+            idimya "我吃下去的东西，我不想忘记它们。这是我能给的最起码的东西。"
+
+            n "（你不知道该说这是温柔还是残忍。）"
+
+        "拿出一盒，放到她面前。":
+            $ scent += 3
+            $ doubt += 1
+
+            n "（你把最里面的那一盒拿出来，放在她手边的台面上。）"
+
+            scene kitchen
+            with Dissolve(0.8)
+            show vig
+            show idimya apron flat at sprite_base, lean_back
+
+            note "她低头看着那盒东西，很久没有动。"
+
+            idimya "……你知道你在做什么吗。"
+            n "「不知道。」"
+            idimya "很好。至少这句是真话。"
+            idimya "把它放回去。"
+
+            note "你把盒子放回去，关上门。冷光消失的那一刻，厨房忽然显得很暖。"
+
+    jump ch1_knife
+
+
+label ch1_knife:
+
+    scene kitchen
+    with Dissolve(1.0)
+
+    show vig
+    show idimya apron calm at sprite_base, push_slow
+
+    note "她把刀放下了。放得很轻，几乎没有声音。"
+
+    idimya "饭还要一会儿。"
+    idimya "要不要先坐下。"
+
+    note "你这才发现，厨房里其实只有一把椅子。"
+
+    menu:
+        "坐。":
+            $ trust += 1
+            note "你坐下了。她站在你旁边，靠着台面，低头看你。"
+
+            show idimya apron smile_soft at sprite_base, lean_in
+            with Dissolve(0.6)
+
+            idimya "这样很好。"
+            idimya "我喜欢矮一点的人。不，不是身高。"
+            idimya "是愿意坐下来的人。"
+
+        "问她：你站着，我坐着，这算什么？":
+            $ scent += 2
+            n "「你站着，我坐着。这算什么？」"
+
+            show idimya apron sly at sprite_base, lean_in
+            with Dissolve(0.5)
+
+            idimya "算我在让你。"
+            idimya "我很少让人。你要珍惜。"
+
+        "站着。保持距离。":
+            $ doubt += 2
+            note "你没有坐。她也没有再让。"
+
+            show idimya apron flat at sprite_base, lean_back
+            with Dissolve(0.4)
+
+            idimya "……好。"
+            idimya "那我们就这样说话。"
+
+            note "接下来的十分钟，锅在响，你们谁都没有再开口。"
+
+    jump ch1_end
+
+
+label ch1_end:
+
+    scene morning
+    with Dissolve(2.4)
+
+    show vig
+
+    note "后来你不太记得那顿饭是怎么吃完的。"
+    note "你只记得窗外开始亮的时候，她还坐在那儿，没有催你走。"
+
+    show idimya ponytail calm at sprite_base, push_slow
+    with Dissolve(1.0)
+
+    idimya "天亮了。"
+    idimya "……你要走的话，现在是最好的时候。"
+
+    menu:
+        "「我不走。」":
+            $ trust += 2
+            n "「我不走。」"
+
+            show idimya ponytail amused at sprite_base, lean_in
+            with Dissolve(0.6)
+
+            idimya "你知道你在说什么吗。"
+            idimya "天亮了，我就没那么好看了。"
+            idimya "……而且我饿的时候，也不再那么客气。"
+
+            n "「我知道。」"
+
+            idimya "……"
+            idimya "那你把外套挂回去吧。"
+
+            note "她说了这句话，就去洗碗了。背对着你。"
+            note "你听见水声里夹着一句很轻的话，轻到可能是你听错了。"
+
+            $ persistent.ch1_stay = True
+
+        "「我该走了。」":
+            $ doubt += 1
+            n "「我该走了。」"
+
+            show idimya ponytail flat at sprite_base, lean_back
+            with Dissolve(0.5)
+
+            idimya "嗯。"
+            idimya "路上小心。"
+
+            note "她送都没有送。你穿鞋的时候，听到厨房传来水声。"
+            note "还有一声很轻的、像是把什么东西放回柜子里的声音。"
+
+            $ persistent.ch1_leave = True
+
+        "问她：「下一次，还是我按门铃吗？」":
+            $ scent += 2
+            $ trust += 1
+            n "「下一次，还是我按门铃吗？」"
+
+            show idimya ponytail amused at sprite_base, lean_in
+            with Dissolve(0.6)
+
+            idimya "不。"
+            idimya "下一次，你自己开门。"
+
+            note "她说这句话的时候，把一把钥匙推到你面前。"
+            note "钥匙是温的。她大概握了很久。"
+
+            $ promise = "自己开门"
+            $ persistent.ch1_key = True
+
+    $ renpy.save_persistent()
+
+    scene black
+    with Dissolve(1.8)
+
+    if doubt >= trust + 2:
+        $ chapter_name = "第一章结局 · 她记住了你看见了什么"
+    elif promise == "自己开门":
+        $ chapter_name = "第一章结局 · 她给了你钥匙"
+    else:
+        $ chapter_name = "第一章结局 · 她记住了你留下来"
+
+    centered "{size=18}{color=#8b7b69}第一章 · 完{/color}{/size}\n\n{color=#d9a05f}[chapter_name]{/color}"
+
+    centered "{size=17}{color=#8b7b69}第二章 · 刀与糖{/color}\n\n{size=15}{color=#6b5c4d}一起做饭。\n调味不是靠菜谱，是靠闻。\n\n（制作中）{/color}"
 
     return

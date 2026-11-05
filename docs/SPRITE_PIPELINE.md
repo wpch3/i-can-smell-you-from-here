@@ -1,13 +1,15 @@
 # 立绘制作与动态立绘方案
 
-## 一、现状（M1 第一天）
+## 一、现状（v0.3.0）
 
 | 项 | 状态 |
 |---|---|
 | 立绘底图（黑底） | ✅ `assets/sprites/idimya/base_v1.png` |
-| 表情差分 | ✅ 8 个：`calm / amused / sly / suspicious / hungry / smile_soft / eyes_down / laugh / flat` |
-| 造型（服装 / 发型） | ✅ 3 套：`apron`（围裙）、`coat`（大衣）、`ponytail`（马尾） |
-| 背景 | ✅ 5 张：小酒馆（夜）/ 玄关 / 厨房 / 冰箱走廊 / 早晨餐桌 |
+| 表情差分 | ✅ 8 个（base 全脸）：`calm / amused / sly / suspicious / hungry / smile_soft / eyes_down / laugh` |
+| 造型（服装 / 发型） | ✅ 4 套：`apron`（围裙）、`coat`（大衣）、`ponytail`（马尾）、`hairup`（盘发） |
+| 造型 × 表情格数 | ✅ **25 格**（base 8 / apron 5 / coat 4 / ponytail 5 / hairup 3） |
+| 背景 | ✅ 6 张：小酒馆（夜）/ 玄关 / 厨房 / 冰箱（夜开）/ 早晨餐桌 / 主视觉 |
+| 分层立绘（L2） | ✅ 刘海 / 丝巾 / 高光三层，刚性位移 + 旋转 + 光呼吸 |
 | 眨眼层 | ✅ `blink_closed.png` → 加工成 `blink_patch.png` |
 | 透明化 + 统一裁切 + 精灵表 | ✅ `tools/build_sprites.py` 一键生成 |
 | 引擎内动态立绘 | ✅ 呼吸 + 眨眼 + 表情切换 + 推近/退开 |
@@ -16,12 +18,40 @@
 产物（`icancook/game/images/idimya/`）：
 
 ```
-sheet.png        18 格横向精灵表（10764×1312）
-sheet.json       每格坐标；键名形如 "apron/sly"
-sheet.json       每格坐标 + 尺寸（网页引擎与 Ren'Py 共用）
-blink_patch.png  584×1304   只有眼部可见的羽化补丁
-calm/amused/sly/suspicious/hungry.png   单张，备用
+sheet.png        25 格网格精灵表（3588×6800，6 列 × 5 行，6.6 MB，-colors 200 压缩）
+sheet.json       每格坐标 + 尺寸 + groups 清单（网页引擎与 Ren'Py 共用）
+blink_patch.png  602×1362   只有眼部可见的羽化补丁
+layers/layer_bangs.png   前发（刘海）独立层
+layers/layer_scarf.png   丝巾垂端独立层
+layers/layer_spec.png    高光独立层（screen 混合）
+layers.json      三层的 box / pivot / canvas
 ```
+
+### 造型 × 表情矩阵（25 格，cell 598×1360）
+
+| 造型 | 可用表情 | 格数 |
+|---|---|---|
+| `base` | calm / amused / sly / suspicious / hungry / smile_soft / eyes_down / laugh | 8 |
+| `apron` 围裙 | calm / amused / smile_soft / sly / **flat** | 5 |
+| `coat` 大衣 | calm / suspicious / sly / **flat** | 4 |
+| `ponytail` 马尾 | calm / amused / hungry / sly / **flat** | 5 |
+| `hairup` 盘发 | calm / amused / smile_soft | 3 |
+
+Ren'Py：`show idimya <造型> <表情>`；网页端键名为 `<造型>/<表情>`。
+
+> **flat 是什么**：同一套造型的"面无表情"底图（也就是这套造型的定妆图）。
+
+### 一条踩过的坑：表情**必须**用各造型自己的图
+
+早期做法是「每套造型都借 `expr_*.png` 当表情」。结果换到马尾/盘发时，
+立绘会突然变回短发——因为 `expr_*.png` 是拿 `base_v1` 做 img2img 出来的，
+**头发是 base 的短发**，只有脸是同一个。
+
+现在每套造型的表情都用它自己的底图 img2img（`ponytail_amused.png` 这类），
+发型和衣服永远属于本造型。代价是表情集不通用，好处是不会串妆。
+
+> 另一个命名遗留：`outfit_apron.png` 其实是**蓝吊带**，真正的围裙是 `apron_flat.png`。
+> `GROUPS` 里围裙组已经改用后者当底图。
 
 ## 二、要不要做「动态立绘」和「底层」？
 
@@ -30,7 +60,8 @@ calm/amused/sly/suspicious/hungry.png   单张，备用
 | 层 | 做法 | 成本 | 本项目的判断 |
 |---|---|---|---|
 | **L1 层叠动画** | 精灵表切表情 + 眨眼补丁 + 呼吸位移 + 推近 | 几乎为零（已完成） | ✅ 必做，性价比最高 |
-| **L2 骨架绑定** | Live2D / Spine：把头发、丝巾、胸口、手臂分成独立图层做网格变形 | 中（要把现在这张单张立绘**拆成 15–20 个图层**，等于重画一次） | ⏳ 等剧本定稿后再做，否则每次改动作都要重绑 |
+| **L2 刚性分层** | 把头发、丝巾、高光拆成 3–10 个独立图层，每层**只做整体位移/旋转**，不做网格变形 | 低（从现有图切层，不需要重画） | ✅ **已实现 3 层**（刘海 / 丝巾 / 高光） |
+| **L2+ 骨架绑定** | Live2D / Spine 网格变形 | 高（要重画 15–20 层且会撕裂笔触） | ❌ 不做，见 `DYNAMIC_SPRITE_OPTIONS.md` |
 | **L3 逐帧** | 手绘 8–12 帧循环（发丝、烛光、呼吸） | 高（每帧都是完整重绘，跟厚涂风格冲突） | ❌ 不做。厚涂风格逐帧容易抖 |
 
 ### 为什么现在不做 Live2D
@@ -39,7 +70,8 @@ calm/amused/sly/suspicious/hungry.png   单张，备用
 2. **资产前置条件没满足**：Live2D 需要**分层 PSD**（前发 / 后发 / 脸 / 眼白 / 瞳 / 睫毛 / 眉 / 嘴 / 身体 / 丝巾 / 衣服…）。现在只有一张扁平 PNG，要拆层等于重画。
 3. **收益错配**：这个游戏的表演核心是**距离、光、和停顿**，不是头发飘动。把预算花在「她靠近」的构图和烛光呼吸上，观感提升远大于加 Live2D。
 
-**所以动态立绘的策略是：先用 L1 把「活人感」做出来（已完成），等 Ch1–Ch4 的剧本和表情需求稳定后，再决定要不要为关键场景做 1–2 张 L2 精修立绘。**
+**所以动态立绘的策略是：先用 L1 把「活人感」做出来（已完成），再用「切层 + 刚性运动」做 L2（已完成 3 层）。**
+关键点是不做网格变形——厚涂的笔触拉一下就会变成橡皮泥，而整层平移/旋转不会。
 
 ## 三、「底层」需要什么
 

@@ -55,6 +55,7 @@ const $ = (id) => doc.getElementById(id);
   let smellsSeen = 0;
   let steps = 0;
   let last = '';
+  let lastCenter = '';
 
   while (steps++ < 4000) {
     await sleep(12);
@@ -77,8 +78,15 @@ const $ = (id) => doc.getElementById(id);
       continue;
     }
 
-    // 居中独白
-    if ($('center').classList.contains('show')) { click($('stage')); await sleep(40); continue; }
+    // 居中独白：它不在 #text 里，得单独记，否则章末/结局名永远抓不到
+    const center = $('center');
+    if (center.classList.contains('show')) {
+      const ct = center.textContent.replace(/\s+/g, ' ').trim();
+      if (ct && ct !== lastCenter) { transcript.push('[独白] ' + ct); lastCenter = ct; }
+      click($('stage'));
+      await sleep(40);
+      continue;
+    }
 
     // 选项
     const box = $('choices');
@@ -93,9 +101,10 @@ const $ = (id) => doc.getElementById(id);
       continue;
     }
 
-    // 结束判定：回到标题或长时间无变化
-    if (transcript.length && $('box').classList.contains('empty') && steps > 40) {
-      const ended = transcript.some((t) => t.includes('序章 · 完'));
+    // 结束判定：任意一章的章末独白出现即停（剧本已进到第二章预告）
+    if (transcript.length && steps > 40) {
+      const ended = transcript.some((t) =>
+        t.includes('序章 · 完') || t.includes('第一章 · 完') || t.includes('第二章 · 刀与糖'));
       if (ended) break;
     }
 
@@ -109,6 +118,9 @@ const $ = (id) => doc.getElementById(id);
   console.log('--- 开场 ---');
   transcript.slice(0, 3).forEach((t) => console.log('  ' + t.slice(0, 70)));
   console.log('--- 结尾 ---');
-  transcript.slice(-4).forEach((t) => console.log('  ' + t.slice(0, 70)));
+  transcript.slice(-6).forEach((t) => console.log('  ' + t.slice(0, 78)));
+  const ends = transcript.filter((t) => t.includes('结局') || t.includes('· 完') || t.includes('制作中') || t.startsWith('[独白]'));
+  console.log('--- 章末 ---');
+  ends.slice(-4).forEach((t) => console.log('  ' + t.replace(/\s+/g, ' ').slice(0, 88)));
   process.exit(errors.length ? 1 : 0);
 })();

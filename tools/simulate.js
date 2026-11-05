@@ -26,7 +26,8 @@ function play(path){
     else if(ins.op==='if'){pc=evalExpr(ins.cond,vars)?ins.pc:ins.else_pc;}
     else if(ins.op==='jump'){ if(ins.label){label=ins.label;pc=0;} else {pc=ins.pc;} }
     else if(ins.op==='menu'){
-      const pick = pi<path.length? path[pi++] : 0;
+      let pick = pi<path.length? path[pi++] : 0;
+      if (pick >= ins.options.length) pick = ins.options.length - 1;  // 选项数不足时取最后一项
       choices.push(ins.options[pick].text);
       pc=ins.options[pick].pc;
     }
@@ -39,24 +40,49 @@ function play(path){
   return {end:'loop',label,says,choices,vars};
 }
 
-// 穷举前 4 个菜单（3^4=81）
+// 穷举前 4 个菜单（3^4=81），然后在 Ch1 用默认选择
 const outs={};
 let total=0;
 for(let a=0;a<3;a++)for(let b=0;b<3;b++)for(let c=0;c<3;c++)for(let d=0;d<3;d++){
-  const r=play([a,b,c,d]);
+  const r=play([a,b,c,d,0,0,0,0]);
   total++;
   const key=r.end+'/'+(r.vars.chapter_name||'?');
   outs[key]=(outs[key]||0)+1;
-  if(r.end!=='end') console.log('BAD',a,b,c,d,r.end,r.label,r.says);
+  if(r.end!=='return' && r.end!=='end') console.log('BAD',a,b,c,d,r.end,r.label,r.says);
 }
 console.log('paths:',total);
 console.log(outs);
 
-// 列出每个结局的一条代表路径
+// 随机抽样 3000 条完整路径，确认 Ch1 三个结局都可达
+let seed = 12345;
+const rnd = () => (seed = (seed * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff;
+function playRandom() {
+  const saved = [];
+  const n = 24;
+  for (let i = 0; i < n; i++) saved.push(Math.floor(rnd() * 3));
+  return play(saved);
+}
+const dist = {};
+for (let i = 0; i < 3000; i++) {
+  const r = playRandom();
+  const k = (r.vars.chapter_name || '?') + ' [' + r.end + ']';
+  dist[k] = (dist[k] || 0) + 1;
+}
+console.log('=== 随机 3000 次 · 结局分布 ===');
+Object.entries(dist).sort((a, b) => b[1] - a[1]).forEach(([k, v]) => console.log('  ' + k + ' × ' + v));
+
+// 列出每个结局的一条代表路径（含 Ch1 的 3^4=81 种走法抽样）
 const seen={};
-for(let a=0;a<3;a++)for(let b=0;b<3;b++)for(let c=0;c<3;c++)for(let d=0;d<3;d++){
-  const r=play([a,b,c,d]);
+const ch1={
+  '登门·照做':0,'登门·追问外套':1,'登门·不脱':2,
+  '厨房·现在做':0,'厨房·改天':1,'厨房·反悔':2,
+  '冰箱·关上门':0,'冰箱·问她':1,'冰箱·拿出来':2,
+  '椅子·坐':0,'椅子·反问':1,'椅子·站着':2,
+  '天亮·不走':0,'天亮·走':1,'天亮·要钥匙':2,
+};
+for(let d1=0;d1<3;d1++)for(let d2=0;d2<3;d2++)for(let d3=0;d3<3;d3++)for(let d4=0;d4<3;d4++){
+  const r=play([0,0,0,0,d1,d2,d3,d4]);
   const k=r.vars.chapter_name;
-  if(!seen[k]) seen[k]={path:[a,b,c,d],vars:{scent:r.vars.scent,trust:r.vars.trust,doubt:r.vars.doubt},choices:r.choices};
+  if(!seen[k]) seen[k]={path:[d1,d2,d3,d4],vars:{scent:r.vars.scent,trust:r.vars.trust,doubt:r.vars.doubt},choices:r.choices.slice(5)};
 }
 for(const k in seen) console.log(k, JSON.stringify(seen[k]));
