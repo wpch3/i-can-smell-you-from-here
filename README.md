@@ -20,6 +20,7 @@ python3 -m http.server 8000 --bind 0.0.0.0
 ```bash
 python3 tools/rpy2json.py icancook/game/script.rpy -o demo/story.json
 node tools/simulate.js        # 全部固定路径 + 3000 条随机路径的纯逻辑总检
+python3 tools/check_script.py                   # 静态检查：引号/图名/label/变量
 node tools/smoke-test.js "0,0,0,0,0,0,0,0,0"   # 真点一遍（需要 npm i jsdom）
 ```
 
@@ -34,6 +35,8 @@ node tools/smoke-test.js "0,0,0,0,0,0,0,0,0"   # 真点一遍（需要 npm i jsd
 | `tools/rpy2json.py` | 剧本转译器：`.rpy` → `demo/story.json` |
 | `tools/build_sprites.py` | 立绘管线：造型 × 表情 → 网格精灵表 + `im.Crop` 注册块 |
 | `tools/build_layers.py` | L2 分层：切出刘海 / 丝巾 / 高光三张独立层 |
+| `tools/gen_audio.py` | 程序化合成 4 条环境音 + 7 个音效（零版权素材） |
+| `tools/check_script.py` | 剧本静态检查，补 Ren'Py 编译器的盲区 |
 | `docs/TECH_STACK.md` | 技术选型：为什么是 Ren'Py + Python，怎么出 exe |
 | `docs/GAME_CONCEPT.md` | 概念书：故事、章节、系统、结局 |
 | `docs/ART_BIBLE.md` | 美术设定锁 + 可复用提示词模板 + UI / 音效规范 |
