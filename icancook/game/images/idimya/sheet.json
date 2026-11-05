@@ -55,104 +55,116 @@
    598,
    1360
   ],
-  "apron/calm": [
+  "base/flat": [
    1196,
+   1360,
+   598,
+   1360
+  ],
+  "apron/calm": [
+   1794,
    1360,
    598,
    1360
   ],
   "apron/amused": [
-   1794,
+   2392,
    1360,
    598,
    1360
   ],
   "apron/smile_soft": [
-   2392,
+   2990,
    1360,
    598,
    1360
   ],
   "apron/sly": [
-   2990,
-   1360,
+   0,
+   2720,
    598,
    1360
   ],
   "apron/flat": [
-   0,
+   598,
    2720,
    598,
    1360
   ],
   "coat/calm": [
-   598,
+   1196,
    2720,
    598,
    1360
   ],
   "coat/suspicious": [
-   1196,
+   1794,
    2720,
    598,
    1360
   ],
   "coat/sly": [
-   1794,
+   2392,
    2720,
    598,
    1360
   ],
   "coat/flat": [
-   2392,
+   2990,
    2720,
    598,
    1360
   ],
   "ponytail/calm": [
-   2990,
-   2720,
+   0,
+   4080,
    598,
    1360
   ],
   "ponytail/amused": [
-   0,
+   598,
    4080,
    598,
    1360
   ],
   "ponytail/hungry": [
-   598,
-   4080,
-   598,
-   1360
-  ],
-  "ponytail/sly": [
    1196,
    4080,
    598,
    1360
   ],
-  "ponytail/flat": [
+  "ponytail/sly": [
    1794,
    4080,
    598,
    1360
   ],
-  "hairup/calm": [
+  "ponytail/flat": [
    2392,
    4080,
    598,
    1360
   ],
-  "hairup/amused": [
+  "hairup/calm": [
    2990,
    4080,
    598,
    1360
   ],
-  "hairup/smile_soft": [
+  "hairup/amused": [
    0,
+   5440,
+   598,
+   1360
+  ],
+  "hairup/smile_soft": [
+   598,
+   5440,
+   598,
+   1360
+  ],
+  "hairup/sly": [
+   1196,
    5440,
    598,
    1360
@@ -168,7 +180,8 @@
    "hungry",
    "smile_soft",
    "eyes_down",
-   "laugh"
+   "laugh",
+   "flat"
   ],
   "apron": [
    "calm",
@@ -193,7 +206,8 @@
   "hairup": [
    "calm",
    "amused",
-   "smile_soft"
+   "smile_soft",
+   "sly"
   ]
  }
 }

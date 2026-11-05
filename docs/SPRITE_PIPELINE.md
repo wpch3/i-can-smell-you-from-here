@@ -7,7 +7,7 @@
 | 立绘底图（黑底） | ✅ `assets/sprites/idimya/base_v1.png` |
 | 表情差分 | ✅ 8 个（base 全脸）：`calm / amused / sly / suspicious / hungry / smile_soft / eyes_down / laugh` |
 | 造型（服装 / 发型） | ✅ 4 套：`apron`（围裙）、`coat`（大衣）、`ponytail`（马尾）、`hairup`（盘发） |
-| 造型 × 表情格数 | ✅ **25 格**（base 8 / apron 5 / coat 4 / ponytail 5 / hairup 3） |
+| 造型 × 表情格数 | ✅ **27 格**（base 9 / apron 5 / coat 4 / ponytail 5 / hairup 4） |
 | 背景 | ✅ 6 张：小酒馆（夜）/ 玄关 / 厨房 / 冰箱（夜开）/ 早晨餐桌 / 主视觉 |
 | 分层立绘（L2） | ✅ 刘海 / 丝巾 / 高光三层，刚性位移 + 旋转 + 光呼吸 |
 | 眨眼层 | ✅ `blink_closed.png` → 加工成 `blink_patch.png` |
@@ -18,7 +18,7 @@
 产物（`icancook/game/images/idimya/`）：
 
 ```
-sheet.png        25 格网格精灵表（3588×6800，6 列 × 5 行，6.6 MB，-colors 200 压缩）
+sheet.png        27 格网格精灵表（3588×6800，6 列 × 5 行，7.4 MB，-colors 200 压缩）
 sheet.json       每格坐标 + 尺寸 + groups 清单（网页引擎与 Ren'Py 共用）
 blink_patch.png  602×1362   只有眼部可见的羽化补丁
 layers/layer_bangs.png   前发（刘海）独立层
@@ -27,19 +27,57 @@ layers/layer_spec.png    高光独立层（screen 混合）
 layers.json      三层的 box / pivot / canvas
 ```
 
-### 造型 × 表情矩阵（25 格，cell 598×1360）
+### 造型 × 表情矩阵（27 格，cell 598×1360）
 
 | 造型 | 可用表情 | 格数 |
 |---|---|---|
-| `base` | calm / amused / sly / suspicious / hungry / smile_soft / eyes_down / laugh | 8 |
+| `base` | calm / amused / sly / suspicious / hungry / smile_soft / eyes_down / laugh / flat | 9 |
 | `apron` 围裙 | calm / amused / smile_soft / sly / **flat** | 5 |
 | `coat` 大衣 | calm / suspicious / sly / **flat** | 4 |
 | `ponytail` 马尾 | calm / amused / hungry / sly / **flat** | 5 |
-| `hairup` 盘发 | calm / amused / smile_soft | 3 |
+| `hairup` 盘发 | calm / amused / smile_soft / sly | 4 |
 
 Ren'Py：`show idimya <造型> <表情>`；网页端键名为 `<造型>/<表情>`。
 
 > **flat 是什么**：同一套造型的"面无表情"底图（也就是这套造型的定妆图）。
+
+### 脸的唯一来源：`base_v1.png`
+
+**这条是本项目绘画一致性的核心规则。**
+
+早期两版都错了：
+- 第一版让各造型「借 `expr_*.png`」→ 换马尾时头发变回短发
+- 第二版让各造型「用自己的图 img2img 出表情」→ 每过一次 img2img，五官就被磨平一格：
+  下颌变宽、鼻梁塌成一块、嘴唇失去光泽、皮肤发灰。25 格里有 17 格比 base 老五六岁，
+  风格直接散掉（用户就是看着这个提出「脸部没有统一风格」的）。
+
+现在 `build_sprites.py` 的做法：
+
+```
+底图(本造型的衣服/发型)  ← 衣服、发型、光位
+    ↓ paste_face()       把 base_v1 的脸按椭圆遮罩贴上去（下沿收在下巴以上）
+    ↓ paste_expression() 再把 expr_*.png 的「眉线以下」贴上去（重羽化 0x34，避开刘海）
+    ↓ BEAUTY             统一调色（unsharp + 饱和 +16% + 对比 +7）
+成品格子
+```
+
+**脸永远只有一张**，表情差异只来自眼/嘴那一小块，所以 27 格看起来是同一个人在换表情。
+
+踩过的三个坑：
+1. 脸框下沿超过 y≈355 会把脖子贴过去 → 围裙组领口叠成「双丝巾」。
+2. 表情框上沿高过眉线会把刘海擦掉一块（羽化越重越明显）。
+3. 做过一次「全局色彩匹配」，参考区域含大量橙发，结果把马尾/盘发的肤色拉爆 → 已撤销；
+   各造型底色差异小到可以接受，宁可不动。
+
+### Beauty pass 参数
+
+```python
+BEAUTY = ["-unsharp", "0x1.3+0.9+0.02",      # 眼线、唇锋重新立起来
+          "-modulate", "100,116,100",         # 饱和 +16%：皮肤透气血，蓝布不回灰
+          "-brightness-contrast", "1x7"]      # 高光才"亮得起来"
+```
+
+所有格子（含 `blink_patch.png`）用同一套参数，风格才不会散。
 
 ### 一条踩过的坑：表情**必须**用各造型自己的图
 

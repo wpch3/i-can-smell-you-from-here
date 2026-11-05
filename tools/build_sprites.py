@@ -28,9 +28,15 @@ SRC = ROOT / "assets" / "sprites" / "idimya"
 OUT = ROOT / "icancook" / "game" / "images" / "idimya"
 
 # 造型组：每套服装+发型 = 一组表情差分。剧情里用 `show idimya <造型>/<表情>` 调用。
-# 顺序即精灵表顺序；每组 512 宽的格位，方便引擎端直接按列号索引。
+#
+# ★ 脸的唯一来源是 base_v1.png（定妆脸）★
+#   每套造型的脸都从 base_v1 上「抠下来贴过去」，表情再从对应的 expr_*.png 借。
+#   为什么不再用「拿造型图做 img2img 出表情」：
+#   每一次 img2img 都会把五官磨平一格 —— 下颌变宽、鼻梁塌成一块、嘴唇失去光泽、
+#   皮肤发灰，整张脸比 base 老五六岁。25 格里有 17 格是这样，风格就散了。
+#   现在的做法只用一次 AI 生成（base_v1 与本造型定妆图），脸永远只有一张。
 GROUPS = [
-    # 造型名        基准图                表情后缀 → 文件
+    # 造型名        底图（衣服/发型）      表情后缀 → 来源图
     ("base",       "base_v1.png", [
         ("calm",       None),
         ("amused",     "expr_amused.png"),
@@ -40,38 +46,59 @@ GROUPS = [
         ("smile_soft", "expr_smile_soft.png"),
         ("eyes_down",  "expr_eyes_down.png"),
         ("laugh",      "expr_laugh.png"),
+        # 剧本里 `show idimya base flat` 会用（转身/近景留白时的"不给表情"）
+        ("flat",       "expr_flat.png"),
     ]),
-    # 非 base 组一律用**本造型自己的表情图**（ponytail_amused.png 这种），
-    # 不能借 expr_*.png —— 那些是拿 base_v1 出的，头发是短发，
-    # 借过来会把马尾/盘发换回短发，而且五官坐标也有 1~2px 偏差。
     # 注意：outfit_apron.png 其实是「蓝吊带」，不是围裙（早期命名遗留）。
-    # 真围裙是 apron_flat.png，所以围裙组以它为底，表情也从它 img2img 出来。
+    # 真围裙是 apron_flat.png。
     ("apron",      "apron_flat.png", [
         ("calm",     None),
-        ("amused",   "apron_amused.png"),
-        ("smile_soft","apron_smile_soft.png"),
-        ("sly",      "apron_sly.png"),
+        ("amused",   "expr_amused.png"),
+        ("smile_soft","expr_smile_soft.png"),
+        ("sly",      "expr_sly.png"),
         ("flat",     None),
     ]),
     ("coat",       "outfit_coat.png", [
         ("calm",     None),
-        ("suspicious","coat_suspicious.png"),
-        ("sly",      "coat_sly.png"),
+        ("suspicious","expr_suspicious.png"),
+        ("sly",      "expr_sly.png"),
         ("flat",     "coat_flat.png"),
     ]),
     ("ponytail",   "hair_ponytail.png", [
         ("calm",     None),
-        ("amused",   "ponytail_amused.png"),
-        ("hungry",   "ponytail_hungry.png"),
-        ("sly",      "ponytail_sly.png"),
+        ("amused",   "expr_amused.png"),
+        ("hungry",   "expr_hungry.png"),
+        ("sly",      "expr_sly.png"),
         ("flat",     "ponytail_flat.png"),
     ]),
     ("hairup",     "hair_up.png", [
         ("calm",     None),
-        ("amused",   "hairup_amused.png"),
-        ("smile_soft","hairup_smile_soft.png"),
+        ("amused",   "expr_amused.png"),
+        ("smile_soft","expr_smile_soft.png"),
+        ("sly",      "expr_sly.png"),
     ]),
 ]
+
+# 脸部合成参数（源图 768x1376 坐标）。实测：所有源图双眼中心 (375,260)、眼距 338。
+FACE_SRC = "base_v1.png"
+# 下沿必须收在下巴以上：base_v1 的下巴在 y≈355，超过就会把脖子一起贴过去，
+# 围裙组的领口会叠成「双丝巾」。
+# 左右也要收进来：左边界原先压在左下颌骨上，会切出一条竖直线。
+FACE_BOX = (272, 190, 212, 182)      # 只盖脸（含下颌），不碰头发和脖子
+FACE_RX, FACE_RY = 0.46, 0.50        # 椭圆半径（占 box 比例）
+FACE_BLUR = "0x1e"                   # 贴脸用：中等羽化
+# 表情框：从眉线以下开始，避开刘海（早期用 (262,190,232,232) 会把刘海擦掉一块）
+EXPR_BOX = (272, 208, 212, 162)      # 眉线以下到下巴，含嘴
+EXPR_RX, EXPR_RY = 0.47, 0.52
+EXPR_BLUR = "0x34"                   # 贴表情用：重羽化，接缝完全看不出来
+
+# 定妆调色（Beauty pass）：「够不够惊艳」主要卡在这三下
+#   unsharp          —— 让眼线和唇锋重新立起来（AI 输出普遍偏软）
+#   modulate 116     —— 饱和度 +16%：皮肤透出气血、蓝布不回灰
+#   brightness 1x7   —— 抬一点对比：厚涂的高光才"亮得起来"
+BEAUTY = ["-unsharp", "0x1.3+0.9+0.02",
+          "-modulate", "100,116,100",
+          "-brightness-contrast", "1x7"]
 
 BLINK_SRC = "blink_closed.png"
 # 眼部横带（源图坐标 768×1376，实测位）
@@ -105,61 +132,76 @@ def alpha(src: Path, dst: Path):
     run("convert", str(src), "-fuzz", FUZZ, "-transparent", "black", "-alpha", "set", str(dst))
 
 
-def face_patch(src: Path, canvas: Path, base_file: str):
-    """从表情图里只取眼部那一块，羽化边缘后贴到造型底图上。
+def _oval_cut(src: Path, box, rx, ry, blur, dst: Path):
+    """从 src 里按 box 抠一块，用椭圆羽化遮罩做 alpha（CopyOpacity 才是对的姿势：
+    DstIn 需要预先有 alpha 的遮罩，直接用灰度图会得到硬边）。"""
+    bx, by, bw, bh = box
+    face = dst.with_name(dst.stem + "_face.png")
+    mask = dst.with_name(dst.stem + "_mask.png")
+    run("convert", str(src), "-crop", f"{bw}x{bh}+{bx}+{by}", "+repage", str(face))
+    run("convert", "-size", f"{bw}x{bh}", "xc:black", "-fill", "white",
+        "-draw", f"ellipse {bw // 2},{bh // 2} {int(bw * rx)},{int(bh * ry)} 0,360",
+        "-blur", blur, str(mask))
+    run("convert", str(face), str(mask), "-alpha", "off",
+        "-compose", "CopyOpacity", "-composite", str(dst))
+    face.unlink(missing_ok=True)
+    mask.unlink(missing_ok=True)
 
-    背景：AI 出的 expr_*.png 都是拿 base_v1 当参考的，头发是短发。
-    直接拿它当 ponytail/amused 会把马尾换回短发。
-    只借「眼睛周围」就不会动到发型和衣服。
+
+def color_match(patch: Path, ref: Path):
+    """把 patch 的整体色偏对齐到 ref（同尺寸区域）：逐通道 均值/方差 匹配。
+
+    每套造型的底色并不一样（围裙那张脖子偏红、大衣那张偏冷），
+    直接贴上去会有「另一张脸」的割裂感。这一步只调色，不动结构。
     """
-    px, py, pw, ph = (int(v) for v in
-                      FACE_PATCH.replace("x", "+").split("+"))
-    align = EYE_ALIGN.get(base_file, EYE_ALIGN["base_v1.png"])
-    scale = align["scale"]
-    gx, gy = align["center"]
-    ax, ay = EXPR_ANCHOR
+    def stats(p):
+        out = subprocess.run(["convert", str(p), "-alpha", "off",
+                              "-format", "%[fx:mean.r] %[fx:mean.g] %[fx:mean.b] "
+                                         "%[fx:standard_deviation.r] "
+                                         "%[fx:standard_deviation.g] "
+                                         "%[fx:standard_deviation.b]", "info:"],
+                             capture_output=True, text=True, check=True).stdout.split()
+        return [float(x) for x in out]
+    try:
+        mp, sp = stats(patch), stats(ref)
+    except Exception:
+        return
+    # 单通道线性变换：p' = (p - m_p) * (s_r / s_p) + m_r
+    args = []
+    for i, ch in enumerate("RGB"):
+        m_p, s_p = mp[i], mp[3 + i]
+        m_r, s_r = sp[i], sp[3 + i]
+        k = (s_r / s_p) if s_p > 1e-4 else 1.0
+        b = m_r - m_p * k
+        args += ["-channel", ch, "-evaluate", "multiply", f"{k:.4f}",
+                 "-evaluate", "add", f"{b:.4f}"]
+    tmp = patch.with_name(patch.stem + "_cm.png")
+    run("convert", str(patch), "-colorspace", "sRGB", *args,
+        "-channel", "RGBA", str(tmp))
+    tmp.replace(patch)
 
-    stem = canvas.with_suffix("")
-    piece = Path(str(stem) + "_piece.png")
-    run("convert", str(src), "-fuzz", FUZZ, "-transparent", "black", "-alpha", "set",
-        "-crop", FACE_PATCH, "+repage", str(piece))
 
-    # 1) 按眼距缩放（绕表情基准点），让五官大小和本组造型一致
-    sw, sh = round(pw * scale), round(ph * scale)
-    scaled = Path(str(stem) + "_scaled.png")
-    run("convert", str(piece), "-filter", "Lanczos",
-        "-resize", f"{sw}x{sh}!", str(scaled))
-
-    # 2) 羽化遮罩（尺寸跟缩放后一致）
-    f = FACE_FEATHER
-    mask = Path(str(stem) + "_mask.png")
-    run("convert", "-size", f"{sw}x{sh}", "xc:black",
-        "-fill", "white",
-        "-draw", f"roundrectangle {f},{f} {sw - f},{sh - f} {f + 4},{f + 4}",
-        "-blur", f"0x{f / 2}", str(mask))
-
-    cut = Path(str(stem) + "_cut.png")
-    run("convert", str(scaled),
-        "(", str(mask), "-alpha", "copy", ")",
-        "-compose", "DstIn", "-composite", str(cut))
-
-    # 3) 贴到画布：让表情的「双眼中点」与造型的「双眼中点」重合。
-    #    注意 piece 的坐标原点是裁切框左上角，不是源图左上角 —— 早期漏了这层
-    #    换算，贴片会飞到头顶上去。
-    ex, ey = ax - px, ay - py                    # 眼中心在裁切块内的位置
-    px_c, py_c = pw / 2, ph / 2                  # 缩放围绕裁切块中心
-    ex_s = px_c + scale * (ex - px_c)            # 缩放后眼中心在块内的位置
-    ey_s = py_c + scale * (ey - py_c)
-    ox = round(gx - ex_s)                        # 贴到画布时的左上角偏移（源坐标）
-    oy = round(gy - ey_s)
-
-    run("convert", str(canvas),
-        "(", str(cut), ")",
-        "-geometry", f"+{ox}+{oy}",
+def paste_face(src: Path, canvas: Path):
+    """把 base_v1 的定妆脸贴到某套造型的底图上（衣服/发型保持本造型）。"""
+    cut = canvas.with_name(canvas.stem + "_fc.png")
+    _oval_cut(src, FACE_BOX, FACE_RX, FACE_RY, FACE_BLUR, cut)
+    # 不做全局色彩匹配：参考区域包含大量橙发，按均值/方差对齐会把肤色拉爆。
+    # 各造型的底色差异（围裙组偏暖）小到可以接受，宁可不动。
+    bx, by = FACE_BOX[0], FACE_BOX[1]
+    run("convert", str(canvas), "(", str(cut), ")", "-geometry", f"+{bx}+{by}",
         "-compose", "over", "-composite", str(canvas))
+    cut.unlink(missing_ok=True)
 
-    for tmp in (piece, scaled, mask, cut):
-        tmp.unlink(missing_ok=True)
+
+def paste_expression(expr: Path, canvas: Path):
+    """把表情图的「眉线以下」贴到已合成的脸上。框刻意避开刘海，
+    否则重羽化会把刘海擦掉一块，一眼假。"""
+    cut = canvas.with_name(canvas.stem + "_ec.png")
+    _oval_cut(expr, EXPR_BOX, EXPR_RX, EXPR_RY, EXPR_BLUR, cut)
+    bx, by = EXPR_BOX[0], EXPR_BOX[1]
+    run("convert", str(canvas), "(", str(cut), ")", "-geometry", f"+{bx}+{by}",
+        "-compose", "over", "-composite", str(canvas))
+    cut.unlink(missing_ok=True)
 
 
 RENPY_SCRIPT = ROOT / "icancook" / "game" / "script.rpy"
@@ -223,11 +265,18 @@ def main():
                 print(f"  !! 缺少源图，跳过：{src.name}")
                 continue
             dst = tmp / f"{group}__{face}.png"
-            # 画布永远是**本组底图**（发型/衣服来自它），
-            # 表情图只提供眼睛那一块。
+            # 画布永远是**本组底图**（发型 / 衣服来自它）
             alpha(SRC / base_file, dst)
-            # 所有表情图都是原生同构图（拿本造型底图做 img2img 出来的），
-            # 直接整图透明化即可，不需要任何贴片修补。
+            # 非 base 组：先把 base_v1 的定妆脸贴上去
+            if base_file != FACE_SRC:
+                paste_face(SRC / FACE_SRC, dst)
+            # 表情：只借眉线以下那一块，不碰发型和衣服
+            if fn:
+                alpha(SRC / fn, tmp / "_expr.png")
+                paste_expression(tmp / "_expr.png", dst)
+                (tmp / "_expr.png").unlink(missing_ok=True)
+            # 统一调色（所有格子同一套参数，风格才不会散）
+            run("convert", str(dst), *BEAUTY, str(dst))
             jobs.append((group, face, dst))
 
     if not jobs:
@@ -315,7 +364,7 @@ def main():
             "-compose", "CopyOpacity", "-composite", str(patch))
         run("convert", "-size", f"{w}x{h}", "xc:none", "(", str(patch), ")",
             "-geometry", f"+{235 - l}+{235 - t}", "-compose", "over", "-composite",
-            str(OUT / "blink_patch.png"))
+            *BEAUTY, str(OUT / "blink_patch.png"))
 
     # 5) 单张成品：默认删除（精灵表已够用，省 20MB）；需要时加 --singles
     if "--singles" in sys.argv:
