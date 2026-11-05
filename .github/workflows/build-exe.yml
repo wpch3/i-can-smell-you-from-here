@@ -81,6 +81,9 @@ jobs:
           & "$env:RENPY_ROOT\renpy.exe" "${{ github.workspace }}\icancook" lint *>&1 |
               Tee-Object -FilePath $log
           $code = $LASTEXITCODE
+          Write-Host "lint exit code = $code"
+          Write-Host "--- lint.log 行数: $((Get-Content $log).Count) ---"
+          Get-Content $log | Select-Object -Last 60 | ForEach-Object { Write-Host $_ }
           if ($code -ne 0) {
             $text = (Get-Content $log -Raw)
             if (-not $text) { $text = "(lint 无输出)" }
