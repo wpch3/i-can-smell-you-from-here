@@ -16,6 +16,7 @@
     kitchen_close: '../icancook/game/images/bg_kitchen_close.jpg',
     window_dawn: '../icancook/game/images/bg_window_dawn.jpg',
     vig: '../icancook/game/images/vignette.png',
+    table_front: '../icancook/game/images/table_front.png',
   };
   const SPRITE_DIR = '../icancook/game/images/idimya/';
 
@@ -145,10 +146,21 @@
 
   // 玩家遇到问题时要能自己确认「拿到的是哪一版」：F12 里会看到这行，标题页角落也有版本号。
   // 之前那个「点进去一片黑」的 bug 有相当概率是浏览器缓存造成的误报，先排除这个变量。
-  const VERSION = '0.5.7';
+  const VERSION = '0.6.0';
   console.info(`她记住的方式 · 网页 Demo v${VERSION}`);
   const verEl = document.getElementById('ver');
   if (verEl) verEl.textContent = `v${VERSION}`;
+
+  /**
+   * 所有静态资源都挂上版本号。
+   *
+   * 用户反复报"网页版打不开/进去一片黑"，而我在真实 Chromium 里每次都能跑通 ——
+   * 这类"我这边好了你那边没好"的十条里有九条是缓存：浏览器死死记住旧的
+   * engine.js / story.json / 立绘表，于是新代码永远不生效，玩家却以为坏了。
+   * 挂上 VERSION 之后，任何一次发版都会强制重新拉取，症状再也不会因为缓存复发。
+   */
+  const CACHE_BUST = '?v=' + VERSION;
+  const asset = (u) => (u.includes('?') ? u : u + CACHE_BUST);
 
   const $ = (s) => document.querySelector(s);
   const el = {
@@ -156,7 +168,9 @@
     barTop: $('#barTop'),
     barBottom: $('#barBottom'),
     bg: $('#bg'),
+    table: $('#table'),
     char: $('#char'),
+    charBase: $('#charBase'),
     charInner: $('#charInner'),
     lid: $('#lid'),
     layerHair: $('#layerHair'),
@@ -192,10 +206,13 @@
 
   window.__spriteDebug = () => ({ ready: SPRITE.ready, frames: Object.keys(SPRITE.frames || {}), sheet: !!SPRITE.sheet });
   window.__setExpr = (n) => setExpression(n);
+  // 调试/汇报用：F12 里可以手动切场景与摆位，方便截图定位构图问题
+  window.__scene = (n) => setScene(n);
+  window.__layout = (m) => setLayout(m);
 
   function loadSprite() {
     SPRITE.frames = SPRITE.frames || {};
-    fetch(SPRITE_DIR + 'sheet.json')
+    fetch(asset(SPRITE_DIR + 'sheet.json'))
       .then((r) => r.json())
       .then((m) => {
         SPRITE.cell = m.cell;
@@ -204,15 +221,22 @@
         SPRITE.rows = m.rows || 1;
         const sheet = new Image();
         sheet.onload = () => { SPRITE.sheet = sheet; SPRITE.ready = true; };
-        sheet.src = SPRITE_DIR + m.image;
-        const bl = new Image();
-        bl.onload = () => { SPRITE.blink = bl; };
-        bl.src = SPRITE_DIR + m.blink_patch.file;
+        sheet.src = asset(SPRITE_DIR + m.image);
+        // sheet.json 里 blink_patch 是字符串（"blink_patch.png"）。
+        // 旧代码读的是 .file → 请求 idimya/undefined，眨眼图层永远加载不到，
+        // 网页版其实从来没眨过眼。这里两种写法都兼容。
+        const blinkName = typeof m.blink_patch === 'string'
+          ? m.blink_patch : (m.blink_patch && m.blink_patch.file);
+        if (blinkName) {
+          const bl = new Image();
+          bl.onload = () => { SPRITE.blink = bl; };
+          bl.src = asset(SPRITE_DIR + blinkName);
+        }
 
         // L2 分层：同一格坐标系，直接叠
-        el.layerHair.style.backgroundImage = `url("${SPRITE_DIR}layers/layer_bangs.png")`;
-        el.layerScarf.style.backgroundImage = `url("${SPRITE_DIR}layers/layer_scarf.png")`;
-        el.layerSpec.style.backgroundImage = `url("${SPRITE_DIR}layers/layer_spec.png")`;
+        el.layerHair.style.backgroundImage = `url("${asset(SPRITE_DIR + 'layers/layer_bangs.png')}")`;
+        el.layerScarf.style.backgroundImage = `url("${asset(SPRITE_DIR + 'layers/layer_scarf.png')}")`;
+        el.layerSpec.style.backgroundImage = `url("${asset(SPRITE_DIR + 'layers/layer_spec.png')}")`;
       })
       .catch((e) => console.warn('立绘表加载失败', e));
   }
@@ -223,25 +247,109 @@
     paintSprite();
   }
 
+  /* ---------------------------------------------------------------- 摆位
+   *
+   * 立绘（sheet 的每一格）是**站姿全身**：头顶到膝盖下，1360px 高。
+   * 原来引擎只有一种摆法 —— 「底边贴屏幕底、高度 = 舞台 92%」，
+   * 结果在 bistro（圆桌、她是坐着的）这一场彻底崩了：
+   *   · 她比桌子高一截，腰在桌沿之上，腿穿过整张桌面
+   *   · 头顶顶出画面上沿，被切掉
+   * 这两条都是用户当场指出来的（「人物超出了屏幕」「人物没有坐下」
+   * 「人物超出了背景图层」）。
+   *
+   * 现在按背景分两种摆法：
+   *
+   *   seat  —— 她坐在桌后。缩放 / 位置全部从定稿反推，不是估的：
+   *            assets/concept/key-visual-official.png 里，脖子处丝巾宽 338px、
+   *            立绘里同一处只有 284px → 缩放比 1.190；再把丝巾上沿对齐
+   *            （定稿 y=414 / 立绘 y=356）→ 顶端 y≈-46、中心 x≈976。
+   *            下沿裁到竖屏也不会露出「截断的腿」的位置，
+   *            剩下的交给前景桌面层 #table 遮住。
+   *
+   *   stand —— 她站在屋里（厨房/玄关/冰箱）。保持「底边贴地」，
+   *            但高度改成 1.02 倍舞台高、且允许头顶出画一点点，
+   *            因为她是站在离镜头很近的地方 —— 比原来 0.92 更压得住画面。
+   */
+  const LAYOUT = {
+    // top 不是定稿的 -46，而是 120：遮幅有 120px 高，
+    // 按定稿贴顶的话，她的头发正好被遮幅吃掉 —— 看起来就是「人物超出屏幕」。
+    // 120 = 遮幅高度，等于让她「坐在遮幅下沿」起步，头顶留 70px 余量。
+    seat: { zoom: 1.19, top: 44, cx: 976 },
+    stand: { zoom: 0.92, bottom: 0, cx: 960 },
+  };
+  let layoutMode = 'stand';
+
+  /** 切换摆位。座位场景（圆桌）用 seat，其余用 stand。 */
+  function setLayout(mode) {
+    if (layoutMode === mode) return;
+    layoutMode = mode;
+    // 前景桌面只在这类「她坐在桌子后面」的场景出现
+    if (el.table) el.table.style.opacity = mode === 'seat' ? '1' : '0';
+    paintSprite();
+  }
+
+  /** 按背景决定摆位：只有小酒馆是「圆桌 + 坐着」 */
+  function layoutFor(sceneName) {
+    return sceneName === 'bistro' || sceneName === 'kv' ? 'seat' : 'stand';
+  }
+
   function paintSprite() {
     if (!SPRITE.ready) return;
-    const f = SPRITE.frames[SPRITE.name] || SPRITE.frames.calm;
+    // 注意：SPRITE.frames 只有 "造型/表情" 形式的键（base/calm 等），
+    // 原来这里兜底写的是 SPRITE.frames.calm —— 那个键不存在，
+    // 于是 scene 触发的第一次 paintSprite 直接抛异常，
+    // 整段剧本在 start 的第 2 条就停了。
+    const f = SPRITE.frames[SPRITE.name] || SPRITE.frames['base/calm'];
+    if (!f) return;
     const { w, h } = SPRITE.cell;
-    // 用舞台高度的比例定尺寸：立绘高度 ≈ 舞台 92%
     const stageH = el.stage.clientHeight || 1080;
-    const scale = (stageH * 0.92) / h;
+    const stageW = el.stage.clientWidth || 1920;
+    const L = LAYOUT[layoutMode] || LAYOUT.stand;
+
+    if (layoutMode === 'seat') {
+      // 定稿坐标是 1920x1080 下的像素 → 按舞台高度等比换算
+      const k = stageH / 1080;
+      const dispH = h * L.zoom;
+      const dispW = w * L.zoom;
+      const cellScale = (dispH * k) / h;
+      el.char.style.height = Math.round(dispH * k) + 'px';
+      el.char.style.width = Math.round(dispW * k) + 'px';
+      el.char.style.left = Math.round((L.cx - dispW / 2) * k) + 'px';
+      el.char.style.top = Math.round(L.top * k) + 'px';
+      el.char.style.bottom = 'auto';
+      el.char.style.transform = 'none';       // 位移交给 left/top，transform 留给演出
+      el.charInner.style.width = '100%';
+      el.charInner.style.height = '100%';
+      el.charInner.style.backgroundImage = `url("${asset(SPRITE_DIR + 'sheet.png')}")`;
+      el.charInner.style.backgroundSize =
+        `${Math.round(w * SPRITE.cols * cellScale)}px ${Math.round(h * SPRITE.rows * cellScale)}px`;
+      el.charInner.style.backgroundPosition =
+        `${-Math.round(f[0] * cellScale)}px ${-Math.round(f[1] * cellScale)}px`;
+      paintLayers();
+      return;
+    }
+
+    // stand：底边贴屏幕底，高度 = 舞台 92%（头顶刚好留出遮幅的位置）
+    const scale = (stageH * L.zoom) / h;
     el.char.style.width = Math.round(w * scale) + 'px';
-    el.char.style.height = Math.round(stageH * 0.92) + 'px';
+    el.char.style.height = Math.round(h * scale) + 'px';
+    el.char.style.left = '50%';
+    el.char.style.top = 'auto';
+    el.char.style.bottom = '0';
+    el.char.style.transform = 'translateX(-50%)';
     el.charInner.style.width = '100%';
     el.charInner.style.height = '100%';
-    el.charInner.style.backgroundImage = `url("${SPRITE_DIR}sheet.png")`;
+    el.charInner.style.backgroundImage = `url("${asset(SPRITE_DIR + 'sheet.png')}")`;
     el.charInner.style.backgroundSize =
       `${Math.round(w * SPRITE.cols * scale)}px ${Math.round(h * SPRITE.rows * scale)}px`;
     el.charInner.style.backgroundPosition =
       `${-Math.round(f[0] * scale)}px ${-Math.round(f[1] * scale)}px`;
+    paintLayers();
+  }
 
-    // L2 的三层只从 base/calm 切出来，换到别的造型时必须藏起来，
-    // 否则会叠上一层「短发 + 蓝吊带」的刘海和丝巾，比不动还糟。
+  // L2 的三层只从 base/calm 切出来，换到别的造型时必须藏起来，
+  // 否则会叠上一层「短发 + 蓝吊带」的刘海和丝巾，比不动还糟。
+  function paintLayers() {
     const isBase = SPRITE.name.startsWith('base/');
     el.layerHair.style.display = el.layerScarf.style.display =
       el.layerSpec.style.display = isBase ? 'block' : 'none';
@@ -606,7 +714,7 @@
     }
     } catch (e) {
       // 剧本执行出异常时，绝对不要静默停住 —— 那和"卡死"对玩家来说没区别。
-      console.error('剧本执行异常 @', name, S.pc, e);
+      console.error('剧本执行异常 @', name, S.pc, e && e.stack);
       showFatal(e, `${name} 第 ${S.pc} 条`);
     }
   }
@@ -663,15 +771,17 @@
       el.bg.style.opacity = '0';
       el.char.style.opacity = '0';
       el.vig.style.opacity = '0.9';
+      setLayout('stand');
       return;
     }
     el.bg.style.opacity = '1';
     el.vig.style.opacity = '1';
+    setLayout(layoutFor(img));
     // kv 与 bg 是同一张图：bg 作为静态底，char 承担推近演出
     const url = IMG[img] || IMG.kv;
     if (el.bg.dataset.src !== url) {
       el.bg.dataset.src = url;
-      el.bg.style.backgroundImage = `url("${url}")`;
+      el.bg.style.backgroundImage = `url("${asset(url)}")`;
       checkImage(url);
     }
   }
@@ -963,7 +1073,7 @@
 
   // ---------------------------------------------------------------- 启动
   async function boot() {
-    const res = await fetch('story.json');
+    const res = await fetch(asset('story.json'));
     story = await res.json();
 
     S = {
@@ -1018,6 +1128,13 @@
         + `<span class="gc">${got}/${items.length}</span></li>${rows}`;
     }).join('');
   }
+
+  // 窗口尺寸变了要重新摆位：seat 用的是 1920x1080 下的绝对像素，换分辨率必须重算
+  let resizeTimer = null;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => paintSprite(), 120);
+  });
 
   el.startBtn.addEventListener('click', () => {
     el.title.classList.add('hidden');

@@ -12,6 +12,10 @@ define note = Character(None, what_color="#a89a88")        # 旁白
 ## ——— 图像 ———————————————————————————————————————————————
 image kv = "images/key_visual.jpg"
 image vig = "images/vignette.png"
+## 前景桌面遮挡层：从 bg_bistro 抠出的桌沿以下部分（tools/build_props.py 生成）。
+## show 在立绘之上，把她的腰以下挡住 —— 站姿立绘因此看起来是"坐在桌后"。
+image table_front = "images/table_front.png"
+
 image black = Solid("#000000")
 image bistro = "images/bg_bistro.jpg"
 image kitchen = "images/bg_kitchen.jpg"
@@ -65,9 +69,40 @@ image idimya hairup sly = im.Crop("images/idimya/sheet.png", (1196, 5440, 598, 1
 ## ——— 立绘注册结束
 
 ## ——— 演出：让「她离你有多近」变成可感知的变量 ———————————————
+## ——— 摆位：站姿 vs 坐姿 ————————————————————————————————————————
+##
+## 立绘每一格都是**站姿全身**（头顶到膝盖下，598x1360）。
+## 原来只有 sprite_base 一种摆法（xalign .5 / yalign 1.0）：
+##   · 高度按原始像素铺满整个 1080，等于「她比背景里的家具高一截」
+##   · 底部对齐屏幕底，腿直接穿进圆桌
+## 在 bistro（圆桌、她是坐着的）这一场就是灾难：
+##   人超出屏幕上沿、没有坐下、脚踩在桌子中间还压不住背景。
+##
+## 现在分两种：
+##   sprite_stand —— 站在屋里（厨房/玄关/冰箱）。缩小到 0.92 屏高，底边贴屏幕底。
+##                   0.92 是为了给 120px 遮幅留出头顶位置，否则一开遮幅就削到头发。
+##   sprite_seat  —— 坐在圆桌后。缩放/位置从定稿反推：
+##                   assets/concept/key-visual-official.png 里脖子处丝巾宽 338px，
+##                   立绘同处 284px → zoom 1.19；丝巾上沿对齐后顶端 y≈-46，
+##                   但遮幅有 120px，所以上移取 44，保证头顶不被吃掉。
+##                   腰以下由前景层 table_front 挡住 —— 于是「站姿立绘」看起来是坐着的。
+##                   立绘本身一个像素都没改。
+transform sprite_stand:
+    xalign 0.5
+    yalign 1.0
+    zoom 0.92
+
+transform sprite_seat:
+    xalign 0.5
+    yalign 0.0
+    ypos 44
+    zoom 1.19
+
+## 兼容：老写法 sprite_base 现在等价于「站姿」
 transform sprite_base:
     xalign 0.5
     yalign 1.0
+    zoom 0.92
 
 transform push_slow:
     zoom 1.0
@@ -133,7 +168,12 @@ label ch0_arrive:
 
     show vig
 
-    show idimya base amused at sprite_base, push_slow
+    show idimya base amused at sprite_seat, push_slow
+    ## 顺序要紧：桌面必须 show 在立绘**之后**（zorder 更大），
+    ## 才能压在她身上，把腰以下挡掉 —— 于是"站姿立绘"看起来是坐着的。
+    ## 注意不能在纯黑场景之前 show：这层不透明部分会跟着一起淡出，
+    ## 变成"桌子浮在黑幕上"。
+    show table_front
 
     note "小酒馆在一条你从没注意过的巷子里。木墙比记忆中更高，也更暗。"
 
@@ -151,7 +191,7 @@ label ch0_arrive:
 
     n "（她把「不会吃你」这句话咽回去了。）"
 
-    show idimya base amused at sprite_base, lean_in
+    show idimya base amused at sprite_seat, lean_in
     with Dissolve(0.6)
 
     idimya "三周不见。你有没有想我？"
@@ -161,7 +201,7 @@ label ch0_arrive:
             $ trust += 1
             n "「想。想到有点睡不着。」"
 
-            show idimya base laugh at sprite_base, lean_in
+            show idimya base laugh at sprite_seat, lean_in
             idimya "噢——"
             idimya "这句答得太快了。快到我都不好意思不信。"
 
@@ -177,7 +217,7 @@ label ch0_arrive:
             $ scent += 2
             n "「你呢？这三个月里，你约过几个人来这张桌子？」"
 
-            show idimya base eyes_down at sprite_base, lean_back
+            show idimya base eyes_down at sprite_seat, lean_back
             with Dissolve(0.4)
             idimya "……"
             idimya "你是第一个被我问到还想反问我的。"
@@ -192,7 +232,7 @@ label ch0_arrive:
 
 label ch0_q1:
 
-    show idimya base calm at sprite_base, push_slow
+    show idimya base calm at sprite_seat, push_slow
     with Dissolve(0.8)
 
     note "她把烛台往你那边推了一点。火苗歪了一下，她的脸暗了一半，又亮回来。"
@@ -217,7 +257,7 @@ label ch0_q1:
             $ doubt += 2
             n "「因为你看起来不会伤害我。」"
 
-            show idimya base flat at sprite_base, lean_back
+            show idimya base flat at sprite_seat, lean_back
             idimya "「看起来」。"
             idimya "你挑了一个很聪明的词，然后把它用在了最不该用的地方。"
             $ doubt += 1
@@ -227,7 +267,7 @@ label ch0_q1:
             $ trust += 1
             n "「因为我很饿。」"
 
-            show idimya base hungry at sprite_base, lean_in
+            show idimya base hungry at sprite_seat, lean_in
             with Dissolve(0.5)
 
             idimya "……哈。"
@@ -243,7 +283,7 @@ label ch0_q1:
 
 label ch0_smell:
 
-    show idimya base calm at sprite_base, push_slow
+    show idimya base calm at sprite_seat, push_slow
     with Dissolve(0.6)
 
     note "你低下头。桌上的东西离你很近：烛台、一杯没动过的酒、一本合着的笔记本。"
@@ -269,7 +309,7 @@ label ch0_smell:
 
 label ch0_q2:
 
-    show idimya base calm at sprite_base, push_slow
+    show idimya base calm at sprite_seat, push_slow
     with Dissolve(0.6)
 
     idimya "第二个问题。"
@@ -295,13 +335,13 @@ label ch0_q2:
         "「我怕的是自己会习惯你。」":
             $ scent += 2
             $ trust += 1
-            show idimya base amused at sprite_base, lean_in
+            show idimya base amused at sprite_seat, lean_in
             with Dissolve(0.5)
 
             n "「我怕的是自己会习惯你。」"
 
             idimya "……"
-            show idimya base smile_soft at sprite_base, lean_in
+            show idimya base smile_soft at sprite_seat, lean_in
             idimya "这句话，是你今天晚上说的最好听的一句。"
             idimya "也是我听得最认真的一句。"
             idimya "很危险。你说的。不是我。"
@@ -315,7 +355,7 @@ label ch0_q2:
 
 label ch0_q3:
 
-    show idimya base calm at sprite_base, push_slow
+    show idimya base calm at sprite_seat, push_slow
     with Dissolve(0.6)
 
     note "烛火低了一截。她伸手把蜡油按回烛芯里，动作很慢，像在给什么东西掖被子。"
@@ -338,7 +378,7 @@ label ch0_q3:
             $ doubt += 3
             n "「一个我可以骗过去的东西。」"
 
-            show idimya base suspicious at sprite_base, lean_back
+            show idimya base suspicious at sprite_seat, lean_back
             with Dissolve(0.4)
 
             idimya "那你现在应该已经骗过去了才对。"
@@ -349,7 +389,7 @@ label ch0_q3:
         "「你本来是什么，就是什么。别为我改。」":
             $ scent += 2
             $ trust += 2
-            show idimya base sly at sprite_base, lean_in
+            show idimya base sly at sprite_seat, lean_in
             with Dissolve(0.6)
 
             n "「你本来是什么，就是什么。别为我改。」"
@@ -371,7 +411,7 @@ label ch0_q3:
 
 label ch0_reversal:
 
-    show idimya base calm at sprite_base, push_slow
+    show idimya base calm at sprite_seat, push_slow
     with Dissolve(0.6)
 
     note "你把菜单推回去，合上，放在她手边。"
@@ -379,7 +419,7 @@ label ch0_reversal:
     n "「今晚你来点。」"
     n "「不过在你点之前——我想知道，你想吃什么。」"
 
-    show idimya base eyes_down at sprite_base, lean_in
+    show idimya base eyes_down at sprite_seat, lean_in
     with Dissolve(0.8)
 
     note "她的笑停了一下。不是僵住，是那种被人摸到了心口的位置、突然不知道要不要后退的停。"
@@ -437,7 +477,7 @@ label ch0_reversal:
 
 label ch0_ending:
 
-    show idimya base calm at sprite_base, push_slow
+    show idimya base calm at sprite_seat, push_slow
     with Dissolve(0.8)
 
     if doubt >= trust + 1:
@@ -458,7 +498,7 @@ label ch0_ending:
 
 label end_lie:
 
-    show idimya base suspicious at sprite_base
+    show idimya base suspicious at sprite_seat
     with Dissolve(0.4)
 
     note "她送你到门口，替你拉开门，冷风灌进来。"
@@ -477,12 +517,13 @@ label end_lie:
     note "桌上多了一个杯子。属于别人的杯子。"
 
     $ persistent.endings_lie = True
+    hide table_front          # 圆桌场景结束，桌面层必须收掉
     jump ch0_after
 
 
 label end_name:
 
-    show idimya base calm at sprite_base
+    show idimya base calm at sprite_seat
     with Dissolve(0.4)
 
     note "她陪你走到巷口，站定，没有跟出来。"
@@ -503,12 +544,13 @@ label end_name:
     note "你不知道那算是温柔，还是警告。"
 
     $ persistent.endings_name = True
+    hide table_front          # 圆桌场景结束，桌面层必须收掉
     jump ch0_after
 
 
 label end_scent:
 
-    show idimya base sly at sprite_base
+    show idimya base sly at sprite_seat
     with Dissolve(0.4)
 
     note "她没送你。你走到门口时，她在背后开口。"
@@ -528,6 +570,7 @@ label end_scent:
     note "巷子很长。你走到尽头才发现，自己一路上都在屏着呼吸。"
 
     $ persistent.endings_scent = True
+    hide table_front          # 圆桌场景结束，桌面层必须收掉
     jump ch0_after
 
 
@@ -539,6 +582,7 @@ label ch0_after:
 
     $ renpy.save_persistent()
 
+    hide table_front
     scene black
     with Dissolve(1.6)
 

@@ -98,6 +98,17 @@
   #lid.closed{opacity:1}
   #charInner, #lid{ background-size:100% 100%; }
 
+  /* 前景桌面层：默认隐藏（只有座位场景才出现） */
+  #table{
+    position:absolute; inset:0;
+    background-image:url("../icancook/game/images/table_front.png?v=0.6.0");
+    background-size:100% 100%;
+    background-repeat:no-repeat;
+    opacity:0;
+    transition:opacity .8s ease;
+    pointer-events:none;
+  }
+
   #vig{
     position:absolute; inset:0;
     background:radial-gradient(ellipse at 50% 46%, rgba(0,0,0,0) 30%, rgba(0,0,0,.26) 64%, rgba(0,0,0,.72) 100%);
@@ -463,6 +474,11 @@
     <div id="lid"></div>
   </div>
 
+  <!-- 前景桌面：从 bg_bistro 抠出来的桌沿以下部分。
+       压在立绘之上，把她的腰以下挡住 —— 站姿立绘因此看起来是「坐在桌后」。
+       由 tools/build_props.py 生成，勿手改。 -->
+  <div id="table"></div>
+
   <div id="vig"></div>
   <div id="grain"></div>
 
@@ -507,6 +523,6 @@
   </div>
 
 </div>
-<script src="engine.js"></script>
+<script src="engine.js?v=0.6.0"></script>
 </body>
 </html>

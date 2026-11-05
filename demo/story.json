@@ -92,7 +92,12 @@
    {
     "op": "show",
     "img": "idimya base amused",
-    "at": "sprite_base, push_slow"
+    "at": "sprite_seat, push_slow"
+   },
+   {
+    "op": "show",
+    "img": "table_front",
+    "at": null
    },
    {
     "op": "say",
@@ -137,7 +142,7 @@
    {
     "op": "show",
     "img": "idimya base amused",
-    "at": "sprite_base, lean_in"
+    "at": "sprite_seat, lean_in"
    },
    {
     "op": "with",
@@ -153,15 +158,15 @@
     "options": [
      {
       "text": "说实话。",
-      "pc": 16
+      "pc": 17
      },
      {
       "text": "绕过去。",
-      "pc": 22
+      "pc": 23
      },
      {
       "text": "反问她。",
-      "pc": 28
+      "pc": 29
      }
     ]
    },
@@ -177,7 +182,7 @@
    {
     "op": "show",
     "img": "idimya base laugh",
-    "at": "sprite_base, lean_in"
+    "at": "sprite_seat, lean_in"
    },
    {
     "op": "say",
@@ -192,7 +197,7 @@
    {
     "op": "jump",
     "label": null,
-    "pc": 36
+    "pc": 37
    },
    {
     "op": "set",
@@ -220,7 +225,7 @@
    {
     "op": "jump",
     "label": null,
-    "pc": 36
+    "pc": 37
    },
    {
     "op": "set",
@@ -234,7 +239,7 @@
    {
     "op": "show",
     "img": "idimya base eyes_down",
-    "at": "sprite_base, lean_back"
+    "at": "sprite_seat, lean_back"
    },
    {
     "op": "with",
@@ -258,7 +263,7 @@
    {
     "op": "jump",
     "label": null,
-    "pc": 36
+    "pc": 37
    },
    {
     "op": "jump",
@@ -272,7 +277,7 @@
    {
     "op": "show",
     "img": "idimya base calm",
-    "at": "sprite_base, push_slow"
+    "at": "sprite_seat, push_slow"
    },
    {
     "op": "with",
@@ -361,7 +366,7 @@
    {
     "op": "show",
     "img": "idimya base flat",
-    "at": "sprite_base, lean_back"
+    "at": "sprite_seat, lean_back"
    },
    {
     "op": "say",
@@ -398,7 +403,7 @@
    {
     "op": "show",
     "img": "idimya base hungry",
-    "at": "sprite_base, lean_in"
+    "at": "sprite_seat, lean_in"
    },
    {
     "op": "with",
@@ -436,7 +441,7 @@
    {
     "op": "show",
     "img": "idimya base calm",
-    "at": "sprite_base, push_slow"
+    "at": "sprite_seat, push_slow"
    },
    {
     "op": "with",
@@ -503,7 +508,7 @@
    {
     "op": "show",
     "img": "idimya base calm",
-    "at": "sprite_base, push_slow"
+    "at": "sprite_seat, push_slow"
    },
    {
     "op": "with",
@@ -604,7 +609,7 @@
    {
     "op": "show",
     "img": "idimya base amused",
-    "at": "sprite_base, lean_in"
+    "at": "sprite_seat, lean_in"
    },
    {
     "op": "with",
@@ -623,7 +628,7 @@
    {
     "op": "show",
     "img": "idimya base smile_soft",
-    "at": "sprite_base, lean_in"
+    "at": "sprite_seat, lean_in"
    },
    {
     "op": "say",
@@ -657,7 +662,7 @@
    {
     "op": "show",
     "img": "idimya base calm",
-    "at": "sprite_base, push_slow"
+    "at": "sprite_seat, push_slow"
    },
    {
     "op": "with",
@@ -741,7 +746,7 @@
    {
     "op": "show",
     "img": "idimya base suspicious",
-    "at": "sprite_base, lean_back"
+    "at": "sprite_seat, lean_back"
    },
    {
     "op": "with",
@@ -778,7 +783,7 @@
    {
     "op": "show",
     "img": "idimya base sly",
-    "at": "sprite_base, lean_in"
+    "at": "sprite_seat, lean_in"
    },
    {
     "op": "with",
@@ -836,7 +841,7 @@
    {
     "op": "show",
     "img": "idimya base calm",
-    "at": "sprite_base, push_slow"
+    "at": "sprite_seat, push_slow"
    },
    {
     "op": "with",
@@ -860,7 +865,7 @@
    {
     "op": "show",
     "img": "idimya base eyes_down",
-    "at": "sprite_base, lean_in"
+    "at": "sprite_seat, lean_in"
    },
    {
     "op": "with",
@@ -1047,7 +1052,7 @@
    {
     "op": "show",
     "img": "idimya base calm",
-    "at": "sprite_base, push_slow"
+    "at": "sprite_seat, push_slow"
    },
    {
     "op": "with",
@@ -1107,7 +1112,7 @@
    {
     "op": "show",
     "img": "idimya base suspicious",
-    "at": "sprite_base"
+    "at": "sprite_seat"
    },
    {
     "op": "with",
@@ -1168,6 +1173,10 @@
     "flag": "endings_lie"
    },
    {
+    "op": "hide",
+    "img": "table_front          # 圆桌场景结束，桌面层必须收掉"
+   },
+   {
     "op": "jump",
     "label": "ch0_after"
    },
@@ -1179,7 +1188,7 @@
    {
     "op": "show",
     "img": "idimya base calm",
-    "at": "sprite_base"
+    "at": "sprite_seat"
    },
    {
     "op": "with",
@@ -1245,6 +1254,10 @@
     "flag": "endings_name"
    },
    {
+    "op": "hide",
+    "img": "table_front          # 圆桌场景结束，桌面层必须收掉"
+   },
+   {
     "op": "jump",
     "label": "ch0_after"
    },
@@ -1256,7 +1269,7 @@
    {
     "op": "show",
     "img": "idimya base sly",
-    "at": "sprite_base"
+    "at": "sprite_seat"
    },
    {
     "op": "with",
@@ -1317,6 +1330,10 @@
     "flag": "endings_scent"
    },
    {
+    "op": "hide",
+    "img": "table_front          # 圆桌场景结束，桌面层必须收掉"
+   },
+   {
     "op": "jump",
     "label": "ch0_after"
    },
@@ -1325,6 +1342,10 @@
    }
   ],
   "ch0_after": [
+   {
+    "op": "hide",
+    "img": "table_front"
+   },
    {
     "op": "scene",
     "img": "black"

@@ -107,6 +107,31 @@ def main():
         if m and m.group(1) not in labels:
             bad(f"{i}: jump {m.group(1)} —— 没有这个 label")
 
+    # ---------- 4b. 构图规则：站在圆桌前的 bug 不许再回来
+    #
+    # 立绘是站姿全身。在 bistro（圆桌、坐着的场景）如果还用站姿摆位，
+    # 就会重演用户报的三个问题：人超出屏幕上沿 / 没有坐下 / 腿穿过桌面。
+    # 规则：scene bistro 之后、下一次 scene 之前，立绘必须用 sprite_seat，
+    # 并且必须 show 了前景桌面层 table_front。
+    scene_now = None
+    seat_zone = []          # 当前 bistro 段落里的行号
+    for i, ln in enumerate(lines):
+        st = ln.strip()
+        m = re.match(r"^scene\s+(\w+)", st)
+        if m:
+            scene_now = m.group(1)
+        m = re.match(r"^show idimya .*\bat (\w+)", st)
+        if m and scene_now == "bistro" and m.group(1) == "sprite_base":
+            bad(f"{i}: scene bistro 里用了站姿摆位 sprite_base"
+                f" —— 圆桌场景必须用 sprite_seat，否则她会站进桌子中间")
+        if scene_now == "bistro":
+            seat_zone.append(st)
+
+    if lines and any(re.match(r"^scene bistro", l.strip()) for l in lines):
+        if not any(l.startswith("show table_front") for l in seat_zone):
+            bad("scene bistro 段落里没有 show table_front"
+                " —— 缺前景桌面层，她的腿会穿过桌面（跑 tools/build_props.py 生成）")
+
     # ---------- 5. sheet.json 完整性
     manifest = json.loads(SHEET.read_text(encoding="utf-8"))
     frames = set()
