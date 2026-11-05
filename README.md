@@ -19,8 +19,8 @@ python3 -m http.server 8000 --bind 0.0.0.0
 
 ```bash
 python3 tools/rpy2json.py icancook/game/script.rpy -o demo/story.json
-node tools/simulate.js        # 81 条分支路径的纯逻辑总检
-node tools/smoke-test.js      # 真点一遍（需要 npm i jsdom）
+node tools/simulate.js        # 全部固定路径 + 3000 条随机路径的纯逻辑总检
+node tools/smoke-test.js "0,0,0,0,0,0,0,0,0"   # 真点一遍（需要 npm i jsdom）
 ```
 
 ## 现在有什么
@@ -32,10 +32,20 @@ node tools/smoke-test.js      # 真点一遍（需要 npm i jsdom）
 | `icancook/` | **游戏工程（Ren'Py 8.5.3）**，产出 Windows .exe |
 | `demo/` | **网页 Demo**（同一份剧本，浏览器直接玩） |
 | `tools/rpy2json.py` | 剧本转译器：`.rpy` → `demo/story.json` |
+| `tools/build_sprites.py` | 立绘管线：造型 × 表情 → 网格精灵表 + `im.Crop` 注册块 |
+| `tools/build_layers.py` | L2 分层：切出刘海 / 丝巾 / 高光三张独立层 |
 | `docs/TECH_STACK.md` | 技术选型：为什么是 Ren'Py + Python，怎么出 exe |
 | `docs/GAME_CONCEPT.md` | 概念书：故事、章节、系统、结局 |
 | `docs/ART_BIBLE.md` | 美术设定锁 + 可复用提示词模板 + UI / 音效规范 |
 | `docs/ROADMAP.md` | 里程碑 |
+
+## 已完成的内容
+
+- **序章**：进店 → 三个有重量的问题 → 点菜反转 → 三种「她记住你的方式」
+- **第一章 · 门铃**：玄关 → 厨房（「上次你说下次你来做，还算数吗」）→ 冰箱里十七个标着日期的罐子 → 一把椅子 → 天亮三选，章末 3 个结局
+- **立绘**：5 套造型 × 表情 = **25 格**（base 8 / apron 5 / coat 4 / ponytail 5 / hairup 3），598×1360 网格精灵表
+- **动态立绘**：L1（眨眼 / 呼吸 / 视点跟随 / 烛光）+ L2（刘海 / 丝巾 / 高光三层刚性位移与光呼吸）
+- **背景**：小酒馆 / 玄关 / 厨房 / 冰箱（夜开）/ 早晨餐桌
 
 ## 下载 exe
 
