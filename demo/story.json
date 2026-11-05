@@ -10,7 +10,9 @@
   "trust": 0,
   "doubt": 0,
   "promise": null,
-  "chapter_name": ""
+  "chapter_name": "",
+  "seasoning": "\"\"          # 第二章：你最后放下的那一样东西",
+  "ch2_trust": 0
  },
  "labels": {
   "start": [
@@ -27,6 +29,26 @@
     "dur": 1.2
    },
    {
+    "op": "show",
+    "img": "bar_top",
+    "at": "bar_in_top(0.9)"
+   },
+   {
+    "op": "show",
+    "img": "bar_bottom",
+    "at": "bar_in_bottom(0.9)"
+   },
+   {
+    "op": "play",
+    "channel": "sound",
+    "target": "sfx_bell",
+    "fade": null
+   },
+   {
+    "op": "wait",
+    "sec": 0.6
+   },
+   {
     "op": "say",
     "who": "note",
     "text": "有些邀请是不该接受的。"
@@ -35,6 +57,12 @@
     "op": "say",
     "who": "note",
     "text": "比如来自一个明确告诉过你「人类很好吃」的人。"
+   },
+   {
+    "op": "play",
+    "channel": "ambience",
+    "target": "amb_rain",
+    "fade": 3.0
    },
    {
     "op": "jump",
@@ -1403,6 +1431,12 @@
     "dur": 1.8
    },
    {
+    "op": "play",
+    "channel": "ambience",
+    "target": "amb_rain",
+    "fade": 3.0
+   },
+   {
     "op": "show",
     "img": "vig",
     "at": null
@@ -1461,15 +1495,15 @@
     "options": [
      {
       "text": "照做。",
-      "pc": 14
+      "pc": 15
      },
      {
       "text": "先问一句：那件外套是谁的？",
-      "pc": 19
+      "pc": 20
      },
      {
       "text": "不脱，站门口。",
-      "pc": 30
+      "pc": 31
      }
     ]
    },
@@ -1495,7 +1529,7 @@
    {
     "op": "jump",
     "label": null,
-    "pc": 39
+    "pc": 40
    },
    {
     "op": "set",
@@ -1547,7 +1581,7 @@
    {
     "op": "jump",
     "label": null,
-    "pc": 39
+    "pc": 40
    },
    {
     "op": "set",
@@ -1590,7 +1624,7 @@
    {
     "op": "jump",
     "label": null,
-    "pc": 39
+    "pc": 40
    },
    {
     "op": "jump",
@@ -1608,6 +1642,12 @@
    {
     "op": "with",
     "dur": 1.6
+   },
+   {
+    "op": "play",
+    "channel": "ambience",
+    "target": "amb_kitchen",
+    "fade": 3.5
    },
    {
     "op": "show",
@@ -1658,15 +1698,15 @@
     "options": [
      {
       "text": "算数。现在就做。",
-      "pc": 12
+      "pc": 13
      },
      {
       "text": "算数，但改天。",
-      "pc": 22
+      "pc": 23
      },
      {
       "text": "反悔。我做不到。",
-      "pc": 29
+      "pc": 30
      }
     ]
    },
@@ -1714,7 +1754,7 @@
    {
     "op": "jump",
     "label": null,
-    "pc": 40
+    "pc": 41
    },
    {
     "op": "set",
@@ -1747,7 +1787,7 @@
    {
     "op": "jump",
     "label": null,
-    "pc": 40
+    "pc": 41
    },
    {
     "op": "set",
@@ -1798,7 +1838,7 @@
    {
     "op": "jump",
     "label": null,
-    "pc": 40
+    "pc": 41
    },
    {
     "op": "end"
@@ -1817,6 +1857,12 @@
    {
     "op": "with",
     "dur": 1.0
+   },
+   {
+    "op": "play",
+    "channel": "ambience",
+    "target": "amb_fridge",
+    "fade": 2.5
    },
    {
     "op": "show",
@@ -1848,15 +1894,15 @@
     "options": [
      {
       "text": "关上门，装作没看见。",
-      "pc": 9
+      "pc": 10
      },
      {
       "text": "问她：这些日期是什么？",
-      "pc": 20
+      "pc": 21
      },
      {
       "text": "拿出一盒，放到她面前。",
-      "pc": 33
+      "pc": 34
      }
     ]
    },
@@ -1910,7 +1956,7 @@
    {
     "op": "jump",
     "label": null,
-    "pc": 47
+    "pc": 48
    },
    {
     "op": "set",
@@ -1971,7 +2017,7 @@
    {
     "op": "jump",
     "label": null,
-    "pc": 47
+    "pc": 48
    },
    {
     "op": "set",
@@ -2037,7 +2083,7 @@
    {
     "op": "jump",
     "label": null,
-    "pc": 47
+    "pc": 48
    },
    {
     "op": "jump",
@@ -2223,11 +2269,44 @@
   "ch1_end": [
    {
     "op": "scene",
+    "img": "window_dawn"
+   },
+   {
+    "op": "with",
+    "dur": 2.6
+   },
+   {
+    "op": "play",
+    "channel": "ambience",
+    "target": "amb_morning",
+    "fade": 4.0
+   },
+   {
+    "op": "show",
+    "img": "vig",
+    "at": null
+   },
+   {
+    "op": "say",
+    "who": "note",
+    "text": "雨停了。"
+   },
+   {
+    "op": "say",
+    "who": "note",
+    "text": "窗上有一个圆形的痕，是很久以前有人用手擦开的，擦得刚好够看出去。"
+   },
+   {
+    "op": "wait",
+    "sec": 1.2
+   },
+   {
+    "op": "scene",
     "img": "morning"
    },
    {
     "op": "with",
-    "dur": 2.4
+    "dur": 2.0
    },
    {
     "op": "show",
@@ -2268,15 +2347,15 @@
     "options": [
      {
       "text": "「我不走。」",
-      "pc": 10
+      "pc": 17
      },
      {
       "text": "「我该走了。」",
-      "pc": 24
+      "pc": 31
      },
      {
       "text": "问她：「下一次，还是我按门铃吗？」",
-      "pc": 34
+      "pc": 41
      }
     ]
    },
@@ -2345,7 +2424,7 @@
    {
     "op": "jump",
     "label": null,
-    "pc": 46
+    "pc": 53
    },
    {
     "op": "set",
@@ -2392,7 +2471,7 @@
    {
     "op": "jump",
     "label": null,
-    "pc": 46
+    "pc": 53
    },
    {
     "op": "set",
@@ -2447,7 +2526,7 @@
    {
     "op": "jump",
     "label": null,
-    "pc": 46
+    "pc": 53
    },
    {
     "op": "scene",
@@ -2460,8 +2539,8 @@
    {
     "op": "if",
     "cond": "doubt >= trust + 2",
-    "pc": 49,
-    "else_pc": 51
+    "pc": 56,
+    "else_pc": 58
    },
    {
     "op": "set",
@@ -2470,13 +2549,13 @@
    {
     "op": "jump",
     "label": null,
-    "pc": 55
+    "pc": 62
    },
    {
     "op": "if",
     "cond": "promise == \"自己开门\"",
-    "pc": 52,
-    "else_pc": 54
+    "pc": 59,
+    "else_pc": 61
    },
    {
     "op": "set",
@@ -2485,7 +2564,7 @@
    {
     "op": "jump",
     "label": null,
-    "pc": 55
+    "pc": 62
    },
    {
     "op": "set",
@@ -2496,8 +2575,852 @@
     "text": "{size=18}{color=#8b7b69}第一章 · 完{/color}{/size}\\n\\n{color=#d9a05f}[chapter_name]{/color}"
    },
    {
+    "op": "jump",
+    "label": "ch2_title"
+   },
+   {
+    "op": "end"
+   }
+  ],
+  "ch2_title": [
+   {
+    "op": "stop",
+    "channel": "ambience",
+    "fade": 1.5
+   },
+   {
+    "op": "scene",
+    "img": "black"
+   },
+   {
+    "op": "with",
+    "dur": 1.4
+   },
+   {
+    "op": "show",
+    "img": "bar_top",
+    "at": "bar_in_top(0.7)"
+   },
+   {
+    "op": "show",
+    "img": "bar_bottom",
+    "at": "bar_in_bottom(0.7)"
+   },
+   {
     "op": "centered",
-    "text": "{size=17}{color=#8b7b69}第二章 · 刀与糖{/color}\\n\\n{size=15}{color=#6b5c4d}一起做饭。\\n调味不是靠菜谱，是靠闻。\\n\\n（制作中）{/color}"
+    "text": "{size=17}{color=#8b7b69}第二章 · 刀与糖{/color}\\n\\n{size=15}{color=#6b5c4d}一起做饭。\\n调味不是靠菜谱，是靠闻。{/color}"
+   },
+   {
+    "op": "if",
+    "cond": "persistent.ch1_key",
+    "pc": 7,
+    "else_pc": 10
+   },
+   {
+    "op": "say",
+    "who": "note",
+    "text": "你是用自己那把钥匙进来的。"
+   },
+   {
+    "op": "say",
+    "who": "note",
+    "text": "门开的时候，她正在切东西，没有回头。"
+   },
+   {
+    "op": "jump",
+    "label": null,
+    "pc": 16
+   },
+   {
+    "op": "if",
+    "cond": "persistent.ch1_leave",
+    "pc": 11,
+    "else_pc": 14
+   },
+   {
+    "op": "say",
+    "who": "note",
+    "text": "你走了。然后又回来了。"
+   },
+   {
+    "op": "say",
+    "who": "note",
+    "text": "你自己也说不清是哪一步开始回头的。"
+   },
+   {
+    "op": "jump",
+    "label": null,
+    "pc": 16
+   },
+   {
+    "op": "say",
+    "who": "note",
+    "text": "你没有走。"
+   },
+   {
+    "op": "say",
+    "who": "note",
+    "text": "天亮以后你睡了一会儿，醒来的时候，厨房里已经有声音了。"
+   },
+   {
+    "op": "scene",
+    "img": "kitchen"
+   },
+   {
+    "op": "with",
+    "dur": 1.6
+   },
+   {
+    "op": "play",
+    "channel": "ambience",
+    "target": "amb_kitchen",
+    "fade": 3.5
+   },
+   {
+    "op": "show",
+    "img": "vig",
+    "at": null
+   },
+   {
+    "op": "show",
+    "img": "idimya apron calm",
+    "at": "sprite_base, push_slow"
+   },
+   {
+    "op": "with",
+    "dur": 1.0
+   },
+   {
+    "op": "say",
+    "who": "note",
+    "text": "台上摆着两样东西：一把刀，和一小碟糖。"
+   },
+   {
+    "op": "say",
+    "who": "note",
+    "text": "刀是厨房里最锋利的那把。糖是粗糙的黄糖，结成块。"
+   },
+   {
+    "op": "say",
+    "who": "idimya",
+    "text": "选一个。"
+   },
+   {
+    "op": "say",
+    "who": "n",
+    "text": "「……什么？」"
+   },
+   {
+    "op": "say",
+    "who": "idimya",
+    "text": "今天你先动刀，还是先动糖。"
+   },
+   {
+    "op": "say",
+    "who": "idimya",
+    "text": "顺序会决定这顿饭是什么味道。"
+   },
+   {
+    "op": "say",
+    "who": "idimya",
+    "text": "也会决定我今晚怎么想你。"
+   },
+   {
+    "op": "menu",
+    "options": [
+     {
+      "text": "先拿刀。",
+      "pc": 30
+     },
+     {
+      "text": "先拿糖。",
+      "pc": 34
+     },
+     {
+      "text": "两样都不拿，先问她：你希望我选哪个？",
+      "pc": 38
+     }
+    ]
+   },
+   {
+    "op": "set",
+    "expr": "ch2_trust += 1"
+   },
+   {
+    "op": "set",
+    "expr": "scent += 1"
+   },
+   {
+    "op": "jump",
+    "label": "ch2_knife"
+   },
+   {
+    "op": "jump",
+    "label": null,
+    "pc": 42
+   },
+   {
+    "op": "set",
+    "expr": "ch2_trust += 2"
+   },
+   {
+    "op": "set",
+    "expr": "trust += 1"
+   },
+   {
+    "op": "jump",
+    "label": "ch2_sugar"
+   },
+   {
+    "op": "jump",
+    "label": null,
+    "pc": 42
+   },
+   {
+    "op": "set",
+    "expr": "scent += 2"
+   },
+   {
+    "op": "set",
+    "expr": "doubt += 1"
+   },
+   {
+    "op": "jump",
+    "label": "ch2_ask"
+   },
+   {
+    "op": "jump",
+    "label": null,
+    "pc": 42
+   },
+   {
+    "op": "end"
+   }
+  ],
+  "ch2_knife": [
+   {
+    "op": "say",
+    "who": "note",
+    "text": "你握住了刀柄。比想象的沉。"
+   },
+   {
+    "op": "show",
+    "img": "idimya apron sly",
+    "at": "sprite_base, lean_in"
+   },
+   {
+    "op": "with",
+    "dur": 0.5
+   },
+   {
+    "op": "say",
+    "who": "idimya",
+    "text": "手很稳。"
+   },
+   {
+    "op": "say",
+    "who": "idimya",
+    "text": "稳的人一般不太诚实。"
+   },
+   {
+    "op": "say",
+    "who": "n",
+    "text": "「为什么？」"
+   },
+   {
+    "op": "say",
+    "who": "idimya",
+    "text": "因为稳是练出来的。练过的人，都有不想让人看见的部分。"
+   },
+   {
+    "op": "play",
+    "channel": "sound",
+    "target": "sfx_knife",
+    "fade": null
+   },
+   {
+    "op": "say",
+    "who": "note",
+    "text": "她绕到你身后，手覆在你的手背上，带着你切下第一刀。"
+   },
+   {
+    "op": "play",
+    "channel": "sound",
+    "target": "sfx_heartbeat",
+    "fade": null
+   },
+   {
+    "op": "say",
+    "who": "note",
+    "text": "她的呼吸落在你耳后。刀很凉，她的手很热。"
+   },
+   {
+    "op": "say",
+    "who": "idimya",
+    "text": "切的时候别看刀。看你要切的东西。"
+   },
+   {
+    "op": "say",
+    "who": "idimya",
+    "text": "看刀的人会切到手。看东西的人不会。"
+   },
+   {
+    "op": "set",
+    "expr": "ch2_trust += 1"
+   },
+   {
+    "op": "jump",
+    "label": "ch2_season"
+   },
+   {
+    "op": "end"
+   }
+  ],
+  "ch2_sugar": [
+   {
+    "op": "say",
+    "who": "note",
+    "text": "你捏起一块黄糖。它在你手指间有点黏。"
+   },
+   {
+    "op": "show",
+    "img": "idimya apron smile_soft",
+    "at": "sprite_base, lean_in"
+   },
+   {
+    "op": "with",
+    "dur": 0.5
+   },
+   {
+    "op": "say",
+    "who": "idimya",
+    "text": "……你选了这个。"
+   },
+   {
+    "op": "say",
+    "who": "n",
+    "text": "「选错了？」"
+   },
+   {
+    "op": "say",
+    "who": "idimya",
+    "text": "没有错。只是很少有人先选糖。"
+   },
+   {
+    "op": "say",
+    "who": "idimya",
+    "text": "大家都会先拿刀。因为刀看起来比较像答案。"
+   },
+   {
+    "op": "say",
+    "who": "note",
+    "text": "她把糖接过去，指尖擦过你的掌心。"
+   },
+   {
+    "op": "say",
+    "who": "note",
+    "text": "然后她把糖放进嘴里，含了一下，才丢进锅里。"
+   },
+   {
+    "op": "say",
+    "who": "idimya",
+    "text": "这样比较甜。"
+   },
+   {
+    "op": "say",
+    "who": "idimya",
+    "text": "你要不要尝尝是不是真的。"
+   },
+   {
+    "op": "say",
+    "who": "n",
+    "text": "（她在等你回答。她知道你在想什么，她也知道你知道。）"
+   },
+   {
+    "op": "set",
+    "expr": "ch2_trust += 2"
+   },
+   {
+    "op": "jump",
+    "label": "ch2_season"
+   },
+   {
+    "op": "end"
+   }
+  ],
+  "ch2_ask": [
+   {
+    "op": "say",
+    "who": "n",
+    "text": "「你希望我选哪个？」"
+   },
+   {
+    "op": "show",
+    "img": "idimya apron flat",
+    "at": "sprite_base"
+   },
+   {
+    "op": "with",
+    "dur": 0.4
+   },
+   {
+    "op": "say",
+    "who": "note",
+    "text": "她停了一下。锅里的油开始响。"
+   },
+   {
+    "op": "say",
+    "who": "idimya",
+    "text": "……你把问题还给我了。"
+   },
+   {
+    "op": "say",
+    "who": "idimya",
+    "text": "上次也有一个人这样做。"
+   },
+   {
+    "op": "say",
+    "who": "idimya",
+    "text": "他后来活了很久。"
+   },
+   {
+    "op": "say",
+    "who": "n",
+    "text": "（「活了很久」这个词，从她嘴里说出来，意思和你想的不一样。）"
+   },
+   {
+    "op": "show",
+    "img": "idimya apron calm",
+    "at": "sprite_base, push_slow"
+   },
+   {
+    "op": "with",
+    "dur": 0.6
+   },
+   {
+    "op": "say",
+    "who": "idimya",
+    "text": "选糖吧。"
+   },
+   {
+    "op": "say",
+    "who": "idimya",
+    "text": "今天我想甜一点。"
+   },
+   {
+    "op": "set",
+    "expr": "trust += 2"
+   },
+   {
+    "op": "jump",
+    "label": "ch2_season"
+   },
+   {
+    "op": "end"
+   }
+  ],
+  "ch2_season": [
+   {
+    "op": "scene",
+    "img": "kitchen"
+   },
+   {
+    "op": "with",
+    "dur": 0.6
+   },
+   {
+    "op": "show",
+    "img": "vig",
+    "at": null
+   },
+   {
+    "op": "show",
+    "img": "idimya apron calm",
+    "at": "sprite_base"
+   },
+   {
+    "op": "scene",
+    "img": "kitchen_close"
+   },
+   {
+    "op": "with",
+    "dur": 1.2
+   },
+   {
+    "op": "show",
+    "img": "vig",
+    "at": "flicker"
+   },
+   {
+    "op": "say",
+    "who": "note",
+    "text": "锅热了。她把三样东西推到你面前：盐、糖、还有一小瓶深色的东西。"
+   },
+   {
+    "op": "say",
+    "who": "note",
+    "text": "瓶子没有标签。但你已经知道她习惯在每样东西上写日期——这一瓶是唯一没有的。"
+   },
+   {
+    "op": "say",
+    "who": "idimya",
+    "text": "调味不是靠菜谱，是靠闻。"
+   },
+   {
+    "op": "say",
+    "who": "idimya",
+    "text": "你先闻。闻完再决定放什么。"
+   },
+   {
+    "op": "say",
+    "who": "idimya",
+    "text": "放错了也没关系。我会吃完。"
+   },
+   {
+    "op": "screen",
+    "name": "seasoning_pick"
+   },
+   {
+    "op": "if",
+    "cond": "_return == \"salt\"",
+    "pc": 14,
+    "else_pc": 21
+   },
+   {
+    "op": "set",
+    "expr": "seasoning = \"盐\""
+   },
+   {
+    "op": "set",
+    "expr": "ch2_trust += 1"
+   },
+   {
+    "op": "say",
+    "who": "note",
+    "text": "你放了一小撮盐。"
+   },
+   {
+    "op": "say",
+    "who": "note",
+    "text": "她尝了一口，眉毛动了一下。"
+   },
+   {
+    "op": "say",
+    "who": "idimya",
+    "text": "咸的。"
+   },
+   {
+    "op": "say",
+    "who": "idimya",
+    "text": "咸是诚实。你不会骗舌头。"
+   },
+   {
+    "op": "jump",
+    "label": null,
+    "pc": 46
+   },
+   {
+    "op": "if",
+    "cond": "_return == \"sugar\"",
+    "pc": 22,
+    "else_pc": 31
+   },
+   {
+    "op": "set",
+    "expr": "seasoning = \"糖\""
+   },
+   {
+    "op": "set",
+    "expr": "ch2_trust += 1"
+   },
+   {
+    "op": "say",
+    "who": "note",
+    "text": "你放了一勺糖。"
+   },
+   {
+    "op": "say",
+    "who": "note",
+    "text": "她尝了一口，很轻地笑了一下。"
+   },
+   {
+    "op": "say",
+    "who": "idimya",
+    "text": "甜的。"
+   },
+   {
+    "op": "say",
+    "who": "idimya",
+    "text": "甜是讨好。你在讨好我。"
+   },
+   {
+    "op": "say",
+    "who": "n",
+    "text": "「有用吗。」"
+   },
+   {
+    "op": "say",
+    "who": "idimya",
+    "text": "有用。"
+   },
+   {
+    "op": "jump",
+    "label": null,
+    "pc": 46
+   },
+   {
+    "op": "set",
+    "expr": "seasoning = \"那一瓶没有标签的东西\""
+   },
+   {
+    "op": "set",
+    "expr": "scent += 3"
+   },
+   {
+    "op": "set",
+    "expr": "doubt += 2"
+   },
+   {
+    "op": "say",
+    "who": "note",
+    "text": "你拿起了那瓶没有标签的东西。"
+   },
+   {
+    "op": "say",
+    "who": "note",
+    "text": "拔开瓶塞的一瞬间，整个厨房的气味都变了。"
+   },
+   {
+    "op": "say",
+    "who": "note",
+    "text": "很像下雨前的土。也很像她身上靠近脖子那里的味道。"
+   },
+   {
+    "op": "say",
+    "who": "note",
+    "text": "她突然伸手，按住了你的手腕。不快，但很稳。"
+   },
+   {
+    "op": "say",
+    "who": "idimya",
+    "text": "……你怎么知道是这个。"
+   },
+   {
+    "op": "say",
+    "who": "n",
+    "text": "「我不知道。我只是闻到了。」"
+   },
+   {
+    "op": "say",
+    "who": "idimya",
+    "text": "……"
+   },
+   {
+    "op": "say",
+    "who": "idimya",
+    "text": "那你比我以为的要危险。"
+   },
+   {
+    "op": "show",
+    "img": "idimya apron sly",
+    "at": "sprite_base, lean_in"
+   },
+   {
+    "op": "with",
+    "dur": 0.5
+   },
+   {
+    "op": "say",
+    "who": "idimya",
+    "text": "不过没关系。我喜欢危险的东西。"
+   },
+   {
+    "op": "say",
+    "who": "idimya",
+    "text": "它们比较好吃。"
+   },
+   {
+    "op": "scene",
+    "img": "kitchen"
+   },
+   {
+    "op": "with",
+    "dur": 1.4
+   },
+   {
+    "op": "jump",
+    "label": "ch2_end"
+   },
+   {
+    "op": "end"
+   }
+  ],
+  "ch2_end": [
+   {
+    "op": "scene",
+    "img": "kitchen"
+   },
+   {
+    "op": "with",
+    "dur": 1.0
+   },
+   {
+    "op": "show",
+    "img": "vig",
+    "at": null
+   },
+   {
+    "op": "show",
+    "img": "idimya apron smile_soft",
+    "at": "sprite_base, push_slow"
+   },
+   {
+    "op": "say",
+    "who": "note",
+    "text": "菜盛出来了。两盘。她那一盘比你的小。"
+   },
+   {
+    "op": "say",
+    "who": "n",
+    "text": "「你不饿？」"
+   },
+   {
+    "op": "say",
+    "who": "idimya",
+    "text": "我饿。"
+   },
+   {
+    "op": "say",
+    "who": "idimya",
+    "text": "但今天我想看你吃。"
+   },
+   {
+    "op": "say",
+    "who": "note",
+    "text": "你低头吃了一口。味道很怪。"
+   },
+   {
+    "op": "say",
+    "who": "note",
+    "text": "你说不清是盐放多了，还是糖放少了，还是那瓶东西本来就不该出现在菜里。"
+   },
+   {
+    "op": "say",
+    "who": "note",
+    "text": "但这是你很久以来，第一次把一整盘东西吃完。"
+   },
+   {
+    "op": "show",
+    "img": "idimya apron amused",
+    "at": "sprite_base, lean_in"
+   },
+   {
+    "op": "with",
+    "dur": 0.6
+   },
+   {
+    "op": "say",
+    "who": "idimya",
+    "text": "吃完了。"
+   },
+   {
+    "op": "say",
+    "who": "idimya",
+    "text": "你知道这意味着什么吗。"
+   },
+   {
+    "op": "say",
+    "who": "n",
+    "text": "「……什么？」"
+   },
+   {
+    "op": "say",
+    "who": "idimya",
+    "text": "意味着下次你还会来。"
+   },
+   {
+    "op": "say",
+    "who": "note",
+    "text": "她说得很轻，像在说一件已经发生的事。"
+   },
+   {
+    "op": "if",
+    "cond": "seasoning == \"那一瓶没有标签的东西\"",
+    "pc": 19,
+    "else_pc": 22
+   },
+   {
+    "op": "set",
+    "expr": "chapter_name = \"第二章结局 · 她已经知道你会回来\""
+   },
+   {
+    "op": "unlock",
+    "flag": "ch2_seen"
+   },
+   {
+    "op": "jump",
+    "label": null,
+    "pc": 28
+   },
+   {
+    "op": "if",
+    "cond": "ch2_trust >= 3",
+    "pc": 23,
+    "else_pc": 26
+   },
+   {
+    "op": "set",
+    "expr": "chapter_name = \"第二章结局 · 她给你留了半盘\""
+   },
+   {
+    "op": "unlock",
+    "flag": "ch2_shared"
+   },
+   {
+    "op": "jump",
+    "label": null,
+    "pc": 28
+   },
+   {
+    "op": "set",
+    "expr": "chapter_name = \"第二章结局 · 她记住了你放的那一撮\""
+   },
+   {
+    "op": "unlock",
+    "flag": "ch2_taste"
+   },
+   {
+    "op": "stop",
+    "channel": "ambience",
+    "fade": 2.2
+   },
+   {
+    "op": "scene",
+    "img": "black"
+   },
+   {
+    "op": "with",
+    "dur": 1.8
+   },
+   {
+    "op": "hide",
+    "img": "bar_top"
+   },
+   {
+    "op": "hide",
+    "img": "bar_bottom"
+   },
+   {
+    "op": "with",
+    "dur": 0.8
+   },
+   {
+    "op": "centered",
+    "text": "{size=18}{color=#8b7b69}第二章 · 完{/color}{/size}\\n\\n{color=#d9a05f}[chapter_name]{/color}"
+   },
+   {
+    "op": "centered",
+    "text": "{size=17}{color=#8b7b69}第三章 · 十七个日期{/color}\\n\\n{size=15}{color=#6b5c4d}你终于问出了那个问题。\\n她也终于愿意回答。\\n\\n（制作中）{/color}"
    },
    {
     "op": "return"

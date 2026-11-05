@@ -13,6 +13,8 @@
     genkan: '../icancook/game/images/bg_genkan.jpg',
     morning: '../icancook/game/images/bg_morning.jpg',
     fridge: '../icancook/game/images/bg_fridge.jpg',
+    kitchen_close: '../icancook/game/images/bg_kitchen_close.jpg',
+    window_dawn: '../icancook/game/images/bg_window_dawn.jpg',
     vig: '../icancook/game/images/vignette.png',
   };
   const SPRITE_DIR = '../icancook/game/images/idimya/';
@@ -86,9 +88,77 @@
     src.start(t);
   }
 
+  // ---------------------------------------------------------------- 真实音频（用 exe 版同一批 wav）
+  const AUDIO_DIR = '../icancook/game/audio/';
+  const bufCache = {};
+  let ambNode = null, ambGain = null, ambTarget = null;
+
+  async function loadBuf(name) {
+    if (bufCache[name]) return bufCache[name];
+    const c = ac(); if (!c) return null;
+    try {
+      const r = await fetch(AUDIO_DIR + name + '.wav');
+      const ab = await r.arrayBuffer();
+      bufCache[name] = await c.decodeAudioData(ab);
+      return bufCache[name];
+    } catch (e) {
+      console.warn('音频加载失败', name, e);
+      return null;
+    }
+  }
+
+  async function playAmb(name, fade = 2.0) {
+    const c = ac(); if (!c) return;
+    if (ambTarget === name) return;
+    ambTarget = name;
+    const buf = await loadBuf(name);
+    if (ambTarget !== name) return;          // 加载期间又被切换了
+    // 旧的那条淡出
+    if (ambNode) {
+      const old = ambNode, og = ambGain;
+      const t = c.currentTime;
+      og.gain.cancelScheduledValues(t);
+      og.gain.setValueAtTime(og.gain.value, t);
+      og.gain.linearRampToValueAtTime(0.0001, t + fade);
+      try { old.stop(t + fade + 0.05); } catch (e) { /* 已停 */ }
+    }
+    if (!buf) { ambNode = null; ambGain = null; return; }
+    const src = c.createBufferSource();
+    src.buffer = buf; src.loop = true;
+    const g = c.createGain();
+    g.gain.setValueAtTime(0.0001, c.currentTime);
+    g.gain.linearRampToValueAtTime(0.32, c.currentTime + fade);
+    src.connect(g); g.connect(c.destination);
+    src.start();
+    ambNode = src; ambGain = g;
+  }
+
+  function stopAmb(fade = 2.0) {
+    const c = ac(); if (!c || !ambNode) { ambTarget = null; return; }
+    const t = c.currentTime;
+    ambGain.gain.cancelScheduledValues(t);
+    ambGain.gain.setValueAtTime(ambGain.gain.value, t);
+    ambGain.gain.linearRampToValueAtTime(0.0001, t + fade);
+    try { ambNode.stop(t + fade + 0.05); } catch (e) { /* 已停 */ }
+    ambNode = null; ambGain = null; ambTarget = null;
+  }
+
+  async function playSfx(name, vol = 0.5) {
+    const c = ac(); if (!c) return;
+    const buf = await loadBuf(name);
+    if (!buf) return;
+    const src = c.createBufferSource();
+    src.buffer = buf;
+    const g = c.createGain(); g.gain.value = vol;
+    src.connect(g); g.connect(c.destination);
+    src.start();
+  }
+
   const $ = (s) => document.querySelector(s);
   const el = {
     stage: $('#stage'),
+    barTop: $('#barTop'),
+    barBottom: $('#barBottom'),
     bg: $('#bg'),
     char: $('#char'),
     charInner: $('#charInner'),
@@ -275,10 +345,15 @@
 
   /** 变量取值 / 赋值（把 .rpy 里的 Python 片段当 JS 跑） */
   function evalExpr(expr) {
-    const keys = Object.keys(S.vars);
+    const keys = Object.keys(S.vars).filter((k) => /^[A-Za-z_]\w*$/.test(k));
+    const safe = Object.fromEntries(keys.map((k) => [k, S.vars[k]]));
+    // 剧本里的 persistent.xxx 判断（第一章的分支收束）——网页端用 localStorage 顶替
+    safe.persistent = loadStore();
     try {
+      // 用 with(vars) 而不是把变量名当形参：像 `_return` 这种 renpy 内置名
+      // 作为形参名是合法的，但混进 Object.keys 顺序时容易踩到保留字/数字开头。
       // eslint-disable-next-line no-new-func
-      return new Function(...keys, `return (${expr});`)(...keys.map((k) => S.vars[k]));
+      return new Function('vars', `with (vars) { return (${expr}); }`)(safe);
     } catch (e) {
       console.warn('expr failed:', expr, e);
       return undefined;
@@ -316,13 +391,23 @@
     }
 
     let i = 0;
+    let hold = 0;          // 标点停顿：还要等几个 tick 才继续出字
     el.text.textContent = '';
     return new Promise((resolve) => {
       typingResolve = resolve;
       typing = setInterval(() => {
+        if (hold > 0) { hold -= 1; return; }   // 停在半句上，像她真的在喘气
         i += 1;
         if (i % 2 === 0 && !skipping) blip(curSpeaker);
         el.text.textContent = full.slice(0, i);
+        // 停顿节奏：省略号最长，破折号次之，逗号最短。
+        // 这是"她说话慢"最省成本的实现——不要改语速，改停顿。
+        const ch = full[i - 1];
+        if (!skipping && S.textSpeed > 0) {
+          if (ch === '…' || ch === '。') hold = 7;
+          else if (ch === '—') hold = 5;
+          else if (ch === '，' || ch === '、') hold = 3;
+        }
         if (i >= full.length) {
           clearInterval(typing); typing = null;
           typingResolve = null;
@@ -418,6 +503,10 @@
             applyTransform(ins.at, ins.at === 'lean_in' ? 900 : 500);
           } else if (parts[0] === 'vig') {
             el.vig.style.opacity = '1';
+          } else if (parts[0] === 'bar_top') {
+            showBars('top');
+          } else if (parts[0] === 'bar_bottom') {
+            showBars('bottom');
           }
           break;
         }
@@ -445,17 +534,56 @@
           break;
         }
         case 'screen': {
-          await openSmellScreen();
+          if (ins.name && ins.name.startsWith('seasoning')) {
+            // Ren'Py 的 `call screen X` 把按钮值放进 _return，
+            // 剧本后面用 `if _return == "salt"` 判断，网页端要同样落到 S.vars
+            S.vars._return = await openSeasonScreen();
+          } else {
+            await openSmellScreen();
+          }
           break;
         }
         case 'centered': {
           await showCentered(ins.text);
           break;
         }
+        case 'play': {
+          if (ins.channel === 'ambience') {
+            playAmb(ins.target, ins.fade || 2.0);
+          } else {
+            // sound / voice：一次性音效，路径里只有文件名
+            playSfx(ins.target, 0.55);
+          }
+          break;
+        }
+        case 'stop': {
+          if (ins.channel === 'ambience') stopAmb(ins.fade || 1.6);
+          break;
+        }
+        case 'wait': {
+          if (!new URLSearchParams(location.search).has('fast')) {
+            await wait((ins.sec || 0.4) * 1000);
+          }
+          break;
+        }
+        case 'hide': {
+          if (ins.img && String(ins.img).startsWith('bar_')) hideBars();
+          break;
+        }
         case 'unlock': {
           const st = loadStore();
           st[ins.flag] = true;
           saveStore(st);
+          break;
+        }
+        case 'persist': {
+          // `$ persistent.ch2_shared = True` 之类
+          const st = loadStore();
+          try {
+            const val = evalExpr(ins.expr);
+            st[ins.key] = val;
+            saveStore(st);
+          } catch (e) { /* 忽略 */ }
           break;
         }
         case 'return':
@@ -538,15 +666,29 @@
 
   function showCentered(raw) {
     return new Promise((resolve) => {
-      el.center.innerHTML = `<div class="centerText">${renderMarkup(fillPlaceholders(raw))}</div>`;
+      const text = fillPlaceholders(raw);
+      el.center.innerHTML = `<div class="centerText">${renderMarkup(text)}</div>`;
       el.box.classList.add('empty');
       el.center.classList.add('show');
-      window.__centerAdvance = () => {
+
+      // 章节标题：自动淡入 → 停留 → 淡出，玩家不需要点。
+      // 其他独白（结局名、内心）仍然要点一下才过。
+      const isChapter = /第[一二三四五]章|序章/.test(text);
+      let done = false;
+      const finish = () => {
+        if (done) return;
+        done = true;
         window.__centerAdvance = null;
         el.center.classList.remove('show');
         el.box.classList.remove('empty');
         resolve();
       };
+      window.__centerAdvance = finish;
+
+      if (isChapter) {
+        const fast = new URLSearchParams(location.search).has('fast');
+        setTimeout(finish, fast ? 260 : 3400);
+      }
     });
   }
 
@@ -650,6 +792,108 @@
         resolve();
       });
       el.smell.appendChild(leave);
+    });
+  }
+
+  // ---------------------------------------------------------------- 遮幅（电影画幅）
+  function showBars(which) {
+    const bars = [el.barTop, el.barBottom];
+    if (which === 'top' || which === undefined) {
+      el.barTop.classList.add('in');
+    }
+    if (which === 'bottom' || which === undefined) {
+      el.barBottom.classList.add('in');
+    }
+    return bars;
+  }
+  function hideBars() {
+    el.barTop.classList.remove('in');
+    el.barBottom.classList.remove('in');
+  }
+
+  const SEASONINGS = {
+    salt:  { label: '盐', hint: '咸是诚实。',
+             note: '粗粒的，放在一只小陶碟里。没有任何味道，但你会想把它放在舌头上试一下。' },
+    sugar: { label: '黄糖', hint: '甜是讨好。',
+             note: '结成块，边缘有点黏。有一点焦味，像是熬过头了又被人救回来。' },
+    jar:   { label: '没有标签的瓶子', hint: '这一瓶，你不该闻到。', danger: true,
+             note: '拔开瓶塞的瞬间，整个厨房的气味都变了。' },
+  };
+
+  // 第二章的调味：先闻，再放下。30 秒，放下去不可逆。
+  function openSeasonScreen() {
+    return new Promise((resolve) => {
+      // ?fast=1 时把 30 秒压到 1.5 秒，方便冒烟测试，正常游玩不受影响
+      const FAST = new URLSearchParams(location.search).has('fast');
+      const SEASON_SECONDS = FAST ? 1.5 : 30;
+      const seen = new Set();
+      el.smell.innerHTML = '';
+      el.smell.classList.add('show', 'season');
+
+      const bar = document.createElement('div');
+      bar.className = 'seasonBar';
+      const fill = document.createElement('i');
+      bar.appendChild(fill);
+      el.smell.appendChild(bar);
+
+      const head = document.createElement('div');
+      head.className = 'smellHead';
+      head.innerHTML = '<div class="t">调 味</div>'
+        + '<div class="s">先闻。闻完再决定放什么。放错了也没关系——我会吃完。</div>';
+      el.smell.appendChild(head);
+
+      const info = document.createElement('div');
+      info.className = 'smellInfo';
+      info.innerHTML = '<div class="note"></div><div class="line"></div>';
+      el.smell.appendChild(info);
+
+      const pick = document.createElement('div');
+      pick.className = 'seasonPick';
+      Object.entries(SEASONINGS).forEach(([key, s]) => {
+        const b = document.createElement('button');
+        if (s.danger) b.className = 'jarbtn';
+        b.innerHTML = `<div class="n">${s.label}</div><div class="h">闻一闻</div>`;
+        b.addEventListener('click', () => {
+          seen.add(key);
+          info.querySelector('.note').textContent = s.hint;
+          info.querySelector('.line').textContent = s.note;
+          info.classList.add('show');
+          b.classList.add('seen');
+          put.style.visibility = 'visible';
+        });
+        pick.appendChild(b);
+      });
+      el.smell.appendChild(pick);
+
+      // 放下去（只在闻过之后可用）
+      const put = document.createElement('div');
+      put.className = 'seasonPut';
+      put.style.visibility = 'hidden';
+      [['salt', '放盐'], ['sugar', '放糖'], ['jar', '放那一瓶']].forEach(([k, label]) => {
+        const b = document.createElement('button');
+        b.textContent = label;
+        if (k === 'jar') b.classList.add('jar');
+        b.addEventListener('click', () => finish(k));
+        put.appendChild(b);
+      });
+      el.smell.appendChild(put);
+
+      let done = false;
+      let left = SEASON_SECONDS;
+      const tick = setInterval(() => {
+        left = Math.max(0, left - 0.1);
+        fill.style.width = `${(left / SEASON_SECONDS) * 100}%`;
+        if (left <= 8) fill.classList.add('low');
+        if (left <= 0) finish('salt');       // 时间到：默认放盐，她不为难你
+      }, 100);
+
+      function finish(k) {
+        if (done) return;
+        done = true;
+        clearInterval(tick);
+        el.smell.classList.remove('show', 'season');
+        resolve(k);
+      }
     });
   }
 

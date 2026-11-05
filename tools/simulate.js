@@ -2,12 +2,24 @@ const fs=require('fs');
 const story=JSON.parse(fs.readFileSync('/home/user/i-can-smell-you-from-here/demo/story.json','utf8'));
 
 function evalExpr(expr, vars){
-  const keys=Object.keys(vars);
-  return new Function(...keys,`return (${expr});`)(...keys.map(k=>vars[k]));
+  const keys=Object.keys(vars).filter(k=>/^[A-Za-z_]\w*$/.test(k));
+  const env=Object.fromEntries(keys.map(k=>[k,vars[k]]));
+  env.persistent = vars.__persistent || {};   // 剧本里的 persistent.xxx 判断
+  env._return = vars.__return;
+  return new Function('vars',`with(vars){ return (${expr}); }`)(env);
 }
 function runSet(expr, vars){
-  let m=expr.match(/^(\w+)\s*\+=\s*(.+)$/);
+  // persistent.foo = True
+  let m=expr.match(/^persistent\.(\w+)\s*=\s*(.+)$/);
+  if(m){
+    if(!vars.__persistent) vars.__persistent={};
+    vars.__persistent[m[1]]=evalExpr(m[2],vars);
+    return;
+  }
+  m=expr.match(/^(\w+)\s*\+=\s*(.+)$/);
   if(m){vars[m[1]]=(vars[m[1]]||0)+Number(evalExpr(m[2],vars));return;}
+  m=expr.match(/^(\w+)\s*-=\s*(.+)$/);
+  if(m){vars[m[1]]=(vars[m[1]]||0)-Number(evalExpr(m[2],vars));return;}
   m=expr.match(/^(\w+)\s*=\s*(.+)$/);
   if(m){vars[m[1]]=evalExpr(m[2],vars);return;}
   throw new Error('set? '+expr);
@@ -22,6 +34,14 @@ function play(path){
     if(pc>=code.length){return {end:'fell-off',label,says,choices,vars};}
     const ins=code[pc++];
     if(ins.op==='say'){says++;}
+    else if(ins.op==='screen'){
+      // 交互界面：调味那一个从 path 里取（0=盐 1=糖 2=那一瓶），
+      // 其他（嗅桌子）不产生返回值。
+      if(String(ins.name||'').startsWith('seasoning')){
+        const pickIdx = pi<path.length ? path[pi++] : 0;
+        vars.__return = ['salt','sugar','jar'][Math.min(pickIdx,2)];
+      }
+    }
     else if(ins.op==='set'){runSet(ins.expr,vars);}
     else if(ins.op==='if'){pc=evalExpr(ins.cond,vars)?ins.pc:ins.else_pc;}
     else if(ins.op==='jump'){ if(ins.label){label=ins.label;pc=0;} else {pc=ins.pc;} }

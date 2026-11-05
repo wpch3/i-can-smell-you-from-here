@@ -261,6 +261,60 @@
   }
   .leave:hover{color:#f6e9d6; border-color:var(--gold); background:rgba(40,28,18,.95)}
 
+  /* ---------- 调味（第二章）：30 秒不可逆选择 ---------- */
+  .seasonBar{
+    position:absolute; left:0; right:0; top:4.6cqh;
+    height:.35cqh; background:rgba(42,35,28,.9);
+  }
+  .seasonBar i{
+    display:block; height:100%; width:100%;
+    background:var(--gold); transition:width .1s linear, background .4s;
+  }
+  .seasonBar i.low{background:#a8443a}
+
+  .seasonPick{
+    position:absolute; left:0; right:0; top:36cqh;
+    display:flex; justify-content:center; gap:8cqw;
+  }
+  .seasonPick button{
+    padding:2cqh 2.4cqw; background:transparent;
+    border:1px solid rgba(217,160,95,.22);
+    font:inherit; color:#e8dcc8; cursor:pointer;
+    transition:all .22s; text-align:center;
+  }
+  .seasonPick button .n{font-size:2.2cqh; letter-spacing:.08em}
+  .seasonPick button .h{font-size:1.4cqh; color:var(--dim2); margin-top:.8cqh}
+  .seasonPick button:hover{background:rgba(217,160,95,.1); border-color:var(--gold)}
+  .seasonPick button.jarbtn{border-color:rgba(168,68,58,.4)}
+  .seasonPick button.jarbtn:hover{background:rgba(168,68,58,.14); border-color:#c98f86}
+
+  .seasonPut{
+    position:absolute; left:0; right:0; bottom:4.4cqh;
+    display:flex; justify-content:center; gap:3.4cqw;
+  }
+  .seasonPut button{
+    padding:1.2cqh 2cqw; background:rgba(20,15,10,.9);
+    border:1px solid rgba(217,160,95,.35);
+    font:inherit; font-size:1.85cqh; color:#cfc3b2; cursor:pointer;
+    transition:all .22s;
+  }
+  .seasonPut button:hover{color:#f6e9d6; border-color:var(--gold); background:rgba(40,28,18,.95)}
+  .seasonPut button.jar{color:#c98f86; border-color:rgba(168,68,58,.5)}
+  .seasonPut .wait{font-size:1.6cqh; color:var(--dim2); letter-spacing:.1em; align-self:center}
+
+  /* ---------- 电影遮幅 ---------- */
+  .cinebar{
+    position:absolute; left:0; right:0; height:11cqh;
+    background:#000;
+    z-index:18;
+    pointer-events:none;
+    transition:transform 1s cubic-bezier(.22,.61,.36,1);
+  }
+  #barTop{top:0; transform:translateY(-100%)}
+  #barBottom{bottom:0; transform:translateY(100%)}
+  #barTop.in{transform:translateY(0)}
+  #barBottom.in{transform:translateY(0)}
+
   /* ---------- 快捷条 ---------- */
   #quick{
     position:absolute; right:2.4cqw; top:1.6cqh;
@@ -364,6 +418,8 @@
 <div id="stage">
 
   <div id="bg"></div>
+  <div id="barTop" class="cinebar"></div>
+  <div id="barBottom" class="cinebar"></div>
   <div id="char">
     <div id="charInner"></div>
     <div id="layerHair" class="layer"></div>

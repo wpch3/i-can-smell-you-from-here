@@ -78,6 +78,21 @@ const $ = (id) => doc.getElementById(id);
       continue;
     }
 
+    // 调味界面（第二章）：先点三样都闻一遍，再按剧本路径放下一样
+    if ($('smell').classList.contains('season')) {
+      const picks = [...$('smell').querySelectorAll('.seasonPick button')];
+      picks.forEach((b) => click(b));
+      await sleep(60);
+      const putBtns = [...$('smell').querySelectorAll('.seasonPut button')];
+      const idx = wantPath.length ? (wantPath[choices.length] ?? 0) : 0;
+      if (putBtns.length) {
+        choices.push('放下：' + putBtns[Math.min(idx, putBtns.length - 1)].textContent);
+        click(putBtns[Math.min(idx, putBtns.length - 1)]);
+      }
+      await sleep(80);
+      continue;
+    }
+
     // 居中独白：它不在 #text 里，得单独记，否则章末/结局名永远抓不到
     const center = $('center');
     if (center.classList.contains('show')) {
@@ -104,7 +119,7 @@ const $ = (id) => doc.getElementById(id);
     // 结束判定：任意一章的章末独白出现即停（剧本已进到第二章预告）
     if (transcript.length && steps > 40) {
       const ended = transcript.some((t) =>
-        t.includes('序章 · 完') || t.includes('第一章 · 完') || t.includes('第二章 · 刀与糖'));
+        t.includes('第二章 · 完'));
       if (ended) break;
     }
 

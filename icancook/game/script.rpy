@@ -18,6 +18,17 @@ image kitchen = "images/bg_kitchen.jpg"
 image genkan = "images/bg_genkan.jpg"
 image morning = "images/bg_morning.jpg"
 image fridge = "images/bg_fridge.jpg"
+image kitchen_close = "images/bg_kitchen_close.jpg"
+image window_dawn = "images/bg_window_dawn.jpg"
+
+## ——— 音频 —（tools/gen_audio.py 程序化生成，无版权问题）
+define audio.amb_kitchen = "audio/amb_kitchen.wav"
+define audio.amb_fridge = "audio/amb_fridge.wav"
+define audio.amb_rain = "audio/amb_rain.wav"
+define audio.amb_morning = "audio/amb_morning.wav"
+define audio.sfx_knife = "audio/sfx_knife.wav"
+define audio.sfx_bell = "audio/sfx_bell.wav"
+define audio.sfx_heartbeat = "audio/sfx_heartbeat.wav"
 
 ## ——— 立绘：从精灵表裁切（坐标由 tools/build_sprites.py 自动生成，勿手改） ———
 image idimya base calm = im.Crop("images/idimya/sheet.png", (0, 0, 598, 1360))
@@ -79,6 +90,8 @@ default trust = 0
 default doubt = 0
 default promise = None
 default chapter_name = ""
+default seasoning = ""          # 第二章：你最后放下的那一样东西
+default ch2_trust = 0           # 第二章局部计数（不影响第一章的账本）
 
 label start:
 
@@ -87,8 +100,17 @@ label start:
     scene bistro
     with Dissolve(1.2)
 
+    # 过场：先遮幅再开画，观众会立刻知道"这是正片"
+    show bar_top at bar_in_top(0.9)
+    show bar_bottom at bar_in_bottom(0.9)
+
+    play sound sfx_bell
+    pause 0.6
+
     note "有些邀请是不该接受的。"
     note "比如来自一个明确告诉过你「人类很好吃」的人。"
+
+    play ambience amb_rain fadein 3.0
 
     jump ch0_arrive
 
@@ -561,6 +583,8 @@ label ch1_genkan:
     scene genkan
     with Dissolve(1.8)
 
+    play ambience amb_rain fadein 3.0
+
     show vig
 
     note "你按了门铃。"
@@ -626,6 +650,8 @@ label ch1_kitchen:
 
     scene kitchen
     with Dissolve(1.6)
+
+    play ambience amb_kitchen fadein 3.5
 
     show vig
 
@@ -694,6 +720,8 @@ label ch1_cook:
 
     scene fridge
     with Dissolve(1.0)
+
+    play ambience amb_fridge fadein 2.5
 
     show vig
 
@@ -812,8 +840,21 @@ label ch1_knife:
 
 label ch1_end:
 
+    # 过场：先给窗，再给人。中间那 2 秒空白就是"一整夜过去了"。
+    scene window_dawn
+    with Dissolve(2.6)
+
+    play ambience amb_morning fadein 4.0
+
+    show vig
+
+    note "雨停了。"
+    note "窗上有一个圆形的痕，是很久以前有人用手擦开的，擦得刚好够看出去。"
+
+    pause 1.2
+
     scene morning
-    with Dissolve(2.4)
+    with Dissolve(2.0)
 
     show vig
 
@@ -894,6 +935,261 @@ label ch1_end:
 
     centered "{size=18}{color=#8b7b69}第一章 · 完{/color}{/size}\n\n{color=#d9a05f}[chapter_name]{/color}"
 
-    centered "{size=17}{color=#8b7b69}第二章 · 刀与糖{/color}\n\n{size=15}{color=#6b5c4d}一起做饭。\n调味不是靠菜谱，是靠闻。\n\n（制作中）{/color}"
+    jump ch2_title
+
+## ——————————————————————————————————————————————————————————————
+## Chapter 2 — 刀与糖
+## 核心：一把真的刀、一个 30 秒的调味交互、一次"被看见"的体面
+## ——————————————————————————————————————————————————————————————
+
+label ch2_title:
+
+    stop ambience fadeout 1.5
+    scene black
+    with Dissolve(1.4)
+
+    # 切章：先全黑，再让两条遮幅滑进来 —— 这一下就是"过场"
+    show bar_top at bar_in_top(0.7)
+    show bar_bottom at bar_in_bottom(0.7)
+
+    centered "{size=17}{color=#8b7b69}第二章 · 刀与糖{/color}\n\n{size=15}{color=#6b5c4d}一起做饭。\n调味不是靠菜谱，是靠闻。{/color}"
+
+    # 第一章的分支在这里收束：三档进入语气不同，但都通向同一间厨房
+    if persistent.ch1_key:
+        note "你是用自己那把钥匙进来的。"
+        note "门开的时候，她正在切东西，没有回头。"
+    elif persistent.ch1_leave:
+        note "你走了。然后又回来了。"
+        note "你自己也说不清是哪一步开始回头的。"
+    else:
+        note "你没有走。"
+        note "天亮以后你睡了一会儿，醒来的时候，厨房里已经有声音了。"
+
+    # 遮幅留在画面上：这一章全程电影画幅
+    scene kitchen
+    with Dissolve(1.6)
+
+    play ambience amb_kitchen fadein 3.5
+
+    show vig
+    show idimya apron calm at sprite_base, push_slow
+    with Dissolve(1.0)
+
+    note "台上摆着两样东西：一把刀，和一小碟糖。"
+    note "刀是厨房里最锋利的那把。糖是粗糙的黄糖，结成块。"
+
+    idimya "选一个。"
+    n "「……什么？」"
+    idimya "今天你先动刀，还是先动糖。"
+    idimya "顺序会决定这顿饭是什么味道。"
+    idimya "也会决定我今晚怎么想你。"
+
+    menu:
+        "先拿刀。":
+            $ ch2_trust += 1
+            $ scent += 1
+            jump ch2_knife
+
+        "先拿糖。":
+            $ ch2_trust += 2
+            $ trust += 1
+            jump ch2_sugar
+
+        "两样都不拿，先问她：你希望我选哪个？":
+            $ scent += 2
+            $ doubt += 1
+            jump ch2_ask
+
+
+label ch2_knife:
+
+    note "你握住了刀柄。比想象的沉。"
+
+    show idimya apron sly at sprite_base, lean_in
+    with Dissolve(0.5)
+
+    idimya "手很稳。"
+    idimya "稳的人一般不太诚实。"
+    n "「为什么？」"
+    idimya "因为稳是练出来的。练过的人，都有不想让人看见的部分。"
+
+    play sound sfx_knife
+    note "她绕到你身后，手覆在你的手背上，带着你切下第一刀。"
+    play sound sfx_heartbeat
+    note "她的呼吸落在你耳后。刀很凉，她的手很热。"
+
+    idimya "切的时候别看刀。看你要切的东西。"
+    idimya "看刀的人会切到手。看东西的人不会。"
+
+    $ ch2_trust += 1
+    jump ch2_season
+
+
+label ch2_sugar:
+
+    note "你捏起一块黄糖。它在你手指间有点黏。"
+
+    show idimya apron smile_soft at sprite_base, lean_in
+    with Dissolve(0.5)
+
+    idimya "……你选了这个。"
+    n "「选错了？」"
+    idimya "没有错。只是很少有人先选糖。"
+    idimya "大家都会先拿刀。因为刀看起来比较像答案。"
+
+    note "她把糖接过去，指尖擦过你的掌心。"
+    note "然后她把糖放进嘴里，含了一下，才丢进锅里。"
+
+    idimya "这样比较甜。"
+    idimya "你要不要尝尝是不是真的。"
+
+    n "（她在等你回答。她知道你在想什么，她也知道你知道。）"
+
+    $ ch2_trust += 2
+    jump ch2_season
+
+
+label ch2_ask:
+
+    n "「你希望我选哪个？」"
+
+    show idimya apron flat at sprite_base
+    with Dissolve(0.4)
+
+    note "她停了一下。锅里的油开始响。"
+
+    idimya "……你把问题还给我了。"
+    idimya "上次也有一个人这样做。"
+    idimya "他后来活了很久。"
+
+    n "（「活了很久」这个词，从她嘴里说出来，意思和你想的不一样。）"
+
+    show idimya apron calm at sprite_base, push_slow
+    with Dissolve(0.6)
+
+    idimya "选糖吧。"
+    idimya "今天我想甜一点。"
+
+    $ trust += 2
+    jump ch2_season
+
+
+label ch2_season:
+
+    scene kitchen
+    with Dissolve(0.6)
+
+    show vig
+    show idimya apron calm at sprite_base
+
+    scene kitchen_close
+    with Dissolve(1.2)
+
+    show vig at flicker
+
+    note "锅热了。她把三样东西推到你面前：盐、糖、还有一小瓶深色的东西。"
+    note "瓶子没有标签。但你已经知道她习惯在每样东西上写日期——这一瓶是唯一没有的。"
+
+    idimya "调味不是靠菜谱，是靠闻。"
+    idimya "你先闻。闻完再决定放什么。"
+    idimya "放错了也没关系。我会吃完。"
+
+    call screen seasoning_pick
+
+    if _return == "salt":
+        $ seasoning = "盐"
+        $ ch2_trust += 1
+        note "你放了一小撮盐。"
+        note "她尝了一口，眉毛动了一下。"
+        idimya "咸的。"
+        idimya "咸是诚实。你不会骗舌头。"
+    elif _return == "sugar":
+        $ seasoning = "糖"
+        $ ch2_trust += 1
+        note "你放了一勺糖。"
+        note "她尝了一口，很轻地笑了一下。"
+        idimya "甜的。"
+        idimya "甜是讨好。你在讨好我。"
+        n "「有用吗。」"
+        idimya "有用。"
+    else:
+        $ seasoning = "那一瓶没有标签的东西"
+        $ scent += 3
+        $ doubt += 2
+        note "你拿起了那瓶没有标签的东西。"
+        note "拔开瓶塞的一瞬间，整个厨房的气味都变了。"
+        note "很像下雨前的土。也很像她身上靠近脖子那里的味道。"
+        note "她突然伸手，按住了你的手腕。不快，但很稳。"
+        idimya "……你怎么知道是这个。"
+        n "「我不知道。我只是闻到了。」"
+        idimya "……"
+        idimya "那你比我以为的要危险。"
+        show idimya apron sly at sprite_base, lean_in
+        with Dissolve(0.5)
+        idimya "不过没关系。我喜欢危险的东西。"
+        idimya "它们比较好吃。"
+
+    $ renpy.save_persistent()
+
+    scene kitchen
+    with Dissolve(1.4)
+
+    jump ch2_end
+
+
+label ch2_end:
+
+    scene kitchen
+    with Dissolve(1.0)
+
+    show vig
+    show idimya apron smile_soft at sprite_base, push_slow
+
+    note "菜盛出来了。两盘。她那一盘比你的小。"
+
+    n "「你不饿？」"
+    idimya "我饿。"
+    idimya "但今天我想看你吃。"
+
+    note "你低头吃了一口。味道很怪。"
+    note "你说不清是盐放多了，还是糖放少了，还是那瓶东西本来就不该出现在菜里。"
+    note "但这是你很久以来，第一次把一整盘东西吃完。"
+
+    show idimya apron amused at sprite_base, lean_in
+    with Dissolve(0.6)
+
+    idimya "吃完了。"
+    idimya "你知道这意味着什么吗。"
+    n "「……什么？」"
+    idimya "意味着下次你还会来。"
+
+    note "她说得很轻，像在说一件已经发生的事。"
+
+    # 用本章自己的账（ch2_trust + 放下的那一样），不掺第一章的累计值，
+    # 否则玩家一路照做也会被判成"她早就看穿你了"。
+    if seasoning == "那一瓶没有标签的东西":
+        $ chapter_name = "第二章结局 · 她已经知道你会回来"
+        $ persistent.ch2_seen = True
+    elif ch2_trust >= 3:
+        $ chapter_name = "第二章结局 · 她给你留了半盘"
+        $ persistent.ch2_shared = True
+    else:
+        $ chapter_name = "第二章结局 · 她记住了你放的那一撮"
+        $ persistent.ch2_taste = True
+
+    $ renpy.save_persistent()
+
+    stop ambience fadeout 2.2
+
+    scene black
+    with Dissolve(1.8)
+
+    hide bar_top
+    hide bar_bottom
+    with Dissolve(0.8)
+
+    centered "{size=18}{color=#8b7b69}第二章 · 完{/color}{/size}\n\n{color=#d9a05f}[chapter_name]{/color}"
+
+    centered "{size=17}{color=#8b7b69}第三章 · 十七个日期{/color}\n\n{size=15}{color=#6b5c4d}你终于问出了那个问题。\n她也终于愿意回答。\n\n（制作中）{/color}"
 
     return

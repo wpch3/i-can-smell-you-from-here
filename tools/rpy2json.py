@@ -272,6 +272,40 @@ class Compiler:
                 i += 1
                 continue
 
+            # ---------------- 音频与停顿（过场用）
+            if text.startswith("play ") or text.startswith("queue "):
+                rest = text.split(" ", 1)[1]
+                parts = rest.split()
+                channel = parts[0] if parts else "sound"
+                target = parts[1] if len(parts) > 1 else ""
+                fade = None
+                m = re.search(r"fadein\s+([\d.]+)", rest)
+                if m:
+                    fade = float(m.group(1))
+                code.append({"op": "play", "channel": channel, "target": target, "fade": fade})
+                i += 1
+                continue
+
+            if text.startswith("stop "):
+                rest = text.split(" ", 1)[1]
+                channel = rest.split()[0]
+                m = re.search(r"fadeout\s+([\d.]+)", rest)
+                code.append({"op": "stop", "channel": channel,
+                             "fade": float(m.group(1)) if m else None})
+                i += 1
+                continue
+
+            if text.startswith("pause"):
+                m = re.search(r"([\d.]+)", text)
+                code.append({"op": "wait", "sec": float(m.group(1)) if m else 0.5})
+                i += 1
+                continue
+
+            if text.startswith("hide "):
+                code.append({"op": "hide", "img": text[5:].strip()})
+                i += 1
+                continue
+
             if text.startswith("with "):
                 trans = text[5:].strip()
                 m = re.match(r"Dissolve\(([\d.]+)\)", trans)
