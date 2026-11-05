@@ -56,7 +56,7 @@ GROUPS = [
     ("coat",       "outfit_coat.png", [
         ("calm",     None),
         ("suspicious","coat_suspicious.png"),
-        ("sly",      "expr_sly.png"),          # 待补 coat_sly.png
+        ("sly",      "coat_sly.png"),
         ("flat",     "coat_flat.png"),
     ]),
     ("ponytail",   "hair_ponytail.png", [
