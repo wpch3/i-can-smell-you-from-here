@@ -302,6 +302,8 @@ screen navigation():
 
         textbutton _("读档") action ShowMenu("load")
 
+        textbutton _("她记住的方式") action ShowMenu("ending_book")
+
         textbutton _("设置") action ShowMenu("preferences")
 
         if _in_replay:

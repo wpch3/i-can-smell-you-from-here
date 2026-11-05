@@ -594,7 +594,14 @@ label ch1_genkan:
     show idimya hairup calm at sprite_base, push_slow
     with Dissolve(0.8)
 
+    show idimya hairup smile_soft at sprite_base
+    with Dissolve(0.5)
+
     note "她头发是随便盘起来的，几缕落在颈侧。没有化妆。"
+    note "看到是你的时候，她眼睛里有一点东西亮了一下。很快，然后就没了。"
+
+    show idimya hairup calm at sprite_base
+    with Dissolve(0.6)
 
     idimya "你迟到了四分钟。"
 
@@ -611,6 +618,9 @@ label ch1_genkan:
             $ trust += 1
             note "你把外套挂在那件长外套旁边。它的下摆有一块洗过很多次的痕迹。"
 
+            show idimya hairup amused at sprite_base, push_slow
+            with Dissolve(0.5)
+
             idimya "……好。"
             idimya "你比我想的听话。"
 
@@ -621,6 +631,9 @@ label ch1_genkan:
 
             show idimya hairup calm at sprite_base, lean_back
             with Dissolve(0.4)
+
+            show idimya hairup sly at sprite_base, lean_in
+            with Dissolve(0.5)
 
             idimya "……"
             idimya "上一个在这里挂过外套的人。"
@@ -975,6 +988,37 @@ label ch2_title:
     show idimya apron calm at sprite_base, push_slow
     with Dissolve(1.0)
 
+    note "她刚回来，大衣还没脱。袖口有一点潮。"
+
+    show idimya coat calm at sprite_base
+    with Dissolve(0.8)
+
+    idimya "外面还在下。"
+    idimya "我在楼下站了一会儿。"
+
+    n "（她没有说在等谁。）"
+
+    show idimya coat suspicious at sprite_base
+    with Dissolve(0.5)
+
+    idimya "你身上的味道变了。"
+    idimya "不是不好。只是变了。"
+
+    show idimya coat sly at sprite_base, lean_in
+    with Dissolve(0.5)
+
+    idimya "你一直看着这件衣服。"
+    idimya "喜欢的话，可以拿走。"
+    idimya "……我开玩笑的。"
+
+    show idimya coat flat at sprite_base
+    with Dissolve(0.6)
+
+    note "她把大衣挂到椅背上。椅背已经很旧了，挂着的地方磨得发亮。"
+
+    show idimya apron calm at sprite_base, push_slow
+    with Dissolve(1.0)
+
     note "台上摆着两样东西：一把刀，和一小碟糖。"
     note "刀是厨房里最锋利的那把。糖是粗糙的黄糖，结成块。"
 
@@ -1018,8 +1062,13 @@ label ch2_knife:
     play sound sfx_heartbeat
     note "她的呼吸落在你耳后。刀很凉，她的手很热。"
 
+    show idimya ponytail hungry at sprite_base, lean_in
+    with Dissolve(0.7)
+
     idimya "切的时候别看刀。看你要切的东西。"
     idimya "看刀的人会切到手。看东西的人不会。"
+
+    n "（她说这话的时候在看着你的脖子。）"
 
     $ ch2_trust += 1
     jump ch2_season
@@ -1039,6 +1088,9 @@ label ch2_sugar:
 
     note "她把糖接过去，指尖擦过你的掌心。"
     note "然后她把糖放进嘴里，含了一下，才丢进锅里。"
+
+    show idimya ponytail sly at sprite_base, lean_in
+    with Dissolve(0.6)
 
     idimya "这样比较甜。"
     idimya "你要不要尝尝是不是真的。"

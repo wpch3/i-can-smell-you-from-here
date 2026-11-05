@@ -22,7 +22,7 @@
     display:flex; align-items:center; justify-content:center;
   }
 
-  /* ---------- 舞台：16:9，等比缩放 ---------- */
+  /* ---------- 舞台：横屏 16:9，竖屏铺满 ---------- */
   #stage{
     position:relative;
     width:min(100vw, 177.78vh);
@@ -31,6 +31,16 @@
     background:#000;
     cursor:pointer;
     container-type:size;
+  }
+
+  /* 竖屏手机：不再留黑边，改成铺满 + 轻微裁切。
+     立绘是居中构图的，裁掉两侧不影响；背景是风景，裁掉也更好看。 */
+  @media (orientation: portrait) and (max-width: 900px){
+    #stage{
+      width:100vw;
+      height:100vh;
+      height:100dvh;           /* 移动端地址栏会吃掉 vh */
+    }
   }
 
   #bg{
@@ -199,6 +209,12 @@
   #center.show{opacity:1; pointer-events:auto}
   .centerText{
     font-size:2.25cqh; line-height:2.1; text-align:center; white-space:pre-wrap;
+    animation:cenIn .9s cubic-bezier(.22,.61,.36,1) both;
+  }
+  /* 章节卡出现时轻微放大到位，像镜头对焦 —— 不要用淡入淡出了事 */
+  @keyframes cenIn{
+    from{opacity:0; transform:scale(1.035); letter-spacing:.18em}
+    to{opacity:1; transform:scale(1); letter-spacing:normal}
   }
 
   /* ---------- 气味交互 ---------- */
@@ -408,6 +424,15 @@
     font-size:1.5cqh; color:var(--dim2);
   }
   #endList li.got{color:var(--gold)}
+  #endList li.grp{
+    display:flex; justify-content:space-between; align-items:baseline;
+    margin-top:1.5cqh; padding-bottom:.5cqh;
+    border-bottom:1px solid rgba(217,160,95,.18);
+    color:#8b7b69; font-size:1.35cqh; letter-spacing:.14em;
+  }
+  #endList li.grp:first-child{margin-top:0}
+  #endList .gc{color:#5e5347; letter-spacing:.05em}
+  #endList .locked{color:#4a4239}
 
   #warn{
     margin-top:2.6cqh; font-size:1.35cqh; color:#5e5347; line-height:1.9; max-width:52cqw;
@@ -454,7 +479,7 @@
   </div>
 
   <div id="title">
-    <div class="kicker">CHAPTER 0 · 重制版第一次约会</div>
+    <div class="kicker">序章 — 第二章 · 门铃与刀与糖</div>
     <h1>我在这儿就能为你下厨了</h1>
     <div class="en">I Can Cook For You From Here</div>
     <div class="rule"></div>

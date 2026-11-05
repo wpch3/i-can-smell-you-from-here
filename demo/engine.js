@@ -953,14 +953,32 @@
 
   function renderEndings() {
     const st = loadStore();
-    const list = [
-      ['endings_lie', 'A · 她记住了你的谎话'],
-      ['endings_name', 'B · 她记住了你的名字'],
-      ['endings_scent', 'C · 她记住了你的味道'],
+    // 按章分组。没拿到的只给一句提示，不剧透名字 —— 让玩家想再走一遍。
+    const groups = [
+      ['序章', [
+        ['endings_lie', 'A · 她记住了你的谎话'],
+        ['endings_name', 'B · 她记住了你的名字'],
+        ['endings_scent', 'C · 她记住了你的味道'],
+      ]],
+      ['第一章 · 门铃', [
+        ['ch1_stay', '她记住了你留下来'],
+        ['ch1_leave', '她记住了你看见了什么'],
+        ['ch1_key', '她给了你钥匙'],
+      ]],
+      ['第二章 · 刀与糖', [
+        ['ch2_shared', '她给你留了半盘'],
+        ['ch2_taste', '她记住了你放的那一撮'],
+        ['ch2_seen', '她已经知道你会回来'],
+      ]],
     ];
-    el.endList.innerHTML = list
-      .map(([k, t]) => `<li class="${st[k] ? 'got' : ''}">${st[k] ? '◆' : '◇'} ${t}</li>`)
-      .join('');
+    el.endList.innerHTML = groups.map(([title, items]) => {
+      const got = items.filter(([k]) => st[k]).length;
+      const rows = items.map(([k, t]) => (st[k]
+        ? `<li class="got">◆ ${t}</li>`
+        : `<li>◇ <span class="locked">未抵达</span></li>`)).join('');
+      return `<li class="grp"><span class="gt">${title}</span>`
+        + `<span class="gc">${got}/${items.length}</span></li>${rows}`;
+    }).join('');
   }
 
   el.startBtn.addEventListener('click', async () => {

@@ -1461,9 +1461,32 @@
     "dur": 0.8
    },
    {
+    "op": "show",
+    "img": "idimya hairup smile_soft",
+    "at": "sprite_base"
+   },
+   {
+    "op": "with",
+    "dur": 0.5
+   },
+   {
     "op": "say",
     "who": "note",
     "text": "她头发是随便盘起来的，几缕落在颈侧。没有化妆。"
+   },
+   {
+    "op": "say",
+    "who": "note",
+    "text": "看到是你的时候，她眼睛里有一点东西亮了一下。很快，然后就没了。"
+   },
+   {
+    "op": "show",
+    "img": "idimya hairup calm",
+    "at": "sprite_base"
+   },
+   {
+    "op": "with",
+    "dur": 0.6
    },
    {
     "op": "say",
@@ -1495,15 +1518,15 @@
     "options": [
      {
       "text": "照做。",
-      "pc": 15
-     },
-     {
-      "text": "先问一句：那件外套是谁的？",
       "pc": 20
      },
      {
+      "text": "先问一句：那件外套是谁的？",
+      "pc": 27
+     },
+     {
       "text": "不脱，站门口。",
-      "pc": 31
+      "pc": 40
      }
     ]
    },
@@ -1515,6 +1538,15 @@
     "op": "say",
     "who": "note",
     "text": "你把外套挂在那件长外套旁边。它的下摆有一块洗过很多次的痕迹。"
+   },
+   {
+    "op": "show",
+    "img": "idimya hairup amused",
+    "at": "sprite_base, push_slow"
+   },
+   {
+    "op": "with",
+    "dur": 0.5
    },
    {
     "op": "say",
@@ -1529,7 +1561,7 @@
    {
     "op": "jump",
     "label": null,
-    "pc": 40
+    "pc": 49
    },
    {
     "op": "set",
@@ -1552,6 +1584,15 @@
    {
     "op": "with",
     "dur": 0.4
+   },
+   {
+    "op": "show",
+    "img": "idimya hairup sly",
+    "at": "sprite_base, lean_in"
+   },
+   {
+    "op": "with",
+    "dur": 0.5
    },
    {
     "op": "say",
@@ -1581,7 +1622,7 @@
    {
     "op": "jump",
     "label": null,
-    "pc": 40
+    "pc": 49
    },
    {
     "op": "set",
@@ -1624,7 +1665,7 @@
    {
     "op": "jump",
     "label": null,
-    "pc": 40
+    "pc": 49
    },
    {
     "op": "jump",
@@ -2693,6 +2734,101 @@
    {
     "op": "say",
     "who": "note",
+    "text": "她刚回来，大衣还没脱。袖口有一点潮。"
+   },
+   {
+    "op": "show",
+    "img": "idimya coat calm",
+    "at": "sprite_base"
+   },
+   {
+    "op": "with",
+    "dur": 0.8
+   },
+   {
+    "op": "say",
+    "who": "idimya",
+    "text": "外面还在下。"
+   },
+   {
+    "op": "say",
+    "who": "idimya",
+    "text": "我在楼下站了一会儿。"
+   },
+   {
+    "op": "say",
+    "who": "n",
+    "text": "（她没有说在等谁。）"
+   },
+   {
+    "op": "show",
+    "img": "idimya coat suspicious",
+    "at": "sprite_base"
+   },
+   {
+    "op": "with",
+    "dur": 0.5
+   },
+   {
+    "op": "say",
+    "who": "idimya",
+    "text": "你身上的味道变了。"
+   },
+   {
+    "op": "say",
+    "who": "idimya",
+    "text": "不是不好。只是变了。"
+   },
+   {
+    "op": "show",
+    "img": "idimya coat sly",
+    "at": "sprite_base, lean_in"
+   },
+   {
+    "op": "with",
+    "dur": 0.5
+   },
+   {
+    "op": "say",
+    "who": "idimya",
+    "text": "你一直看着这件衣服。"
+   },
+   {
+    "op": "say",
+    "who": "idimya",
+    "text": "喜欢的话，可以拿走。"
+   },
+   {
+    "op": "say",
+    "who": "idimya",
+    "text": "……我开玩笑的。"
+   },
+   {
+    "op": "show",
+    "img": "idimya coat flat",
+    "at": "sprite_base"
+   },
+   {
+    "op": "with",
+    "dur": 0.6
+   },
+   {
+    "op": "say",
+    "who": "note",
+    "text": "她把大衣挂到椅背上。椅背已经很旧了，挂着的地方磨得发亮。"
+   },
+   {
+    "op": "show",
+    "img": "idimya apron calm",
+    "at": "sprite_base, push_slow"
+   },
+   {
+    "op": "with",
+    "dur": 1.0
+   },
+   {
+    "op": "say",
+    "who": "note",
     "text": "台上摆着两样东西：一把刀，和一小碟糖。"
    },
    {
@@ -2730,15 +2866,15 @@
     "options": [
      {
       "text": "先拿刀。",
-      "pc": 30
+      "pc": 50
      },
      {
       "text": "先拿糖。",
-      "pc": 34
+      "pc": 54
      },
      {
       "text": "两样都不拿，先问她：你希望我选哪个？",
-      "pc": 38
+      "pc": 58
      }
     ]
    },
@@ -2757,7 +2893,7 @@
    {
     "op": "jump",
     "label": null,
-    "pc": 42
+    "pc": 62
    },
    {
     "op": "set",
@@ -2774,7 +2910,7 @@
    {
     "op": "jump",
     "label": null,
-    "pc": 42
+    "pc": 62
    },
    {
     "op": "set",
@@ -2791,7 +2927,7 @@
    {
     "op": "jump",
     "label": null,
-    "pc": 42
+    "pc": 62
    },
    {
     "op": "end"
@@ -2855,6 +2991,15 @@
     "text": "她的呼吸落在你耳后。刀很凉，她的手很热。"
    },
    {
+    "op": "show",
+    "img": "idimya ponytail hungry",
+    "at": "sprite_base, lean_in"
+   },
+   {
+    "op": "with",
+    "dur": 0.7
+   },
+   {
     "op": "say",
     "who": "idimya",
     "text": "切的时候别看刀。看你要切的东西。"
@@ -2863,6 +3008,11 @@
     "op": "say",
     "who": "idimya",
     "text": "看刀的人会切到手。看东西的人不会。"
+   },
+   {
+    "op": "say",
+    "who": "n",
+    "text": "（她说这话的时候在看着你的脖子。）"
    },
    {
     "op": "set",
@@ -2920,6 +3070,15 @@
     "op": "say",
     "who": "note",
     "text": "然后她把糖放进嘴里，含了一下，才丢进锅里。"
+   },
+   {
+    "op": "show",
+    "img": "idimya ponytail sly",
+    "at": "sprite_base, lean_in"
+   },
+   {
+    "op": "with",
+    "dur": 0.6
    },
    {
     "op": "say",
