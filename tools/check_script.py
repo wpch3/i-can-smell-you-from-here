@@ -48,6 +48,10 @@ def main():
     defined = set()
     for m in re.finditer(r'^image\s+([\w ]+?)\s*=', text, re.M):
         defined.add(tuple(m.group(1).split()))
+    # ATL 写法：`image idimya seat calm:` 后面跟一串帧（换行不是 `=`）。
+    # 坐姿图的自带眨眼就是这种写法，漏掉会把它们全判成"没定义"。
+    for m in re.finditer(r'^image\s+([\w ]+?)\s*:\s*$', text, re.M):
+        defined.add(tuple(m.group(1).split()))
     # 立绘：image idimya <造型> <表情> 已由 build_sprites 写入 defined，root 名 "idimya"
     sprite_groups = {d[1:] for d in defined if d and d[0] == "idimya"}
     plain = {d[0] for d in defined if len(d) == 1}

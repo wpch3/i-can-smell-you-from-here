@@ -70,15 +70,74 @@ image idimya hairup sly = im.Crop("images/idimya/sheet.png", (1196, 5440, 598, 1
 ## 由 tools/build_seat.py 生成。座位场景（bistro）必须用这一组：
 ## 站姿那张是全身照，桌沿以下依旧是两条直腿，怎么缩放都"没坐下"。
 ## 坐标与缩放已归一化到和定妆图同样大小的头，所以直接用 sprite_seat 摆位即可。
-image idimya seat calm = "images/idimya/seat__calm.png"
-image idimya seat amused = "images/idimya/seat__amused.png"
-image idimya seat sly = "images/idimya/seat__sly.png"
-image idimya seat suspicious = "images/idimya/seat__suspicious.png"
-image idimya seat hungry = "images/idimya/seat__hungry.png"
-image idimya seat smile_soft = "images/idimya/seat__smile_soft.png"
+## 坐姿图：**自带眨眼**。
+##
+## 为什么把眨眼写进 image 本身，而不是挂一个 at 演出：
+##   ① 每一处 show 都要记得加 at_blink(表情)，漏一处就不眨；
+##   ② exe 版没有"叠眼皮补丁"这套东西，最稳的是直接切整张图 ——
+##      半透明叠加会出现两张眼皮（重影），补丁残留会出现睁眼压着闭眼。
+##   这里用 ATL 交替 "睁眼整帧 / 闭眼整帧"，两者都是**不透明整图**，
+##   不存在叠加，也不存在残留。
+##
+## 只有需要眨眼的几个表情做；eyes_down（本来就是垂眼）和 laugh（笑到闭眼）
+## 闭不闭没区别，保持单帧，省资源也省事。
+image idimya seat calm:
+    "images/idimya/seat__calm.png"
+    pause 0.11
+    "images/idimya/seat__calm_closed.png"
+    pause 1.2 + renpy.random.random() * 1.4
+    repeat
+
+image idimya seat amused:
+    "images/idimya/seat__amused.png"
+    pause 0.11
+    "images/idimya/seat__amused_closed.png"
+    pause 1.2 + renpy.random.random() * 1.4
+    repeat
+
+image idimya seat sly:
+    "images/idimya/seat__sly.png"
+    pause 0.11
+    "images/idimya/seat__sly_closed.png"
+    pause 1.2 + renpy.random.random() * 1.4
+    repeat
+
+image idimya seat suspicious:
+    "images/idimya/seat__suspicious.png"
+    pause 0.11
+    "images/idimya/seat__suspicious_closed.png"
+    pause 1.2 + renpy.random.random() * 1.4
+    repeat
+
+image idimya seat hungry:
+    "images/idimya/seat__hungry.png"
+    pause 0.11
+    "images/idimya/seat__hungry_closed.png"
+    pause 1.2 + renpy.random.random() * 1.4
+    repeat
+
+image idimya seat smile_soft:
+    "images/idimya/seat__smile_soft.png"
+    pause 0.11
+    "images/idimya/seat__smile_soft_closed.png"
+    pause 1.2 + renpy.random.random() * 1.4
+    repeat
+
+## 这两个不需要眨眼（一个是垂眼，一个是笑着闭眼）
 image idimya seat eyes_down = "images/idimya/seat__eyes_down.png"
 image idimya seat laugh = "images/idimya/seat__laugh.png"
 image idimya seat flat = "images/idimya/seat__calm.png"
+
+## 闭眼整帧。exe 版没有"叠加眼皮补丁"的做法，直接换整张图：
+## 不会出现半透明叠加，也不会残留睁眼（这两条都是在网页端真机踩过的）。
+image idimya seat calm closed = "images/idimya/seat__calm_closed.png"
+image idimya seat amused closed = "images/idimya/seat__amused_closed.png"
+image idimya seat sly closed = "images/idimya/seat__sly_closed.png"
+image idimya seat suspicious closed = "images/idimya/seat__suspicious_closed.png"
+image idimya seat hungry closed = "images/idimya/seat__hungry_closed.png"
+image idimya seat smile_soft closed = "images/idimya/seat__smile_soft_closed.png"
+image idimya seat eyes_down closed = "images/idimya/seat__eyes_down_closed.png"
+image idimya seat laugh closed = "images/idimya/seat__laugh_closed.png"
 
 ## ——— 立绘注册结束
 
@@ -111,6 +170,7 @@ transform sprite_seat:
     yalign 0.0
     ypos 44
     zoom 1.19
+
 ## 注：zoom 是「坐姿图高度相对 1080 的比例」。坐姿图裁切后 445x1092，
 ## 1.19 时约 1300px 高 —— 头顶压在遮幅下沿，膝盖落在桌沿附近。
 

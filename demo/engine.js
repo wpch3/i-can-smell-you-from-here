@@ -466,6 +466,19 @@
    * 坐姿用的是另一张图（seat__*.png），尺寸和构图都不一样 ——
    * 这时如果还把三层打开，就会在头顶叠出一坨"多出来的头发"，
    * 正是用户说的"部件错位/部件重合"。所以坐姿下一律关掉。 */
+  /* 眨眼图层的几何：站姿那张是 sheet 的格子坐标系（铺满 #charInner 即可），
+   * 坐姿那张是 seat__*.png 自己的坐标系（也是铺满）。两者都是「整格大小的透明图」，
+   * 所以只需要换图源，不需要动定位。 */
+  function syncBlinkLayer() {
+    if (!el.lid) return;
+    const seated = layoutMode === 'seat';
+    const src = seated ? SPRITE.seat.blink : SPRITE.blink;
+    if (!src) { el.lid.style.display = 'none'; return; }
+    el.lid.style.display = 'block';
+    el.lid.style.backgroundImage = `url("${src.src}")`;
+    el.lid.style.backgroundSize = '100% 100%';
+  }
+
   function paintLayers() {
     const seated = layoutMode === 'seat';
     const isBase = SPRITE.name.startsWith('base/') && !seated;
@@ -473,13 +486,13 @@
       el.layerSpec.style.display = isBase ? 'block' : 'none';
     if (el.layerHairUnder) el.layerHairUnder.style.display = isBase ? 'block' : 'none';
 
-    /* 眨眼层也必须关掉。
-     * blink_patch.png 是**按站姿那一格（598x1360）**切出来的眼睛蒙版；
-     * 坐姿换成了另一张图（496x1100、头的位置完全不同）。
-     * 直接铺上去，眼皮就被拉伸着落在她的**脖子**上 ——
-     * 真机截图里那两块"糊在锁骨上的毛边"就是它。
-     * 坐姿组没有闭眼差分，宁可不眨眼，也不能让零件跑到别的地方去。 */
-    if (el.lid) el.lid.style.display = seated ? 'none' : 'block';
+    /* 眨眼层：站姿用 blink_patch.png（sheet 格子坐标），
+     * 坐姿用 seat__blink.png（seat 坐标）—— 两张都是各自坐标系里的整格透明图。
+     *
+     * 早前踩过的坑：把站姿那张铺到坐姿上，眼皮被拉伸着落在她的脖子，
+     * 截图里就是两块"糊在锁骨上的毛边"。所以现在按摆位换图源，
+     * 而不是一刀切关掉 —— 关掉的话圆桌场景她就永远不眨眼了。 */
+    syncBlinkLayer();
   }
 
   /* 眨眼：每 1.2~2.7 秒一次，闭上 110ms。
@@ -495,8 +508,10 @@
   function startBlink() {
     clearInterval(SPRITE.blinkTimer);
     SPRITE.blinkTimer = setInterval(() => {
-      if (!SPRITE.ready || !SPRITE.blink) return;
-      if (layoutMode === 'seat') return;   // 坐姿没有闭眼差分，见 paintLayers 的注释
+      // 坐姿用的是另一张闭眼补丁（SPRITE.seat.blink），这里要一起判断，
+      // 否则圆桌场景永远不眨。
+      const ready = layoutMode === 'seat' ? SPRITE.seat.blink : SPRITE.blink;
+      if (!SPRITE.ready || !ready) return;
       const now = performance.now();
       if (now < SPRITE.blinkUntil) return;
       SPRITE.blinkUntil = now + 110;

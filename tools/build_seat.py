@@ -54,6 +54,14 @@ BASE_FACES = [
 # flat = calm（转场/留白时的"不给表情"，和 sheet 里 base/flat 的处理一致）
 ALIASES = {"flat": "calm"}
 
+# 闭眼差分：单独一张源图（和 seat_src 同一构图，手/衣服/头发完全一致，只有眼睛不同）
+CLOSED_SRC = "seat_expr_closed.png"
+# 眼睛只可能出现在这个横带里（seat_src 坐标 768x1376）。实测：
+# 「睁眼 vs 闭眼」的差异像素 1958 个，全部落在 y=151..239 / x=295..478
+EYE_BAND = (150, 240)
+# 蒙版羽化：眼皮阴影、睫毛要整块盖住，否则闭眼后还留着睁眼的眼角
+EYE_FEATHER = "0x5"
+
 FUZZ = "11%"
 BEAUTY = ["-unsharp", "0x1.3+0.9+0.02",
           "-modulate", "100,116,100",
@@ -112,6 +120,42 @@ def sheet_head():
     return m
 
 
+def eye_mask(open_png, closed_png):
+    """睁眼 / 闭眼逐像素求差 → 只有「眼皮那一块」为白的蒙版（源图坐标系）。
+
+    为什么不用矩形横带：矩形会把鼻子、脸颊、围巾一起显影，
+    眨眼时脸中央浮出一个方块 —— 这是本项目早期真机踩过的坑。
+    """
+    w, h = size(open_png)
+    raw_a = subprocess.run(["convert", str(open_png), "-depth", "8", "rgb:-"],
+                           capture_output=True, check=True).stdout
+    raw_b = subprocess.run(["convert", str(closed_png), "-depth", "8", "rgb:-"],
+                           capture_output=True, check=True).stdout
+    a = np.frombuffer(raw_a, np.uint8).reshape(h, w, 3).astype(np.int16)
+    b = np.frombuffer(raw_b, np.uint8).reshape(h, w, 3).astype(np.int16)
+    diff = np.abs(a - b).max(2)
+    mask = diff > 14
+    band = np.zeros_like(mask)
+    band[EYE_BAND[0]:EYE_BAND[1], :] = True
+    mask &= band
+    if mask.sum() < 200:
+        print("  !! 闭眼差异像素太少，放弃眨眼补丁")
+        return None
+    # 膨胀：眼皮阴影 / 睫毛要整块盖住，否则闭眼后还留着睁眼的眼角
+    from numpy.lib.stride_tricks import sliding_window_view
+    for _ in range(3):
+        pad = np.pad(mask.astype(np.uint8), 2, mode="edge")
+        mask = sliding_window_view(pad, (5, 5)).max(axis=(2, 3)) > 0
+    mask &= band
+    mask_png = closed_png.with_name(closed_png.stem + "_mask.png")
+    subprocess.run(["convert", "-size", f"{w}x{h}", "-depth", "8", "gray:-", str(mask_png)],
+                   input=(mask.astype(np.uint8) * 255).tobytes(), check=True)
+    blurred = closed_png.with_name(closed_png.stem + "_mask_b.png")
+    run("convert", str(mask_png), "-blur", EYE_FEATHER, str(blurred))
+    print(f"  闭眼蒙版 {int(mask.sum())} px")
+    return blurred
+
+
 def main():
     missing = [f for _, f in BASE_FACES if not (SRC / f).exists()]
     if missing:
@@ -153,13 +197,41 @@ def main():
         frames[name] = out
         print(f"  合成 seat/{name}")
 
-    # 眨眼：坐姿组**不做**闭眼补丁。
-    # blink_closed.png 是站姿那张的闭眼差分，几何与坐姿图不同；
-    # 强行缩放贴过去，眼皮会落在她的脖子上（真机截图出现过）。
-    # 引擎里座位场景直接关掉眨眼层，比"叠一个错位的眼皮"安全得多。
+    # 闭眼补丁：用**坐姿自己的**闭眼差分做，不再借用站姿那张。
+    # 做法和 build_sprites.py 一致：睁眼图与闭眼图逐像素求差 → 得到"眼皮"蒙版，
+    # 只把闭着的眼皮显影出来。矩形横带会在脸上留方块，这一条真机验证过。
+    blink = None
+    if (SRC / CLOSED_SRC).exists():
+        blink = tmp / "c_blink.png"
+        to_alpha(SRC / CLOSED_SRC, tmp / "closed_a.png")
+        run("convert", str(tmp / "closed_a.png"), "-filter", "Lanczos",
+            "-resize", f"{sw}x{sh}", str(tmp / "closed_s.png"))
+        # 和一张"睁眼基准"叠一次，保证闭眼图里除了眼皮没有别的差异
+        run("convert", "-size", f"{CW}x{CH}", "xc:none",
+            "(", str(tmp / "closed_s.png"), ")",
+            "-geometry", f"{off_x:+d}{off_y:+d}", "-compose", "over",
+            "-composite", str(blink))
+        mask = eye_mask(tmp / "ref.png", tmp / "closed_a.png")
+        if mask is not None:
+            # ★ 蒙版必须和补丁在同一坐标系。
+            #   蒙版是在**源图**尺度（768x1376）上算的，补丁在**画布**尺度（CWxCH）。
+            #   直接 CopyOpacity 会因尺寸不同而被拉伸/错位 —— 眨眼时眼皮落在鼻子上。
+            #   正确姿势：蒙版按同一缩放 + 同一偏移放到画布上，再当 alpha 用。
+            mask_scaled = tmp / "mask_s.png"
+            run("convert", str(mask), "-filter", "Lanczos", "-resize", f"{sw}x{sh}",
+                str(mask_scaled))
+            mask_canvas = tmp / "mask_c.png"
+            run("convert", "-size", f"{CW}x{CH}", "xc:black", "(", str(mask_scaled), ")",
+                "-geometry", f"{off_x:+d}{off_y:+d}", "-compose", "over",
+                "-composite", str(mask_canvas))
+            run("convert", str(blink), str(mask_canvas), "-alpha", "off",
+                "-compose", "CopyOpacity", "-composite", str(blink))
+            run("convert", str(blink), *BEAUTY, str(blink))
+    else:
+        print("  !! 缺少闭眼源图 seat_expr_closed.png，坐姿不眨眼")
 
     # 统一裁切框（所有表情 + 眨眼 + flat 别名共用）
-    paths = list(frames.values())
+    paths = list(frames.values()) + ([blink] if blink else [])
     left = top = 10 ** 9
     right = bottom = -10 ** 9
     for p in paths:
@@ -182,6 +254,22 @@ def main():
         manifest["frames"][name] = {"file": out.name, "w": cw, "h": ch}
     for alias, target in ALIASES.items():
         manifest["frames"][alias] = manifest["frames"][target]
+
+    # 预合成的「闭眼整帧」：Ren'Py 那边没有分层叠加，
+    # 直接在 ATL 里切换「睁眼整帧 / 闭眼整帧」最稳 ——
+    # 不会出现半透明叠加、也不会残留睁眼（本项目早期在网页端踩过的两个坑）。
+    if blink:
+        for name, p in frames.items():
+            out_closed = OUT / f"seat__{name}_closed.png"
+            run("convert", str(p), "(", str(blink), ")", "-compose", "over",
+                "-composite", "-crop", f"{cw}x{ch}+{left}+{top}", "+repage",
+                str(out_closed))
+            manifest["frames"][name]["closed"] = out_closed.name
+
+    if blink:
+        out_blink = OUT / "seat__blink.png"
+        run("convert", str(blink), "-crop", f"{cw}x{ch}+{left}+{top}", "+repage", str(out_blink))
+        manifest["blink"] = {"file": out_blink.name, "w": cw, "h": ch}
 
 
     (OUT / "seat.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2),

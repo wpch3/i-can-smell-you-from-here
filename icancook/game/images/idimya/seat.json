@@ -11,47 +11,61 @@
     "calm": {
       "file": "seat__calm.png",
       "w": 445,
-      "h": 1092
+      "h": 1092,
+      "closed": "seat__calm_closed.png"
     },
     "amused": {
       "file": "seat__amused.png",
       "w": 445,
-      "h": 1092
+      "h": 1092,
+      "closed": "seat__amused_closed.png"
     },
     "sly": {
       "file": "seat__sly.png",
       "w": 445,
-      "h": 1092
+      "h": 1092,
+      "closed": "seat__sly_closed.png"
     },
     "suspicious": {
       "file": "seat__suspicious.png",
       "w": 445,
-      "h": 1092
+      "h": 1092,
+      "closed": "seat__suspicious_closed.png"
     },
     "hungry": {
       "file": "seat__hungry.png",
       "w": 445,
-      "h": 1092
+      "h": 1092,
+      "closed": "seat__hungry_closed.png"
     },
     "smile_soft": {
       "file": "seat__smile_soft.png",
       "w": 445,
-      "h": 1092
+      "h": 1092,
+      "closed": "seat__smile_soft_closed.png"
     },
     "eyes_down": {
       "file": "seat__eyes_down.png",
       "w": 445,
-      "h": 1092
+      "h": 1092,
+      "closed": "seat__eyes_down_closed.png"
     },
     "laugh": {
       "file": "seat__laugh.png",
       "w": 445,
-      "h": 1092
+      "h": 1092,
+      "closed": "seat__laugh_closed.png"
     },
     "flat": {
       "file": "seat__calm.png",
       "w": 445,
-      "h": 1092
+      "h": 1092,
+      "closed": "seat__calm_closed.png"
     }
+  },
+  "blink": {
+    "file": "seat__blink.png",
+    "w": 445,
+    "h": 1092
   }
 }
