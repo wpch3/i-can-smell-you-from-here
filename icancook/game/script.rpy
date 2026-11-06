@@ -66,6 +66,20 @@ image idimya hairup calm = im.Crop("images/idimya/sheet.png", (2990, 4080, 598, 
 image idimya hairup amused = im.Crop("images/idimya/sheet.png", (0, 5440, 598, 1360))
 image idimya hairup smile_soft = im.Crop("images/idimya/sheet.png", (598, 5440, 598, 1360))
 image idimya hairup sly = im.Crop("images/idimya/sheet.png", (1196, 5440, 598, 1360))
+## ——— 坐姿立绘（真坐姿，不是拿站姿硬塞） ————————————————————————
+## 由 tools/build_seat.py 生成。座位场景（bistro）必须用这一组：
+## 站姿那张是全身照，桌沿以下依旧是两条直腿，怎么缩放都"没坐下"。
+## 坐标与缩放已归一化到和定妆图同样大小的头，所以直接用 sprite_seat 摆位即可。
+image idimya seat calm = "images/idimya/seat__calm.png"
+image idimya seat amused = "images/idimya/seat__amused.png"
+image idimya seat sly = "images/idimya/seat__sly.png"
+image idimya seat suspicious = "images/idimya/seat__suspicious.png"
+image idimya seat hungry = "images/idimya/seat__hungry.png"
+image idimya seat smile_soft = "images/idimya/seat__smile_soft.png"
+image idimya seat eyes_down = "images/idimya/seat__eyes_down.png"
+image idimya seat laugh = "images/idimya/seat__laugh.png"
+image idimya seat flat = "images/idimya/seat__calm.png"
+
 ## ——— 立绘注册结束
 
 ## ——— 演出：让「她离你有多近」变成可感知的变量 ———————————————
@@ -97,6 +111,20 @@ transform sprite_seat:
     yalign 0.0
     ypos 44
     zoom 1.19
+## 注：zoom 是「坐姿图高度相对 1080 的比例」。坐姿图裁切后 445x1092，
+## 1.19 时约 1300px 高 —— 头顶压在遮幅下沿，膝盖落在桌沿附近。
+
+## 玄关专用：站姿，但底边抬到「可见地面的下沿」。
+##
+## bg_genkan 四周有一圈白色画框，底部白框高 25px —— 可见地板到 y=1055 就结束了。
+## sprite_base 一律 yalign 1.0（贴 1080），腿的截断线正好落进白框里，
+## 看起来就是「脚陷进了地板」。抬 25px 之后截断线正好压在地板尽头，
+## 和背景自身的明暗交界重合，不再是一条孤零零的横线。
+transform sprite_genkan:
+    xalign 0.5
+    yalign 1.0
+    yoffset -25
+    zoom 0.92
 
 ## 兼容：老写法 sprite_base 现在等价于「站姿」
 transform sprite_base:
@@ -181,9 +209,10 @@ label ch0_arrive:
 
     ## 广角 → 近景
     hide kv
-    show idimya base amused at sprite_seat, push_slow
+    show idimya seat amused at sprite_seat, push_slow
     ## 顺序要紧：桌面必须 show 在立绘**之后**（zorder 更大），
-    ## 才能压在她身上，把腰以下挡掉 —— 于是"站姿立绘"看起来是坐着的。
+    ## 才能压在她身上。现在用的是**真坐姿**图（image idimya seat *），
+    ## 桌沿只需要盖住她的小腿，不再承担"把站姿伪装成坐姿"的任务。
     ## 注意不能在纯黑场景之前 show：这层不透明部分会跟着一起淡出，
     ## 变成"桌子浮在黑幕上"。
     show table_front
@@ -201,7 +230,7 @@ label ch0_arrive:
 
     n "（她把「不会吃你」这句话咽回去了。）"
 
-    show idimya base amused at sprite_seat, lean_in
+    show idimya seat amused at sprite_seat, lean_in
     with Dissolve(0.6)
 
     idimya "三周不见。你有没有想我？"
@@ -211,7 +240,7 @@ label ch0_arrive:
             $ trust += 1
             n "「想。想到有点睡不着。」"
 
-            show idimya base laugh at sprite_seat, lean_in
+            show idimya seat laugh at sprite_seat, lean_in
             idimya "噢——"
             idimya "这句答得太快了。快到我都不好意思不信。"
 
@@ -227,7 +256,7 @@ label ch0_arrive:
             $ scent += 2
             n "「你呢？这三个月里，你约过几个人来这张桌子？」"
 
-            show idimya base eyes_down at sprite_seat, lean_back
+            show idimya seat eyes_down at sprite_seat, lean_back
             with Dissolve(0.4)
             idimya "……"
             idimya "你是第一个被我问到还想反问我的。"
@@ -242,7 +271,7 @@ label ch0_arrive:
 
 label ch0_q1:
 
-    show idimya base calm at sprite_seat, push_slow
+    show idimya seat calm at sprite_seat, push_slow
     with Dissolve(0.8)
 
     note "她把烛台往你那边推了一点。火苗歪了一下，她的脸暗了一半，又亮回来。"
@@ -267,7 +296,7 @@ label ch0_q1:
             $ doubt += 2
             n "「因为你看起来不会伤害我。」"
 
-            show idimya base flat at sprite_seat, lean_back
+            show idimya seat flat at sprite_seat, lean_back
             idimya "「看起来」。"
             idimya "你挑了一个很聪明的词，然后把它用在了最不该用的地方。"
             $ doubt += 1
@@ -277,7 +306,7 @@ label ch0_q1:
             $ trust += 1
             n "「因为我很饿。」"
 
-            show idimya base hungry at sprite_seat, lean_in
+            show idimya seat hungry at sprite_seat, lean_in
             with Dissolve(0.5)
 
             idimya "……哈。"
@@ -293,7 +322,7 @@ label ch0_q1:
 
 label ch0_smell:
 
-    show idimya base calm at sprite_seat, push_slow
+    show idimya seat calm at sprite_seat, push_slow
     with Dissolve(0.6)
 
     note "你低下头。桌上的东西离你很近：烛台、一杯没动过的酒、一本合着的笔记本。"
@@ -319,7 +348,7 @@ label ch0_smell:
 
 label ch0_q2:
 
-    show idimya base calm at sprite_seat, push_slow
+    show idimya seat calm at sprite_seat, push_slow
     with Dissolve(0.6)
 
     idimya "第二个问题。"
@@ -345,13 +374,13 @@ label ch0_q2:
         "「我怕的是自己会习惯你。」":
             $ scent += 2
             $ trust += 1
-            show idimya base amused at sprite_seat, lean_in
+            show idimya seat amused at sprite_seat, lean_in
             with Dissolve(0.5)
 
             n "「我怕的是自己会习惯你。」"
 
             idimya "……"
-            show idimya base smile_soft at sprite_seat, lean_in
+            show idimya seat smile_soft at sprite_seat, lean_in
             idimya "这句话，是你今天晚上说的最好听的一句。"
             idimya "也是我听得最认真的一句。"
             idimya "很危险。你说的。不是我。"
@@ -365,7 +394,7 @@ label ch0_q2:
 
 label ch0_q3:
 
-    show idimya base calm at sprite_seat, push_slow
+    show idimya seat calm at sprite_seat, push_slow
     with Dissolve(0.6)
 
     note "烛火低了一截。她伸手把蜡油按回烛芯里，动作很慢，像在给什么东西掖被子。"
@@ -388,7 +417,7 @@ label ch0_q3:
             $ doubt += 3
             n "「一个我可以骗过去的东西。」"
 
-            show idimya base suspicious at sprite_seat, lean_back
+            show idimya seat suspicious at sprite_seat, lean_back
             with Dissolve(0.4)
 
             idimya "那你现在应该已经骗过去了才对。"
@@ -399,7 +428,7 @@ label ch0_q3:
         "「你本来是什么，就是什么。别为我改。」":
             $ scent += 2
             $ trust += 2
-            show idimya base sly at sprite_seat, lean_in
+            show idimya seat sly at sprite_seat, lean_in
             with Dissolve(0.6)
 
             n "「你本来是什么，就是什么。别为我改。」"
@@ -421,7 +450,7 @@ label ch0_q3:
 
 label ch0_reversal:
 
-    show idimya base calm at sprite_seat, push_slow
+    show idimya seat calm at sprite_seat, push_slow
     with Dissolve(0.6)
 
     note "你把菜单推回去，合上，放在她手边。"
@@ -429,7 +458,7 @@ label ch0_reversal:
     n "「今晚你来点。」"
     n "「不过在你点之前——我想知道，你想吃什么。」"
 
-    show idimya base eyes_down at sprite_seat, lean_in
+    show idimya seat eyes_down at sprite_seat, lean_in
     with Dissolve(0.8)
 
     note "她的笑停了一下。不是僵住，是那种被人摸到了心口的位置、突然不知道要不要后退的停。"
@@ -487,7 +516,7 @@ label ch0_reversal:
 
 label ch0_ending:
 
-    show idimya base calm at sprite_seat, push_slow
+    show idimya seat calm at sprite_seat, push_slow
     with Dissolve(0.8)
 
     if doubt >= trust + 1:
@@ -508,7 +537,7 @@ label ch0_ending:
 
 label end_lie:
 
-    show idimya base suspicious at sprite_seat
+    show idimya seat suspicious at sprite_seat
     with Dissolve(0.4)
 
     note "她送你到门口，替你拉开门，冷风灌进来。"
@@ -533,7 +562,7 @@ label end_lie:
 
 label end_name:
 
-    show idimya base calm at sprite_seat
+    show idimya seat calm at sprite_seat
     with Dissolve(0.4)
 
     note "她陪你走到巷口，站定，没有跟出来。"
@@ -560,7 +589,7 @@ label end_name:
 
 label end_scent:
 
-    show idimya base sly at sprite_seat
+    show idimya seat sly at sprite_seat
     with Dissolve(0.4)
 
     note "她没送你。你走到门口时，她在背后开口。"
@@ -652,16 +681,16 @@ label ch1_genkan:
 
     note "里面没有脚步声。过了很久，门自己开了一条缝——像是有人早就站在门后，只是等你先按下去。"
 
-    show idimya hairup calm at sprite_base, push_slow
+    show idimya hairup calm at sprite_genkan, push_slow
     with Dissolve(0.8)
 
-    show idimya hairup smile_soft at sprite_base
+    show idimya hairup smile_soft at sprite_genkan
     with Dissolve(0.5)
 
     note "她头发是随便盘起来的，几缕落在颈侧。没有化妆。"
     note "看到是你的时候，她眼睛里有一点东西亮了一下。很快，然后就没了。"
 
-    show idimya hairup calm at sprite_base
+    show idimya hairup calm at sprite_genkan
     with Dissolve(0.6)
 
     idimya "你迟到了四分钟。"
@@ -679,7 +708,7 @@ label ch1_genkan:
             $ trust += 1
             note "你把外套挂在那件长外套旁边。它的下摆有一块洗过很多次的痕迹。"
 
-            show idimya hairup amused at sprite_base, push_slow
+            show idimya hairup amused at sprite_genkan, push_slow
             with Dissolve(0.5)
 
             idimya "……好。"
@@ -690,10 +719,10 @@ label ch1_genkan:
             $ doubt += 1
             n "「那件外套，是谁的？」"
 
-            show idimya hairup calm at sprite_base, lean_back
+            show idimya hairup calm at sprite_genkan, lean_back
             with Dissolve(0.4)
 
-            show idimya hairup sly at sprite_base, lean_in
+            show idimya hairup sly at sprite_genkan, lean_in
             with Dissolve(0.5)
 
             idimya "……"
@@ -707,7 +736,7 @@ label ch1_genkan:
             $ doubt += 2
             n "（你没有动。）"
 
-            show idimya hairup calm at sprite_base, lean_back
+            show idimya hairup calm at sprite_genkan, lean_back
             with Dissolve(0.4)
 
             idimya "行。那就站着。"

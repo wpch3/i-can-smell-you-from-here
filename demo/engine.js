@@ -146,7 +146,7 @@
 
   // 玩家遇到问题时要能自己确认「拿到的是哪一版」：F12 里会看到这行，标题页角落也有版本号。
   // 之前那个「点进去一片黑」的 bug 有相当概率是浏览器缓存造成的误报，先排除这个变量。
-  const VERSION = '0.6.1';
+  const VERSION = '0.6.2';
   console.info(`她记住的方式 · 网页 Demo v${VERSION}`);
   const verEl = document.getElementById('ver');
   if (verEl) verEl.textContent = `v${VERSION}`;
@@ -206,6 +206,9 @@
     name: 'calm',
     blinkTimer: null,
     blinkUntil: 0,
+    // 坐姿组：独立的图 + 独立的帧表（seat.json）。
+    // 站姿那张是全身照，无论怎么缩放都「站」着 —— 用户当场指出过。
+    seat: { ready: false, frames: {}, cell: { w: 0, h: 0 }, blink: null },
   };
 
   window.__spriteDebug = () => ({ ready: SPRITE.ready, frames: Object.keys(SPRITE.frames || {}), sheet: !!SPRITE.sheet });
@@ -251,6 +254,21 @@
         el.layerSpec.style.backgroundImage = `url("${asset(SPRITE_DIR + 'layers/layer_spec.png')}")`;
       })
       .catch((e) => console.warn('立绘表加载失败', e));
+
+    // 坐姿组单独一份 manifest（seat.json），只有表情 → 一张图，不做精灵表
+    fetch(asset(SPRITE_DIR + 'seat.json'))
+      .then((r) => r.json())
+      .then((m) => {
+        SPRITE.seat.cell = m.cell;
+        SPRITE.seat.frames = m.frames;
+        if (m.blink && m.blink.file) {
+          const bl = new Image();
+          bl.onload = () => { SPRITE.seat.blink = bl; };
+          bl.src = asset(SPRITE_DIR + m.blink.file);
+        }
+        SPRITE.seat.ready = true;
+      })
+      .catch(() => console.warn('坐姿立绘缺失，座位场景会退回站姿'));
   }
 
   function setExpression(name) {
@@ -286,10 +304,38 @@
     // top 不是定稿的 -46，而是 120：遮幅有 120px 高，
     // 按定稿贴顶的话，她的头发正好被遮幅吃掉 —— 看起来就是「人物超出屏幕」。
     // 120 = 遮幅高度，等于让她「坐在遮幅下沿」起步，头顶留 70px 余量。
+    // zoom 是 seat__*.png 的高度相对 1080 的比例。
+    // 坐姿图裁切后 496x1100，zoom 1.19 时约 1309px 高 —— 头正好压在遮幅下沿，
+    // 膝盖落在桌沿附近，符合「隔着一张圆桌看她」的距离感。
     seat: { zoom: 1.19, top: 44, cx: 976 },
     stand: { zoom: 0.92, bottom: 0, cx: 960 },
   };
+
+  /* ---------------------------------------------------------------- 落地
+   *
+   * 站姿立绘是「切到大腿中段」的全身照，底边是一条水平直线。
+   * 原来一律 bottom=0（贴屏幕底），在大多数背景上没问题 —— 地板本来就铺到画面下沿。
+   * 但 bg_genkan 例外：那张图的四周有一圈白色画框，底部白框高 25px，
+   * 也就是说「可见的地板」在 y=1055 就结束了。立绘继续往下贴 25px，
+   * 腿的截断线就落进白框里 —— 看起来像脚陷进了地板/画框。
+   *
+   * 现在按背景登记「可见地面下沿」（1080 坐标系），立绘底边对齐到这里；
+   * 同时把截断处做一点向上羽化（不是硬直线），避免"一刀切"的观感。
+   * 数值来自逐图实测：从底往上扫，第一行不再"整体很亮"（>130）的位置。
+   */
+  const GROUND = {
+    genkan: 1055,
+  };
+  const GROUND_DEFAULT = 1080;
+
+  /** 该场景立绘底边所在的 y（1080 坐标系） */
+  function groundY(name) {
+    const g = GROUND[name];
+    return typeof g === 'number' ? g : GROUND_DEFAULT;
+  }
+
   let layoutMode = 'stand';
+  let curScene = 'kv';       // 当前背景名，落地计算要用
 
   /** 切换摆位。座位场景（圆桌）用 seat，其余用 stand。 */
   function setLayout(mode) {
@@ -314,6 +360,57 @@
     return sceneName === 'bistro' || sceneName === 'kv' ? 'seat' : 'stand';
   }
 
+  /* 坐姿：用 seat__*.png 那一组独立图，不再拿站姿全身照硬塞。
+   *
+   * 以前的 seat 摆位是把站姿立绘放大 1.19 倍、再让前景桌面盖住腰以下。
+   * 桌沿之上是对的，桌沿之下依旧是「两条直腿」—— 用户一眼就看穿了。
+   * 现在座位场景换真坐姿图：手放在身前、有膝盖透视、脚踩在地上。
+   *
+   * 尺寸不靠猜：seat.json 里那张图已经是「头和定妆图一样大」的尺度，
+   * 摆位只需要决定「她在 1080 画面里占多高」。
+   */
+  function paintSeated(L, stageH) {
+    const S = SPRITE.seat;
+    const stage = stageH || 1080;
+    const k = stage / 1080;
+    const face = (SPRITE.name || 'base/calm').split('/').pop();
+    const frames = S.ready ? S.frames : null;
+    const useSeat = !!(frames && (frames[face] || frames.calm));
+
+    const cell = useSeat ? S.cell : SPRITE.cell;
+    const dispH = cell.h * L.zoom;
+    const dispW = cell.w * L.zoom;
+
+    el.char.style.height = Math.round(dispH * k) + 'px';
+    el.char.style.width = Math.round(dispW * k) + 'px';
+    el.char.style.left = Math.round((L.cx - dispW / 2) * k) + 'px';
+    el.char.style.top = Math.round(L.top * k) + 'px';
+    el.char.style.bottom = 'auto';
+    el.char.style.transform = baseTransform();
+    el.char.style.maskImage = 'none';
+    el.char.style.webkitMaskImage = 'none';
+
+    el.charInner.style.width = '100%';
+    el.charInner.style.height = '100%';
+    el.charInner.style.backgroundSize = '100% 100%';
+    el.charInner.style.backgroundPosition = '0 0';
+    if (useSeat) {
+      const fr = frames[face] || frames.calm;
+      el.charInner.style.backgroundImage = `url("${asset(SPRITE_DIR + fr.file)}")`;
+    } else {
+      // 兜底：坐姿资产没构建出来时退回原来那张站姿格子（至少不会空白）
+      const f = SPRITE.frames[SPRITE.name] || SPRITE.frames['base/calm'];
+      const { w, h } = SPRITE.cell;
+      const cellScale = (dispH * k) / h;
+      el.charInner.style.backgroundImage = `url("${asset(SPRITE_DIR + 'sheet.png')}")`;
+      el.charInner.style.backgroundSize =
+        `${Math.round(w * SPRITE.cols * cellScale)}px ${Math.round(h * SPRITE.rows * cellScale)}px`;
+      el.charInner.style.backgroundPosition = f
+        ? `${-Math.round(f[0] * cellScale)}px ${-Math.round(f[1] * cellScale)}px` : '0 0';
+    }
+    paintLayers();
+  }
+
   function paintSprite() {
     if (!SPRITE.ready) return;
     // 注意：SPRITE.frames 只有 "造型/表情" 形式的键（base/calm 等），
@@ -328,36 +425,30 @@
     const L = LAYOUT[layoutMode] || LAYOUT.stand;
 
     if (layoutMode === 'seat') {
-      // 定稿坐标是 1920x1080 下的像素 → 按舞台高度等比换算
-      const k = stageH / 1080;
-      const dispH = h * L.zoom;
-      const dispW = w * L.zoom;
-      const cellScale = (dispH * k) / h;
-      el.char.style.height = Math.round(dispH * k) + 'px';
-      el.char.style.width = Math.round(dispW * k) + 'px';
-      el.char.style.left = Math.round((L.cx - dispW / 2) * k) + 'px';
-      el.char.style.top = Math.round(L.top * k) + 'px';
-      el.char.style.bottom = 'auto';
-      el.char.style.transform = baseTransform();   // 坐姿不用 transform 做位移
-      el.charInner.style.width = '100%';
-      el.charInner.style.height = '100%';
-      el.charInner.style.backgroundImage = `url("${asset(SPRITE_DIR + 'sheet.png')}")`;
-      el.charInner.style.backgroundSize =
-        `${Math.round(w * SPRITE.cols * cellScale)}px ${Math.round(h * SPRITE.rows * cellScale)}px`;
-      el.charInner.style.backgroundPosition =
-        `${-Math.round(f[0] * cellScale)}px ${-Math.round(f[1] * cellScale)}px`;
-      paintLayers();
+      paintSeated(L, stageH);
       return;
     }
 
-    // stand：底边贴屏幕底，高度 = 舞台 92%（头顶刚好留出遮幅的位置）
+    // stand：高度 = 舞台 92%（头顶刚好留出遮幅的位置），底边贴「可见地面下沿」
+    // 不再一律 bottom:0 —— 玄关的白画框让地板提前 25px 结束，
+    // 贴屏幕底会把腿的截断线送进画框里（看起来是脚陷进去）。
     const scale = (stageH * L.zoom) / h;
+    const k2 = stageH / 1080;                       // 1080 坐标系 → 舞台像素
+    const lift = Math.round((GROUND_DEFAULT - groundY(curScene)) * k2);
     el.char.style.width = Math.round(w * scale) + 'px';
     el.char.style.height = Math.round(h * scale) + 'px';
     el.char.style.left = '50%';
     el.char.style.top = 'auto';
-    el.char.style.bottom = '0';
+    el.char.style.bottom = lift + 'px';
     el.char.style.transform = baseTransform();
+    // 抬起来以后，立绘底边那条水平"一刀切"就露在画面里了。
+    // 让最后 26px（1080 坐标系）渐隐进地板，截断点就看不出是直线。
+    const fade = Math.round(26 * k2);
+    const mask = lift > 0
+      ? `linear-gradient(to bottom, #000 calc(100% - ${fade}px), transparent 100%)`
+      : 'none';
+    el.char.style.maskImage = mask;
+    el.char.style.webkitMaskImage = mask;
     el.charInner.style.width = '100%';
     el.charInner.style.height = '100%';
     el.charInner.style.backgroundImage = `url("${asset(SPRITE_DIR + 'sheet.png')}")`;
@@ -370,11 +461,25 @@
 
   // L2 的三层只从 base/calm 切出来，换到别的造型时必须藏起来，
   // 否则会叠上一层「短发 + 蓝吊带」的刘海和丝巾，比不动还糟。
+  /* L2 的三层（刘海/丝巾/高光）是从 **base 站姿那一格** 切出来的，
+   * 贴图比例、坐标全都是按 sheet.png 的格子算的。
+   * 坐姿用的是另一张图（seat__*.png），尺寸和构图都不一样 ——
+   * 这时如果还把三层打开，就会在头顶叠出一坨"多出来的头发"，
+   * 正是用户说的"部件错位/部件重合"。所以坐姿下一律关掉。 */
   function paintLayers() {
-    const isBase = SPRITE.name.startsWith('base/');
+    const seated = layoutMode === 'seat';
+    const isBase = SPRITE.name.startsWith('base/') && !seated;
     el.layerHair.style.display = el.layerScarf.style.display =
       el.layerSpec.style.display = isBase ? 'block' : 'none';
     if (el.layerHairUnder) el.layerHairUnder.style.display = isBase ? 'block' : 'none';
+
+    /* 眨眼层也必须关掉。
+     * blink_patch.png 是**按站姿那一格（598x1360）**切出来的眼睛蒙版；
+     * 坐姿换成了另一张图（496x1100、头的位置完全不同）。
+     * 直接铺上去，眼皮就被拉伸着落在她的**脖子**上 ——
+     * 真机截图里那两块"糊在锁骨上的毛边"就是它。
+     * 坐姿组没有闭眼差分，宁可不眨眼，也不能让零件跑到别的地方去。 */
+    if (el.lid) el.lid.style.display = seated ? 'none' : 'block';
   }
 
   /* 眨眼：每 1.2~2.7 秒一次，闭上 110ms。
@@ -391,6 +496,7 @@
     clearInterval(SPRITE.blinkTimer);
     SPRITE.blinkTimer = setInterval(() => {
       if (!SPRITE.ready || !SPRITE.blink) return;
+      if (layoutMode === 'seat') return;   // 坐姿没有闭眼差分，见 paintLayers 的注释
       const now = performance.now();
       if (now < SPRITE.blinkUntil) return;
       SPRITE.blinkUntil = now + 110;
@@ -715,9 +821,19 @@
         case 'show': {
           const parts = (ins.img || '').split(/\s+/);
           if (parts[0] === 'idimya') {
-            // Ren'Py 写法：show idimya <造型> <表情>
+            // Ren'Py 写法：show idimya <造型> <表情>，造型可以省略
             const group = parts[2] ? parts[1] : 'base';
             const face = parts[2] || parts[1] || 'calm';
+            // ★ 关键：以「图组」为准同步摆位。
+            //   script.rpy 里 bistro 用的是 `show idimya seat calm at sprite_seat`，
+            //   图组是 seat。网页如果只看场景名，一旦剧本里漏 show table_front
+            //   或场景切换顺序变了，就会拿站姿去站圆桌 —— 用户报过「她没坐下」。
+            //   图组先说话，场景名只是兜底。
+            if (group === 'seat') {
+              setLayout('seat');          // 坐姿图组 → 座位摆位
+            } else if (layoutMode === 'seat') {
+              setLayout('stand');         // 别的图组 → 退回站姿摆位
+            }
             setExpression(`${group}/${face}`);
             el.char.style.opacity = '1';
             applyTransform(ins.at, ins.at === 'lean_in' ? 900 : 500);
@@ -902,12 +1018,14 @@
       el.bg.style.opacity = '0';
       el.char.style.opacity = '0';
       el.vig.style.opacity = '0.9';
+      curScene = 'black';
       setLayout('stand');
       return;
     }
     el.bg.style.opacity = '1';
     el.vig.style.opacity = '1';
     setKv(false);
+    curScene = img;
     setLayout(layoutFor(img));
     // kv 与 bg 是同一张图：bg 作为静态底，char 承担推近演出
     const url = IMG[img] || IMG.kv;
@@ -983,27 +1101,34 @@
   }
 
   // ---------------------------------------------------------------- 嗅觉交互
+  /* 热区坐标按**真站姿→真坐姿**重标过一次。
+   *
+   * 原来那组是照站姿立绘猜的：她的手被标在 (0.50,0.70)、烛台笔记本在 0.80+，
+   * 换成坐姿图之后「她的手」飘到了胸口下方，烛台落在桌沿边缘点不到。
+   * 现在以 1080 画面实测：她坐在正中，手在 y≈0.50，膝在 0.66，
+   * 前景桌面从 y≈0.78 开始可见 —— 烛台/笔记本就压在桌面可见区里。
+   */
   const SMELLS = {
     candle: {
-      x: 0.40, y: 0.80, w: 0.1, h: 0.2,
+      x: 0.40, y: 0.86, w: 0.11, h: 0.14,
       label: '烛台',
       note: '蜡油、旧火、还有一点铁。',
       line: '蜡油。烧过很多次了，每次都是同一支。她大概从来不换。',
     },
     notebook: {
-      x: 0.66, y: 0.88, w: 0.12, h: 0.12,
+      x: 0.66, y: 0.88, w: 0.13, h: 0.11,
       label: '笔记本',
       note: '皮革、纸、干了很久的甜。',
       line: '皮面的本子，压着一股很淡的甜味。翻过很多次，边角是软的。',
     },
     hand: {
-      x: 0.50, y: 0.70, w: 0.14, h: 0.14,
+      x: 0.51, y: 0.50, w: 0.15, h: 0.12,
       label: '她的手',
       note: '体温、皂、干净的皮肤。',
       line: '她的手腕上没有香水。只有体温，和一点洗涤剂的味道。',
     },
     air: {
-      x: 0.06, y: 0.18, w: 0.1, h: 0.14,
+      x: 0.08, y: 0.30, w: 0.11, h: 0.13,
       label: '空气',
       note: '铁锈。很新鲜的那种铁锈。',
       line: '空气里有别的东西。不是这桌的。是走廊深处飘过来的。',

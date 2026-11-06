@@ -21,6 +21,7 @@ python3 -m http.server 8000 --bind 0.0.0.0
 python3 tools/rpy2json.py icancook/game/script.rpy -o demo/story.json
 node tools/simulate.js        # 全部固定路径 + 3000 条随机路径的纯逻辑总检
 python3 tools/build_props.py                    # 前景桌面遮挡层（改过 bg_bistro 就要重跑）
+python3 tools/build_seat.py                     # 坐姿立绘（座位场景必须用这一组）
 python3 tools/check_script.py                   # 静态检查：引号/图名/label/变量/摆位
 node tools/smoke-test.js "0,0,0,0,0,0,0,0,0"   # 真点一遍（需要 npm i jsdom）
 ```
@@ -35,6 +36,7 @@ node tools/smoke-test.js "0,0,0,0,0,0,0,0,0"   # 真点一遍（需要 npm i jsd
 | `demo/` | **网页 Demo**（同一份剧本，浏览器直接玩） |
 | `tools/rpy2json.py` | 剧本转译器：`.rpy` → `demo/story.json` |
 | `tools/build_sprites.py` | 立绘管线：造型 × 表情 → 网格精灵表 + `im.Crop` 注册块 |
+| `tools/build_seat.py` | 坐姿立绘：按「头部尺度」把坐姿重绘稿归一化到与定妆图同一尺度，输出 `seat__<表情>.png` + `seat.json`（座位场景用真坐姿，不再靠前景桌面遮挡伪装） |
 | `tools/build_layers.py` | L2 分层：切出刘海 / 丝巾尾端 / 高光三张独立层（按颜色分离零件，并自检「三层零位移叠回原格 RMSE=0」） |
 | `tools/gen_audio.py` | 程序化合成 4 条环境音 + 7 个音效（零版权素材） |
 | `tools/build_props.py` | 前景道具层：从 `bg_bistro` 抠出桌沿以下的 `table_front.png`（让她「坐」在桌后，接缝自检 RMSE=0） |

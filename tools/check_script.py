@@ -30,6 +30,7 @@ for stream in (sys.stdout, sys.stderr):
 ROOT = Path(__file__).resolve().parent.parent
 GAME = ROOT / "icancook" / "game"
 SCRIPT = GAME / "script.rpy"
+SEAT = ROOT / "icancook" / "game" / "images" / "idimya" / "seat.json"
 SHEET = GAME / "images" / "idimya" / "sheet.json"
 
 problems = []
@@ -124,6 +125,12 @@ def main():
         if m and scene_now == "bistro" and m.group(1) == "sprite_base":
             bad(f"{i}: scene bistro 里用了站姿摆位 sprite_base"
                 f" —— 圆桌场景必须用 sprite_seat，否则她会站进桌子中间")
+        # 摆位对了、但素材还是站姿的那一组：桌沿以下依旧是两条直腿，
+        # 用户已经指出过「她没坐下」。座位场景必须用 image idimya seat *
+        m2 = re.match(r"^show idimya (\w+) (\w+) at sprite_seat", st)
+        if m2 and m2.group(1) != "seat":
+            bad(f"{i}: scene bistro 里 show idimya {m2.group(1)} {m2.group(2)} at sprite_seat"
+                f" —— 形状不对：坐姿场景要用 image idimya seat *（跑 tools/build_seat.py）")
         if scene_now == "bistro":
             seat_zone.append(st)
 
@@ -138,9 +145,20 @@ def main():
     for k in manifest["frames"]:
         g, f = k.split("/")
         frames.add((g, f))
+    # 坐姿组：单独的 manifest（seat.json），不走 sheet 的格子
+    seat_manifest = SEAT
+    seat_frames = set()
+    if seat_manifest.exists():
+        sm = json.loads(seat_manifest.read_text(encoding="utf-8"))
+        seat_frames = set(sm.get("frames", {}).keys())
+
     # 反向：注册了但表里没有
     for d in defined:
         if d and d[0] == "idimya" and len(d) == 3:
+            if d[1] == "seat":
+                if seat_frames and d[2] not in seat_frames:
+                    bad(f"image idimya seat {d[2]} —— seat.json 里没有这一格（重跑 build_seat）")
+                continue
             if (d[1], d[2]) not in frames:
                 bad(f"image idimya {d[1]} {d[2]} —— sheet.json 里没有这一格（注册块过期，重跑 build_sprites）")
 

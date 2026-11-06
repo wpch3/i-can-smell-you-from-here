@@ -1,0 +1,57 @@
+{
+  "cell": {
+    "w": 445,
+    "h": 1092
+  },
+  "head": {
+    "w": 307,
+    "top": 0
+  },
+  "frames": {
+    "calm": {
+      "file": "seat__calm.png",
+      "w": 445,
+      "h": 1092
+    },
+    "amused": {
+      "file": "seat__amused.png",
+      "w": 445,
+      "h": 1092
+    },
+    "sly": {
+      "file": "seat__sly.png",
+      "w": 445,
+      "h": 1092
+    },
+    "suspicious": {
+      "file": "seat__suspicious.png",
+      "w": 445,
+      "h": 1092
+    },
+    "hungry": {
+      "file": "seat__hungry.png",
+      "w": 445,
+      "h": 1092
+    },
+    "smile_soft": {
+      "file": "seat__smile_soft.png",
+      "w": 445,
+      "h": 1092
+    },
+    "eyes_down": {
+      "file": "seat__eyes_down.png",
+      "w": 445,
+      "h": 1092
+    },
+    "laugh": {
+      "file": "seat__laugh.png",
+      "w": 445,
+      "h": 1092
+    },
+    "flat": {
+      "file": "seat__calm.png",
+      "w": 445,
+      "h": 1092
+    }
+  }
+}

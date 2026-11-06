@@ -114,7 +114,7 @@
    },
    {
     "op": "show",
-    "img": "idimya base amused",
+    "img": "idimya seat amused",
     "at": "sprite_seat, push_slow"
    },
    {
@@ -158,7 +158,7 @@
    },
    {
     "op": "show",
-    "img": "idimya base amused",
+    "img": "idimya seat amused",
     "at": "sprite_seat, lean_in"
    },
    {
@@ -198,7 +198,7 @@
    },
    {
     "op": "show",
-    "img": "idimya base laugh",
+    "img": "idimya seat laugh",
     "at": "sprite_seat, lean_in"
    },
    {
@@ -255,7 +255,7 @@
    },
    {
     "op": "show",
-    "img": "idimya base eyes_down",
+    "img": "idimya seat eyes_down",
     "at": "sprite_seat, lean_back"
    },
    {
@@ -293,7 +293,7 @@
   "ch0_q1": [
    {
     "op": "show",
-    "img": "idimya base calm",
+    "img": "idimya seat calm",
     "at": "sprite_seat, push_slow"
    },
    {
@@ -382,7 +382,7 @@
    },
    {
     "op": "show",
-    "img": "idimya base flat",
+    "img": "idimya seat flat",
     "at": "sprite_seat, lean_back"
    },
    {
@@ -419,7 +419,7 @@
    },
    {
     "op": "show",
-    "img": "idimya base hungry",
+    "img": "idimya seat hungry",
     "at": "sprite_seat, lean_in"
    },
    {
@@ -457,7 +457,7 @@
   "ch0_smell": [
    {
     "op": "show",
-    "img": "idimya base calm",
+    "img": "idimya seat calm",
     "at": "sprite_seat, push_slow"
    },
    {
@@ -524,7 +524,7 @@
   "ch0_q2": [
    {
     "op": "show",
-    "img": "idimya base calm",
+    "img": "idimya seat calm",
     "at": "sprite_seat, push_slow"
    },
    {
@@ -625,7 +625,7 @@
    },
    {
     "op": "show",
-    "img": "idimya base amused",
+    "img": "idimya seat amused",
     "at": "sprite_seat, lean_in"
    },
    {
@@ -644,7 +644,7 @@
    },
    {
     "op": "show",
-    "img": "idimya base smile_soft",
+    "img": "idimya seat smile_soft",
     "at": "sprite_seat, lean_in"
    },
    {
@@ -678,7 +678,7 @@
   "ch0_q3": [
    {
     "op": "show",
-    "img": "idimya base calm",
+    "img": "idimya seat calm",
     "at": "sprite_seat, push_slow"
    },
    {
@@ -762,7 +762,7 @@
    },
    {
     "op": "show",
-    "img": "idimya base suspicious",
+    "img": "idimya seat suspicious",
     "at": "sprite_seat, lean_back"
    },
    {
@@ -799,7 +799,7 @@
    },
    {
     "op": "show",
-    "img": "idimya base sly",
+    "img": "idimya seat sly",
     "at": "sprite_seat, lean_in"
    },
    {
@@ -857,7 +857,7 @@
   "ch0_reversal": [
    {
     "op": "show",
-    "img": "idimya base calm",
+    "img": "idimya seat calm",
     "at": "sprite_seat, push_slow"
    },
    {
@@ -881,7 +881,7 @@
    },
    {
     "op": "show",
-    "img": "idimya base eyes_down",
+    "img": "idimya seat eyes_down",
     "at": "sprite_seat, lean_in"
    },
    {
@@ -1068,7 +1068,7 @@
   "ch0_ending": [
    {
     "op": "show",
-    "img": "idimya base calm",
+    "img": "idimya seat calm",
     "at": "sprite_seat, push_slow"
    },
    {
@@ -1128,7 +1128,7 @@
   "end_lie": [
    {
     "op": "show",
-    "img": "idimya base suspicious",
+    "img": "idimya seat suspicious",
     "at": "sprite_seat"
    },
    {
@@ -1204,7 +1204,7 @@
   "end_name": [
    {
     "op": "show",
-    "img": "idimya base calm",
+    "img": "idimya seat calm",
     "at": "sprite_seat"
    },
    {
@@ -1285,7 +1285,7 @@
   "end_scent": [
    {
     "op": "show",
-    "img": "idimya base sly",
+    "img": "idimya seat sly",
     "at": "sprite_seat"
    },
    {
@@ -1495,7 +1495,7 @@
    {
     "op": "show",
     "img": "idimya hairup calm",
-    "at": "sprite_base, push_slow"
+    "at": "sprite_genkan, push_slow"
    },
    {
     "op": "with",
@@ -1504,7 +1504,7 @@
    {
     "op": "show",
     "img": "idimya hairup smile_soft",
-    "at": "sprite_base"
+    "at": "sprite_genkan"
    },
    {
     "op": "with",
@@ -1523,7 +1523,7 @@
    {
     "op": "show",
     "img": "idimya hairup calm",
-    "at": "sprite_base"
+    "at": "sprite_genkan"
    },
    {
     "op": "with",
@@ -1583,7 +1583,7 @@
    {
     "op": "show",
     "img": "idimya hairup amused",
-    "at": "sprite_base, push_slow"
+    "at": "sprite_genkan, push_slow"
    },
    {
     "op": "with",
@@ -1620,7 +1620,7 @@
    {
     "op": "show",
     "img": "idimya hairup calm",
-    "at": "sprite_base, lean_back"
+    "at": "sprite_genkan, lean_back"
    },
    {
     "op": "with",
@@ -1629,7 +1629,7 @@
    {
     "op": "show",
     "img": "idimya hairup sly",
-    "at": "sprite_base, lean_in"
+    "at": "sprite_genkan, lean_in"
    },
    {
     "op": "with",
@@ -1677,7 +1677,7 @@
    {
     "op": "show",
     "img": "idimya hairup calm",
-    "at": "sprite_base, lean_back"
+    "at": "sprite_genkan, lean_back"
    },
    {
     "op": "with",

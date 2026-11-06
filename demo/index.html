@@ -89,7 +89,7 @@
   /* 眨眼层：只叠眼睛那一小块（蒙版在生成脚本里做，见 tools/build_sprites.py） */
   #lid{
     position:absolute; inset:0;
-    background-image:url("../icancook/game/images/idimya/blink_patch.png?v=0.6.1");
+    background-image:url("../icancook/game/images/idimya/blink_patch.png?v=0.6.2");
     background-repeat:no-repeat;
     background-size:100% 100%;
     opacity:0;
@@ -105,7 +105,7 @@
   /* 广角定稿：开场铺垫镜头，默认隐藏 */
   #kv{
     position:absolute; inset:0;
-    background-image:url("../icancook/game/images/key_visual.jpg?v=0.6.1");
+    background-image:url("../icancook/game/images/key_visual.jpg?v=0.6.2");
     background-size:cover;
     background-position:center;
     opacity:0;
@@ -116,7 +116,7 @@
   /* 前景桌面层：默认隐藏（只有座位场景才出现） */
   #table{
     position:absolute; inset:0;
-    background-image:url("../icancook/game/images/table_front.png?v=0.6.1");
+    background-image:url("../icancook/game/images/table_front.png?v=0.6.2");
     background-size:100% 100%;
     background-repeat:no-repeat;
     opacity:0;
@@ -250,8 +250,12 @@
   }
 
   /* ---------- 气味交互 ---------- */
+  /* 交互层必须压在电影遮幅（z-index 18）之上。
+     之前没写 z-index，遮幅一出现就盖住底部那条「起身」按钮 ——
+     玩家看得见界面、点不到出口，就是这个原因（用户报的"卡关"）。 */
   #smell{
     position:absolute; inset:0;
+    z-index:40;
     display:none;
     background:rgba(5,4,2,.62);
     backdrop-filter:saturate(.35) brightness(.72);
@@ -547,6 +551,6 @@
   </div>
 
 </div>
-<script src="engine.js?v=0.6.1"></script>
+<script src="engine.js?v=0.6.2"></script>
 </body>
 </html>
